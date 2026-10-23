@@ -1,0 +1,31 @@
+{
+  "name": "cmms-faeterj-backend",
+  "version": "1.0.0",
+  "description": "Backend do Sistema CMMS para Gestão de Manutenção Fabril (TCC FAETERJ)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "migrate": "knex migrate:latest --knexfile knexfile.js",
+    "migrate:rollback": "knex migrate:rollback --knexfile knexfile.js",
+    "migrate:make": "knex migrate:make --knexfile knexfile.js",
+    "seed": "knex seed:run --knexfile knexfile.js",
+    "seed:make": "knex seed:make --knexfile knexfile.js"
+  },
+  "keywords": ["cmms", "manutencao", "nodejs", "express", "knex", "mysql", "socket.io", "faeterj", "tcc"],
+  "author": "Iury Lopes",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "knex": "^3.1.0",
+    "mysql2": "^3.11.0",
+    "socket.io": "^4.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}

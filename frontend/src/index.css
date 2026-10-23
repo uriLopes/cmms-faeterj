@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+/* Tipografia base para o CMMS industrial */
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Paleta industrial - Ergonomia Cognitiva ABNT NBR 7195 / ISO 3864 */
+  --color-cmms-danger: #EF4444;
+  --color-cmms-warning: #F59E0B;
+  --color-cmms-success: #10B981;
+  --color-cmms-info: #38BDF8;
+  --color-cmms-accent: #6366F1;
+  --color-cmms-surface: #0F172A;
+  --color-cmms-card: #1E293B;
+  --color-cmms-text: #F8FAFC;
+  --color-cmms-muted: #94A3B8;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-cmms-surface);
+  color: var(--color-cmms-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
