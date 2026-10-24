@@ -23,6 +23,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
 
   const html5QrCodeRef = useRef(null);
   const activeTrackRef = useRef(null);
+  const jaLeuQrCode = useRef(false);
   const containerId = 'vanguard-camera-stream';
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
   }, []);
 
   async function iniciarCameraComPermissao() {
+    jaLeuQrCode.current = false;
     setIniciando(true);
     setErroCamera(null);
     setAvisoLanterna(null);
@@ -67,8 +69,14 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
         { facingMode: 'environment' },
         config,
         (decodedText) => {
+          // Trava síncrona imediata: ignora os 20 frames subsequentes por segundo
+          if (jaLeuQrCode.current) return;
+          jaLeuQrCode.current = true;
+
           if (navigator.vibrate) {
-            navigator.vibrate([100, 50, 100]);
+            try {
+              navigator.vibrate([100, 50, 100]);
+            } catch (e) {}
           }
           finalizarCamera();
           onScanSuccess(decodedText);
@@ -225,6 +233,27 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
   function finalizarCamera() {
     try {
       alternarLanternaFisica(false, false);
+    } catch (e) {}
+
+    try {
+      const videos = document.querySelectorAll('video');
+      videos.forEach((v) => {
+        if (v.srcObject && v.srcObject.getTracks) {
+          v.srcObject.getTracks().forEach((track) => {
+            try {
+              track.stop();
+            } catch (err) {}
+          });
+        }
+      });
+      if (activeTrackRef.current) {
+        try {
+          activeTrackRef.current.stop();
+        } catch (err) {}
+      }
+    } catch (e) {}
+
+    try {
       if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
         html5QrCodeRef.current.stop().catch(() => {});
       }
@@ -232,7 +261,8 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
   }
 
   function handleConfirmarTagManual() {
-    if (!tagDigitada.trim()) return;
+    if (!tagDigitada.trim() || jaLeuQrCode.current) return;
+    jaLeuQrCode.current = true;
     finalizarCamera();
     onScanSuccess(tagDigitada.trim().toUpperCase());
   }

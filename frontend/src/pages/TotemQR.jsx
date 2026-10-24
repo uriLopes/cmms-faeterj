@@ -24,7 +24,7 @@ const MAQUINAS = [
   },
   {
     id: 4,
-    tag: 'PIN-CAB-01',
+    tag: 'PNT-CAB-01',
     setor: 'Pintura Automotiva',
     token: 'qr_pnt_cab_01_token_hash_faeterj_2026'
   }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Check,
   CheckSquare,
@@ -16,6 +16,7 @@ import VanguardLogo from './components/VanguardLogo';
 export default function App() {
   // O app já abre DIRETAMENTE na tela do scanner (Zero cliques intermediários)
   const [tela, setTela] = useState('scanner'); // 'scanner' | 'gabarito' | 'sucesso'
+  const processandoQRRef = useRef(false);
 
   // Identificação do Operador: Nome + Identifiant (Código da Fábrica)
   // Conforme padrão do chão de fábrica e mockup: Jhon Doe - 226244
@@ -59,20 +60,39 @@ export default function App() {
     setModalEditarOperador(false);
   }
 
-  // 1. AÇÃO: QR Code Lido com Sucesso
+  function voltarAoScanner() {
+    processandoQRRef.current = false;
+    setTela('scanner');
+    setChamadoCriado(null);
+    setAtivoData(null);
+    setCarregandoAtivo(false);
+  }
+
+  // 1. AÇÃO: QR Code Lido com Sucesso (Trava contra múltiplos disparos)
   async function handleQRScanned(qrContent) {
+    if (processandoQRRef.current) return;
+    processandoQRRef.current = true;
+
     setTela('gabarito');
     setCarregandoAtivo(true);
     setSintomasSelecionados([]);
     setObservacaoTexto('');
 
     try {
-      let token = qrContent;
-      if (qrContent.includes('/')) {
-        token = qrContent.split('/').pop();
+      let token = qrContent ? String(qrContent).trim() : '';
+      if (token.includes('/')) {
+        token = token.split('/').pop().trim();
       }
 
-      const res = await fetch(`/api/ativos/qr/${encodeURIComponent(token)}`);
+      // Timeout de segurança de 4 segundos para evitar travamento em caso de oscilação de rede
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+      const res = await fetch(`/api/ativos/qr/${encodeURIComponent(token)}`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
       if (!res.ok) throw new Error('Máquina não localizada.');
       const data = await res.json();
       setAtivoData(data.ativo);
@@ -83,8 +103,8 @@ export default function App() {
         setSintomasDisponiveis(sintomasPadrao);
       }
     } catch (err) {
-      console.warn('Fallback de ativo:', err);
-      // Fallback seguro caso offline
+      console.warn('Fallback seguro de ativo:', err);
+      // Fallback seguro imediato
       setAtivoData({
         id: 1,
         tag_patrimonio: 'MV3-ROB-04',
@@ -223,7 +243,7 @@ export default function App() {
             <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
               <button
                 type="button"
-                onClick={() => setTela('scanner')}
+                onClick={voltarAoScanner}
                 className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -231,7 +251,7 @@ export default function App() {
               </button>
               <button
                 type="button"
-                onClick={() => setTela('scanner')}
+                onClick={voltarAoScanner}
                 className="text-xs text-red-400 font-bold flex items-center gap-1"
               >
                 <Camera className="w-3.5 h-3.5" />
@@ -404,11 +424,7 @@ export default function App() {
 
           <button
             type="button"
-            onClick={() => {
-              setTela('scanner'); // Volta direto para a câmera pronta para a próxima máquina
-              setChamadoCriado(null);
-              setAtivoData(null);
-            }}
+            onClick={voltarAoScanner}
             className="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
           >
             <Camera className="w-4 h-4" />
