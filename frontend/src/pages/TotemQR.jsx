@@ -2,79 +2,68 @@ import { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import { io } from 'socket.io-client';
 import {
-  QrCode,
-  Radio,
-  CheckCircle2,
-  Clock,
-  Layers,
-  Wrench,
-  AlertTriangle,
-  Monitor,
+  Maximize2,
+  Minimize2,
   ExternalLink,
-  Smartphone,
+  CheckCircle2,
   Sparkles
 } from 'lucide-react';
 import VanguardLogo from '../components/VanguardLogo';
 
-const MAQUINAS_PADRAO = [
+const MAQUINAS = [
   {
     id: 1,
     tag: 'MV3-ROB-04',
+    setor: 'Chaparia',
     nome: 'Robô de Solda a Ponto KUKA KR210',
     linha: 'Chaparia - Linha MV3',
     posto: 'Posto 40 - Geometria Lateral',
-    criticidade: 'A',
-    token: 'qr_mv3_rob_04_token_hash_faeterj_2026',
-    descricao: 'Braço robótico articulado para solda por resistência do assoalho lateral.'
+    token: 'qr_mv3_rob_04_token_hash_faeterj_2026'
   },
   {
     id: 2,
     tag: 'HC1-APT-02',
+    setor: 'Montagem Final',
     nome: 'Apertadeira Pneumática Atlas Copco QST',
     linha: 'Montagem Final - Linha HC1',
     posto: 'Posto 12 - Fixação de Amortecedor LD',
-    criticidade: 'A',
-    token: 'qr_hc1_apt_02_token_hash_faeterj_2026',
-    descricao: 'Apertadeira de alto torque monitorada por transdutor de ângulo/torque.'
+    token: 'qr_hc1_apt_02_token_hash_faeterj_2026'
   },
   {
     id: 3,
-    tag: 'PIN-CAB-01',
-    nome: 'Cabine de Aplicação KTL Eletrostática',
-    linha: 'Pintura Automotiva - Linha 01',
-    posto: 'Posto 08 - Tanque de Imersão e Cura',
-    criticidade: 'B',
-    token: 'qr_pnt_cab_01_token_hash_faeterj_2026',
-    descricao: 'Sistema de eletrodeposição de fundo anticorrosivo catódico.'
-  },
-  {
-    id: 4,
     tag: 'BNC-CNV-01',
+    setor: 'Tapeçaria & Assentos',
     nome: 'Transportador de Roletes Montagem Bancos',
     linha: 'Tapeçaria & Assentos - Linha 01',
     posto: 'Posto 01 - Abastecimento de Estruturas',
-    criticidade: 'B',
-    token: 'qr_bnc_cnv_01_token_hash_faeterj_2026',
-    descricao: 'Mesa de roletes tracionada com inversor de frequência e sensor óptico.'
+    token: 'qr_bnc_cnv_01_token_hash_faeterj_2026'
+  },
+  {
+    id: 4,
+    tag: 'PIN-CAB-01',
+    setor: 'Pintura Automotiva',
+    nome: 'Cabine de Aplicação KTL Eletrostática',
+    linha: 'Pintura Automotiva - Linha 01',
+    posto: 'Posto 08 - Tanque de Imersão e Cura',
+    token: 'qr_pnt_cab_01_token_hash_faeterj_2026'
   }
 ];
 
 export default function TotemQR() {
-  const [maquinaAtiva, setMaquinaAtiva] = useState(MAQUINAS_PADRAO[0]);
-  const [eventosLog, setEventosLog] = useState([]);
+  const [maquinaAtiva, setMaquinaAtiva] = useState(MAQUINAS[0]);
   const [ultimoDisparo, setUltimoDisparo] = useState(null);
-  const [conectadoSocket, setConectadoSocket] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const canvasRef = useRef(null);
 
-  // Renderiza o QR Code sempre que a máquina selecionada mudar
+  // Renderiza o QR Code no Canvas de alta fidelidade
   useEffect(() => {
     if (canvasRef.current && maquinaAtiva) {
       QRCode.toCanvas(
         canvasRef.current,
         maquinaAtiva.token,
         {
-          width: 280,
-          margin: 2,
+          width: 290,
+          margin: 1,
           color: {
             dark: '#000000',
             light: '#FFFFFF'
@@ -82,42 +71,45 @@ export default function TotemQR() {
           errorCorrectionLevel: 'H'
         },
         (err) => {
-          if (err) console.error('Erro ao gerar QR Code:', err);
+          if (err) console.error('Erro ao renderizar QR Code:', err);
         }
       );
     }
   }, [maquinaAtiva]);
 
-  // Conexão WebSocket em tempo real para capturar os disparos T0 do operador
+  // Teclas de atalho para a apresentação do TCC (1 a 4 para trocar de máquina rapidamente)
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === '1') setMaquinaAtiva(MAQUINAS[0]);
+      if (e.key === '2') setMaquinaAtiva(MAQUINAS[1]);
+      if (e.key === '3') setMaquinaAtiva(MAQUINAS[2]);
+      if (e.key === '4') setMaquinaAtiva(MAQUINAS[3]);
+      if (e.key.toLowerCase() === 'f') toggleFullscreen();
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Conexão WebSocket em tempo real para capturar o disparo do operador no celular
   useEffect(() => {
     const socket = io('http://localhost:3001');
 
     socket.on('connect', () => {
-      setConectadoSocket(true);
       socket.emit('entrar_sala', 'cockpit_pcm');
-    });
-
-    socket.on('disconnect', () => {
-      setConectadoSocket(false);
     });
 
     socket.on('novo_chamado', (data) => {
       const registro = {
-        id: Date.now(),
-        tipo: 'T0_DISPARADO',
-        hora: new Date().toLocaleTimeString(),
         os: data.numero_os || data.chamado?.numero_os || 'OS-NOVA',
         maquina: data.tag_patrimonio || data.chamado?.tag_patrimonio || 'Ativo',
         operador: data.operador_nome || data.chamado?.operador_nome || 'Operador',
-        matricula: data.operador_matricula || data.chamado?.operador_matricula || 'N/A',
-        sintoma: data.descricao_sintoma || data.chamado?.descricao_sintoma || 'Falha reportada',
-        criticidade: data.criticidade || data.chamado?.criticidade || 'A'
+        matricula: data.operador_matricula || data.chamado?.operador_matricula || '226244',
+        hora: new Date().toLocaleTimeString()
       };
 
       setUltimoDisparo(registro);
-      setEventosLog((prev) => [registro, ...prev.slice(0, 9)]);
 
-      // Feedback sonoro sutil
+      // Efeito sonoro discreto de confirmação
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = audioCtx.createOscillator();
@@ -125,11 +117,16 @@ export default function TotemQR() {
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.3);
+        osc.stop(audioCtx.currentTime + 0.35);
       } catch (e) {}
+
+      // Remove o aviso após 7 segundos
+      setTimeout(() => {
+        setUltimoDisparo(null);
+      }, 7000);
     });
 
     return () => {
@@ -137,224 +134,118 @@ export default function TotemQR() {
     };
   }, []);
 
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-slate-100 flex flex-col justify-between selection:bg-red-600">
-      {/* HEADER CORP.VANGUARD */}
-      <header className="bg-black border-b border-zinc-900 px-6 py-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <VanguardLogo variant="horizontal" size="md" />
-          <div className="h-6 w-px bg-zinc-800 hidden sm:block"></div>
-          <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">
-            Totem de Posto • Simulador de Plaquetas QR Code
-          </span>
-        </div>
+    <div className="min-h-screen bg-black text-white flex flex-col justify-center items-center p-6 relative select-none font-sans overflow-hidden">
+      {/* BOTÕES DISCRETOS DE UTILITÁRIOS (Canto superior direito) */}
+      <div className="absolute top-4 right-4 flex items-center gap-3 z-30">
+        <a
+          href="/cockpit"
+          target="_blank"
+          rel="noreferrer"
+          className="text-[11px] font-mono text-zinc-500 hover:text-white px-2.5 py-1 rounded bg-zinc-950/80 border border-zinc-900 flex items-center gap-1.5 transition-colors"
+          title="Abrir Cockpit PCM da Manutenção em nova aba"
+        >
+          <span>Cockpit</span>
+          <ExternalLink className="w-3 h-3" />
+        </a>
 
-        <div className="flex items-center gap-3">
-          <div
-            className={`px-3 py-1 rounded-full text-[11px] font-mono flex items-center gap-1.5 border ${
-              conectadoSocket
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                : 'bg-zinc-900 text-zinc-500 border-zinc-800'
-            }`}
-          >
-            <Radio className={`w-3.5 h-3.5 ${conectadoSocket ? 'animate-pulse' : ''}`} />
-            <span>{conectadoSocket ? 'Barramento WebSocket Ativo' : 'Conectando ao Core...'}</span>
+        <button
+          onClick={toggleFullscreen}
+          className="text-zinc-500 hover:text-white p-1.5 rounded bg-zinc-950/80 border border-zinc-900 transition-colors"
+          title="Tela Cheia para Apresentação do TCC (Tecla F)"
+        >
+          {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+        </button>
+      </div>
+
+      {/* ÁREA CENTRAL PRINCIPAL: EXATAMENTE COMO NO DESIGN DO CANVA */}
+      <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20 my-auto py-6">
+        {/* LADO ESQUERDO: LOGO CORP.VANGUARD + QR CODE COM MOLDURA VERMELHA */}
+        <div className="flex flex-col items-start space-y-7">
+          {/* LOGO OFICIAL CORP.VANGUARD (HORIZONTAL COM SUBTÍTULO) */}
+          <div className="pl-1">
+            <VanguardLogo variant="full" size="lg" />
           </div>
 
-          <a
-            href="/cockpit"
-            target="_blank"
-            rel="noreferrer"
-            className="px-3.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 transition-all"
-          >
-            <Monitor className="w-3.5 h-3.5 text-red-500" />
-            <span>Abrir Cockpit PCM</span>
-            <ExternalLink className="w-3 h-3 text-zinc-500" />
-          </a>
-        </div>
-      </header>
+          {/* QUADRO DO QR CODE COM BORDA VERMELHA EXATA DO CANVA */}
+          <div className="p-3 bg-red-600 rounded-lg shadow-[0_0_40px_rgba(220,38,38,0.3)]">
+            <div className="bg-white p-3 rounded flex flex-col items-center">
+              {/* CANVAS DO QR CODE */}
+              <canvas
+                ref={canvasRef}
+                className="w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] block"
+              ></canvas>
 
-      {/* ÁREA PRINCIPAL: SELETOR DE MÁQUINAS + PLAQUETA COM QR CODE */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* COLUNA ESQUERDA: PLAQUETA FÍSICA COM QR CODE (7 COLUNAS) */}
-        <section className="lg:col-span-7 bg-zinc-900/90 border border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-          {/* Luz focal industrial */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
-
-          {/* Seletor de Ativos Fabris */}
-          <div className="mb-6">
-            <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-400 block mb-2">
-              Selecione a Máquina da Linha para Simular:
-            </span>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {MAQUINAS_PADRAO.map((maq) => {
-                const ativo = maq.id === maquinaAtiva.id;
-                return (
-                  <button
-                    key={maq.id}
-                    onClick={() => setMaquinaAtiva(maq)}
-                    className={`p-3 rounded-2xl text-left border transition-all active:scale-95 ${
-                      ativo
-                        ? 'bg-red-600/20 border-red-500 text-white shadow-lg ring-1 ring-red-500'
-                        : 'bg-black/60 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white'
-                    }`}
-                  >
-                    <span className="font-mono font-black text-xs block text-white">{maq.tag}</span>
-                    <span className="text-[10px] text-zinc-400 line-clamp-1 mt-0.5">{maq.linha.split('-')[0]}</span>
-                  </button>
-                );
-              })}
+              {/* RÓTULO MONOSPACE DA MÁQUINA ABAIXO DO QR CODE */}
+              <span className="font-mono font-black text-xs sm:text-sm text-black tracking-widest uppercase mt-2 select-all">
+                {maquinaAtiva.tag}
+              </span>
             </div>
           </div>
+        </div>
 
-          {/* PLAQUETA DE PATRIMÔNIO INDUSTRIAL (IDENTIFICAÇÃO DE MÁQUINA) */}
-          <div className="bg-black border-2 border-zinc-700 rounded-3xl p-6 shadow-2xl relative">
-            {/* Rebites nos cantos estilo plaqueta industrial de metal */}
-            <span className="absolute top-3 left-3 w-3 h-3 rounded-full bg-zinc-700 border border-zinc-600 shadow-inner"></span>
-            <span className="absolute top-3 right-3 w-3 h-3 rounded-full bg-zinc-700 border border-zinc-600 shadow-inner"></span>
-            <span className="absolute bottom-3 left-3 w-3 h-3 rounded-full bg-zinc-700 border border-zinc-600 shadow-inner"></span>
-            <span className="absolute bottom-3 right-3 w-3 h-3 rounded-full bg-zinc-700 border border-zinc-600 shadow-inner"></span>
+        {/* LADO DIREITO: LISTA VERTICAL DE SELEÇÃO DE MÁQUINAS */}
+        <div className="w-full max-w-xs flex flex-col gap-3.5">
+          {MAQUINAS.map((maq, index) => {
+            const isSelected = maq.id === maquinaAtiva.id;
 
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              {/* O QR CODE EM SI */}
-              <div className="bg-white p-3 rounded-2xl shadow-2xl shrink-0 border-4 border-zinc-800 flex flex-col items-center">
-                <canvas ref={canvasRef} className="rounded-lg"></canvas>
-                <span className="text-[10px] font-mono font-bold text-zinc-700 mt-1 uppercase tracking-wider">
-                  {maquinaAtiva.tag}
-                </span>
-              </div>
+            return (
+              <button
+                key={maq.id}
+                type="button"
+                onClick={() => setMaquinaAtiva(maq)}
+                className={`w-full p-4 rounded-2xl text-left transition-all duration-150 active:scale-98 cursor-pointer ${
+                  isSelected
+                    ? 'border-2 border-red-600 bg-[#1e0a0d] shadow-[0_0_25px_rgba(220,38,38,0.25)] ring-1 ring-red-600/40'
+                    : 'border border-zinc-900 bg-[#111113] hover:bg-[#18181b] hover:border-zinc-800'
+                }`}
+              >
+                {/* TAG DA MÁQUINA */}
+                <h3 className="font-mono font-black text-base sm:text-lg text-white tracking-wide">
+                  {maq.tag}
+                </h3>
 
-              {/* DADOS TÉCNICOS DA MÁQUINA */}
-              <div className="flex-1 space-y-3 text-center sm:text-left">
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                  <span className="px-2.5 py-1 bg-red-600 text-white font-mono font-black text-sm rounded-lg">
-                    {maquinaAtiva.tag}
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded text-[11px] font-bold border ${
-                      maquinaAtiva.criticidade === 'A'
-                        ? 'bg-red-500/20 text-red-400 border-red-500/40'
-                        : 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-                    }`}
-                  >
-                    Criticidade {maquinaAtiva.criticidade}
-                  </span>
-                </div>
-
-                <div>
-                  <h2 className="text-base font-black text-white leading-tight">
-                    {maquinaAtiva.nome}
-                  </h2>
-                  <p className="text-xs text-zinc-400 mt-1">
-                    {maquinaAtiva.linha} • {maquinaAtiva.posto}
-                  </p>
-                </div>
-
-                <p className="text-xs text-zinc-400 leading-relaxed bg-zinc-950/80 p-3 rounded-xl border border-zinc-800">
-                  {maquinaAtiva.descricao}
+                {/* SETOR DA FÁBRICA */}
+                <p className="text-xs text-zinc-400 mt-0.5 tracking-wide">
+                  {maq.setor}
                 </p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-                {/* INSTRUÇÃO AO USUÁRIO */}
-                <div className="pt-2 flex items-center justify-center sm:justify-start gap-2 text-xs font-semibold text-emerald-400">
-                  <Smartphone className="w-4 h-4 animate-bounce" />
-                  <span>Aponte o App do Operador no celular para o QR Code acima</span>
-                </div>
-              </div>
+      {/* NOTIFICAÇÃO FLUTUANTE EM TEMPO REAL QUANDO O OPERADOR DISPARAR T0 */}
+      {ultimoDisparo && (
+        <div className="fixed bottom-6 z-50 bg-emerald-950/90 border-2 border-emerald-500 rounded-2xl p-4 shadow-2xl flex items-center gap-3.5 animate-bounce">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div className="font-mono text-xs">
+            <div className="text-emerald-400 font-bold flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>MARCO T₀ REGISTRADO ({ultimoDisparo.hora})</span>
+            </div>
+            <div className="text-white mt-0.5">
+              <strong>{ultimoDisparo.os}</strong> • {ultimoDisparo.maquina} por {ultimoDisparo.operador} ({ultimoDisparo.matricula})
             </div>
           </div>
-        </section>
+        </div>
+      )}
 
-        {/* COLUNA DIREITA: EVENTOS EM TEMPO REAL & LOG DE DISPARO (5 COLUNAS) */}
-        <section className="lg:col-span-5 space-y-4">
-          {/* CARTÃO DE ÚLTIMO DISPARO $T_0$ */}
-          {ultimoDisparo ? (
-            <div className="bg-emerald-950/30 border-2 border-emerald-500/60 rounded-3xl p-5 shadow-2xl animate-fade-in relative overflow-hidden">
-              <div className="flex items-center justify-between pb-3 border-b border-emerald-500/30">
-                <span className="text-[11px] font-mono font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-emerald-400 animate-spin" />
-                  Marco T₀ Recebido com Sucesso!
-                </span>
-                <span className="text-xs font-mono text-emerald-400 font-bold">{ultimoDisparo.hora}</span>
-              </div>
-
-              <div className="mt-3 space-y-1.5 text-xs font-mono">
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">OS Aberta:</span>
-                  <span className="text-white font-black">{ultimoDisparo.os}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Equipamento:</span>
-                  <span className="text-emerald-300 font-bold">{ultimoDisparo.maquina}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Operador:</span>
-                  <span className="text-white">{ultimoDisparo.operador} ({ultimoDisparo.matricula})</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Sintoma:</span>
-                  <span className="text-zinc-200 line-clamp-1">{ultimoDisparo.sintoma}</span>
-                </div>
-              </div>
-
-              <div className="mt-3 pt-2 border-t border-emerald-500/20 text-[11px] text-emerald-400 flex items-center justify-between">
-                <span>Alerta emitido ao Cockpit do PCM</span>
-                <CheckCircle2 className="w-4 h-4" />
-              </div>
-            </div>
-          ) : (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 text-center text-xs text-zinc-500">
-              <Clock className="w-8 h-8 text-zinc-600 mx-auto mb-2 animate-pulse" />
-              <p className="font-semibold text-zinc-400">Aguardando Leitura de QR Code...</p>
-              <p className="text-[11px] text-zinc-500 mt-1">
-                Quando você escanear o QR Code no celular e clicar em Confirmar ($T_0$), o evento aparecerá aqui instantaneamente.
-              </p>
-            </div>
-          )}
-
-          {/* HISTÓRICO DE DISPAROS DESTA SESSÃO */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 shadow-xl space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-300 flex items-center gap-2">
-                <Layers className="w-4 h-4 text-red-500" />
-                Log de Disparos de Turno
-              </span>
-              <span className="text-[10px] font-mono text-zinc-500">
-                {eventosLog.length} evento(s)
-              </span>
-            </div>
-
-            <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
-              {eventosLog.length === 0 ? (
-                <div className="py-6 text-center text-xs text-zinc-600">
-                  Nenhum chamado disparado ainda neste ciclo.
-                </div>
-              ) : (
-                eventosLog.map((ev) => (
-                  <div
-                    key={ev.id}
-                    className="p-3 bg-black/60 border border-zinc-800 rounded-2xl text-xs space-y-1 hover:border-zinc-700 transition-all font-mono"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-red-400 font-bold">{ev.os}</span>
-                      <span className="text-[10px] text-zinc-500">{ev.hora}</span>
-                    </div>
-                    <div className="text-zinc-300">
-                      {ev.maquina} • {ev.operador}
-                    </div>
-                    <div className="text-[11px] text-zinc-500 line-clamp-1">
-                      {ev.sintoma}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* RODAPÉ CORP.VANGUARD */}
-      <footer className="bg-black border-t border-zinc-900 px-6 py-3 text-center text-xs text-zinc-500 font-mono">
-        Corp.Vanguard Industrial Maintenance Systems • FAETERJ Barra Mansa (TCC ADS)
+      {/* RODAPÉ DISCRETO PARA APRESENTAÇÃO */}
+      <footer className="text-center text-[11px] text-zinc-600 font-mono mt-auto pt-4">
+        Corp.Vanguard • Pressione 1, 2, 3 ou 4 para alternar a máquina • Tecla F para Tela Cheia
       </footer>
     </div>
   );
