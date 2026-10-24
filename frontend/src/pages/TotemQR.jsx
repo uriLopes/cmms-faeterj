@@ -146,10 +146,10 @@ export default function TotemQR() {
       <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20 my-auto">
         {/* LADO ESQUERDO: LOGO ORIGINAL CORP.VANGUARD + QR CODE COM MOLDURA VERMELHA */}
         <div className="flex flex-col items-start space-y-6">
-          {/* LOGO ORIGINAL EM ULTRA ALTA DEFINIÇÃO (1400PX 4K RETINA) */}
+          {/* LOGO ORIGINAL EM ULTRA ALTA DEFINIÇÃO (1400PX 4K RETINA COM PONTA INTACTA) */}
           <div className="w-full max-w-[340px] sm:max-w-[365px]">
             <img
-              src="/brand/corp-vanguard-logo-ultra-hd.png?v=6"
+              src="/brand/corp-vanguard-logo-ultra-hd.png?v=7"
               alt="Corp.Vanguard - Industrial Maintenance Systems"
               className="w-full h-auto object-contain block drop-shadow-[0_2px_12px_rgba(255,255,255,0.08)]"
             />
