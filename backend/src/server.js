@@ -34,7 +34,7 @@ app.use('/api', routes);
 // Rota raiz de health check
 app.get('/status', (req, res) => {
   return res.json({
-    projeto: 'CMMS FAETERJ - Sistema de Gestão de Manutenção Fabril',
+    projeto: 'Corp.Vanguard - Industrial Maintenance Systems (CMMS FAETERJ)',
     versao: '1.0.0',
     status: 'online',
     banco: 'MySQL 8.0 conectado',

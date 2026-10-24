@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     port: 5174,
     host: true, // Permite abrir pelo celular na mesma rede Wi-Fi via IP local!
+    allowedHosts: true, // Permite acesso via túnel HTTPS (localtunnel/cloudflared/ngrok)
     proxy: {
       '/api': {
         target: 'http://localhost:3001',

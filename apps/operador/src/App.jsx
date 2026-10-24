@@ -14,13 +14,49 @@ import {
   CheckSquare,
   Square,
   RefreshCw,
-  Edit2
+  Edit2,
+  Download,
+  Smartphone
 } from 'lucide-react';
 import QRScanner from './components/QRScanner';
+import VanguardLogo from './components/VanguardLogo';
 
 export default function App() {
   // Tela atual: 'inicio' | 'scanner' | 'gabarito' | 'sucesso'
   const [tela, setTela] = useState('inicio');
+
+  // Suporte a PWA / Instalação no Celular
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+      setIsStandalone(true);
+    }
+
+    const handler = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  async function handleInstalarApp() {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setInstallPrompt(null);
+      }
+    } else {
+      alert(
+        'Como instalar no celular:\n\n' +
+        '• No Android (Chrome/Edge): Toque nos 3 pontinhos no canto superior e selecione "Instalar aplicativo" ou "Adicionar à tela inicial".\n\n' +
+        '• No iPhone (Safari): Toque no botão Compartilhar (ícone do quadrado com a seta para cima) e escolha "Adicionar à Tela de Início".'
+      );
+    }
+  }
 
   // Identificação do Operador (Armazenada no aparelho)
   const [matricula, setMatricula] = useState(
@@ -175,15 +211,11 @@ export default function App() {
           {/* Header Superior */}
           <div className="space-y-3">
             <div className="flex justify-between items-center pb-3 border-b border-slate-800/80">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                  Terminal de Fábrica
-                </span>
+              <VanguardLogo variant="horizontal" size="sm" />
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Operador</span>
               </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">
-                Fricção Zero
-              </span>
             </div>
 
             {/* Identificação do Operador */}
@@ -267,6 +299,21 @@ export default function App() {
               Dê <strong>dois toques</strong> na tela para ler o QR Code da máquina parada e reportar a anomalia.
             </p>
           </div>
+
+          {/* Botão de Instalar como Aplicativo (se não estiver em standalone) */}
+          {!isStandalone && (
+            <div className="mb-3">
+              <button
+                type="button"
+                onClick={handleInstalarApp}
+                className="w-full py-2.5 px-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold text-slate-300 hover:text-white transition-all active:scale-95 shadow-md"
+              >
+                <Smartphone className="w-4 h-4 text-rose-400" />
+                <span>Instalar como App no Celular</span>
+                <Download className="w-3.5 h-3.5 text-slate-400 ml-auto" />
+              </button>
+            </div>
+          )}
 
           {/* Rodapé institucional */}
           <div className="text-center text-[10px] text-slate-500 border-t border-slate-900 pt-3">

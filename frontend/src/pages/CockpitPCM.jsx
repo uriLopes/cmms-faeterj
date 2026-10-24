@@ -25,6 +25,7 @@ import { api } from '../services/api';
 import { getSocket } from '../services/socket';
 import { soundAlert } from '../services/soundAlert';
 import NetworkStatusBadge from '../components/NetworkStatusBadge';
+import VanguardLogo from '../components/VanguardLogo';
 
 // Formatador de segundos para HH:MM:SS
 function formatarTempoDowntime(segundosTotais) {
@@ -247,20 +248,18 @@ export default function CockpitPCM() {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div className="w-9 h-9 bg-rose-600 rounded-lg flex items-center justify-center shadow-lg shadow-rose-600/20">
-              <Activity className="w-5 h-5 text-white animate-pulse" />
-            </div>
-            <div>
+            <VanguardLogo variant="horizontal" size="sm" />
+            <div className="hidden sm:block border-l border-slate-800 pl-3">
               <div className="flex items-center gap-2">
-                <h1 className="font-black text-sm tracking-wide uppercase text-white">
-                  Cockpit Manutenção & Linhas (PCM)
+                <h1 className="font-bold text-xs tracking-wide uppercase text-slate-300">
+                  Cockpit PCM & Team Leader
                 </h1>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <span className="text-[10px] font-bold px-2 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                   Tempo Real
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
-                Polo Automotivo • Painel de Controle de Downtime Fabril
+              <p className="text-[10px] text-slate-500">
+                Monitoramento Operacional de Linhas e Despacho de Especialistas
               </p>
             </div>
           </div>
