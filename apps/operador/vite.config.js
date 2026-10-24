@@ -1,17 +1,20 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), basicSsl()],
   server: {
+    https: true, // Garante que a câmera do celular e a lanterna sejam permitidas como SecureContext
     port: 5174,
-    host: true, // Permite abrir pelo celular na mesma rede Wi-Fi via IP local!
-    allowedHosts: true, // Permite acesso via túnel HTTPS (localtunnel/cloudflared/ngrok)
+    host: true, // Disponível na rede local (Wi-Fi)
+    allowedHosts: true, // Permite acesso via túnel HTTPS
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
-        changeOrigin: true
+        changeOrigin: true,
+        secure: false
       }
     }
   }

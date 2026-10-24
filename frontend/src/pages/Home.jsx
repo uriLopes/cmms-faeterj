@@ -59,6 +59,28 @@ export default function Home() {
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Card NOVO: Totem de Posto / Simulador de QR Code */}
+            <div
+              onClick={() => navigate('/totem-qr')}
+              className="bg-gradient-to-br from-zinc-900 to-black border-2 border-red-500/50 hover:border-red-400 p-4 rounded-xl cursor-pointer transition-all hover:shadow-red-900/30 hover:shadow-xl group col-span-1 sm:col-span-2"
+            >
+              <div className="flex items-start justify-between">
+                <div className="p-2.5 bg-red-600/20 border border-red-500/40 rounded-lg text-red-400">
+                  <QrCode className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-red-600 text-white rounded uppercase tracking-wider">
+                  Simulador de Posto • Placas QR
+                </span>
+              </div>
+              <h4 className="font-bold text-base text-white mt-3 group-hover:text-red-400 transition-colors flex items-center gap-2">
+                <span>Totem de Posto • Plaquetas com QR Code</span>
+                <ArrowRight className="w-4 h-4 text-red-400" />
+              </h4>
+              <p className="text-xs text-slate-300 mt-1">
+                Abra na tela do computador para exibir os QR codes em alta definição das máquinas da fábrica. Aponte o celular do Operador para ler e testar em tempo real!
+              </p>
+            </div>
+
             {/* Card 1: Operador (Concluído) */}
             <div
               onClick={() => navigate('/operador')}

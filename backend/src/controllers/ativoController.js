@@ -82,7 +82,11 @@ const ativoController = {
           'a.qr_code_token',
           'a.status_operacional'
         )
-        .where({ 'a.qr_code_token': token.trim(), 'a.ativo': true })
+        .where('a.ativo', true)
+        .andWhere(function() {
+          this.where('a.qr_code_token', token.trim())
+            .orWhere('a.tag_patrimonio', token.trim().toUpperCase());
+        })
         .first();
 
       if (!ativo) {

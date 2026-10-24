@@ -4,11 +4,7 @@ import React from 'react';
  * Componente Oficial da Marca Corp.Vanguard
  * Industrial Maintenance Systems
  * 
- * Variantes:
- * - 'full': Ícone + Wordmark "Corp.Vanguard" + Subtítulo "INDUSTRIAL MAINTENANCE SYSTEMS"
- * - 'horizontal': Ícone + Wordmark "Corp.Vanguard"
- * - 'icon': Apenas o prisma geométrico V (App Icon / Favicon)
- * - 'wordmark': Apenas o texto "Corp.Vanguard"
+ * Utiliza o emblema e a tipografia oficiais fornecidos na identidade visual.
  */
 export default function VanguardLogo({
   variant = 'full',
@@ -16,39 +12,26 @@ export default function VanguardLogo({
   className = '',
   light = false
 }) {
-  // Escalas de tamanho
   const scale = {
     sm: { icon: 'w-6 h-6', title: 'text-sm', sub: 'text-[7px]' },
     md: { icon: 'w-8 h-8', title: 'text-lg', sub: 'text-[8.5px]' },
-    lg: { icon: 'w-11 h-11', title: 'text-2xl', sub: 'text-[10px]' },
+    lg: { icon: 'w-12 h-12', title: 'text-2xl', sub: 'text-[10px]' },
     xl: { icon: 'w-16 h-16', title: 'text-3xl', sub: 'text-xs' }
   }[size] || { icon: 'w-8 h-8', title: 'text-lg', sub: 'text-[8.5px]' };
 
-  // Ícone facetado V da Vanguard
+  // Ícone oficial idêntico ao wireframe e prancha da marca (Sem bolinha verde)
   const renderIcon = (
     <div className={`relative ${scale.icon} shrink-0 flex items-center justify-center`}>
-      <svg
-        viewBox="0 0 100 100"
-        className="w-full h-full drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Teto facetado (topo do prisma) */}
-        <path d="M50 14 L84 32 L50 48 L16 32 Z" fill={light ? '#0F172A' : '#FFFFFF'} />
-        {/* Faceta lateral esquerda */}
-        <path d="M16 36 L44 51 L44 80 L16 66 Z" fill={light ? '#1E293B' : '#E2E8F0'} />
-        {/* Faceta lateral direita */}
-        <path d="M84 36 L56 51 L56 80 L84 66 Z" fill={light ? '#334155' : '#CBD5E1'} />
-        {/* Corte angular que esculpe o 'V' central */}
-        <path d="M50 88 L34 56 L44 56 L50 68 L56 56 L66 56 Z" fill={light ? '#FFFFFF' : '#090A0F'} />
-      </svg>
-      {/* Sutil detalhe em verde industrial (ponto de precisão da marca) */}
-      <span className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#22c55e]" />
+      <img
+        src="/brand/vanguard-header-icon.png"
+        alt="Corp.Vanguard"
+        className="w-full h-full object-contain"
+      />
     </div>
   );
 
   if (variant === 'icon') {
-    return <div className={`inline-flex items-center ${className}`}>{renderIcon}</div>;
+    return <div className={`inline-flex items-center justify-center ${className}`}>{renderIcon}</div>;
   }
 
   // Wordmark "Corp.Vanguard"

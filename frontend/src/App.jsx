@@ -5,12 +5,16 @@ import CockpitPCM from './pages/CockpitPCM';
 import MantenedorPainel from './pages/MantenedorPainel';
 import AlmoxarifadoPainel from './pages/AlmoxarifadoPainel';
 import IndicadoresPainel from './pages/IndicadoresPainel';
+import TotemQR from './pages/TotemQR';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/totem-qr" element={<TotemQR />} />
+        <Route path="/simulador-qr" element={<TotemQR />} />
+        <Route path="/placas-qr" element={<TotemQR />} />
         <Route path="/operador" element={<OperadorChamado />} />
         <Route path="/abrir-chamado" element={<OperadorChamado />} />
         <Route path="/abrir-chamado/:token" element={<OperadorChamado />} />
