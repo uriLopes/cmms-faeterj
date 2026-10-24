@@ -4,7 +4,7 @@ import React from 'react';
  * Componente Oficial da Marca Corp.Vanguard
  * Industrial Maintenance Systems
  * 
- * Utiliza o emblema e a tipografia oficiais fornecidos na identidade visual.
+ * Utiliza o emblema 100% transparente (sem caixa ou fundo cinza) e a tipografia oficial.
  */
 export default function VanguardLogo({
   variant = 'full',
@@ -15,15 +15,15 @@ export default function VanguardLogo({
   const scale = {
     sm: { icon: 'w-6 h-6', title: 'text-sm', sub: 'text-[7px]' },
     md: { icon: 'w-8 h-8', title: 'text-lg', sub: 'text-[8.5px]' },
-    lg: { icon: 'w-12 h-12', title: 'text-2xl', sub: 'text-[10px]' },
+    lg: { icon: 'w-11 h-11', title: 'text-2xl', sub: 'text-[10px]' },
     xl: { icon: 'w-16 h-16', title: 'text-3xl', sub: 'text-xs' }
   }[size] || { icon: 'w-8 h-8', title: 'text-lg', sub: 'text-[8.5px]' };
 
-  // Ícone oficial idêntico ao wireframe e prancha da marca (Sem bolinha verde)
+  // Ícone oficial transparente sem qualquer fundo, recorte cinza ou bolinha verde
   const renderIcon = (
     <div className={`relative ${scale.icon} shrink-0 flex items-center justify-center`}>
       <img
-        src="/brand/vanguard-header-icon.png"
+        src="/brand/vanguard-logo-transparent.png?v=3"
         alt="Corp.Vanguard"
         className="w-full h-full object-contain"
       />

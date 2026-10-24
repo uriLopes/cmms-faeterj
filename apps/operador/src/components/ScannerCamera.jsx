@@ -19,13 +19,13 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
   const [suportaLanterna, setSuportaLanterna] = useState(false);
   const [modalTagManual, setModalTagManual] = useState(false);
   const [tagDigitada, setTagDigitada] = useState('');
+  const [avisoLanterna, setAvisoLanterna] = useState(null);
 
   const html5QrCodeRef = useRef(null);
+  const activeTrackRef = useRef(null);
   const containerId = 'vanguard-camera-stream';
 
   useEffect(() => {
-    // Verifica se a conexão é segura (HTTPS ou localhost)
-    // Navegadores de celular bloqueiam a câmera em HTTP por IP de rede local
     const isLocal =
       window.location.hostname === 'localhost' ||
       window.location.hostname === '127.0.0.1';
@@ -43,22 +43,10 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
   async function iniciarCameraComPermissao() {
     setIniciando(true);
     setErroCamera(null);
+    setAvisoLanterna(null);
 
     try {
-      // 1. Tenta obter permissão explícita de mídia
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        try {
-          const tempStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: { ideal: 'environment' } }
-          });
-          // Para o stream temporário para deixar o html5-qrcode assumir
-          tempStream.getTracks().forEach((t) => t.stop());
-        } catch (permErr) {
-          console.warn('Permissão inicial via getUserMedia:', permErr);
-        }
-      }
-
-      // 2. Se já havia uma instância, para
+      // 1. Encerra qualquer scanner em execução
       if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
         try {
           await html5QrCodeRef.current.stop();
@@ -74,34 +62,11 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
         aspectRatio: 1.0
       };
 
-      // 3. Tenta enumerar câmeras traseiras
-      let cameraSelecionada = { facingMode: 'environment' };
-      try {
-        const cameras = await Html5Qrcode.getCameras();
-        if (cameras && cameras.length > 0) {
-          const traseira =
-            cameras.find(
-              (c) =>
-                c.label.toLowerCase().includes('back') ||
-                c.label.toLowerCase().includes('traseira') ||
-                c.label.toLowerCase().includes('environment') ||
-                c.label.toLowerCase().includes('0')
-            ) || cameras[cameras.length - 1];
-
-          if (traseira && traseira.id) {
-            cameraSelecionada = traseira.id;
-          }
-        }
-      } catch (camListErr) {
-        console.warn('Enumeração de câmeras indisponível, usando facingMode:', camListErr);
-      }
-
-      // 4. Inicia o leitor
+      // 2. Inicia diretamente com facingMode: 'environment' (lente traseira principal com flash)
       await qrScannerInstance.start(
-        cameraSelecionada,
+        { facingMode: 'environment' },
         config,
         (decodedText) => {
-          // Sucesso na leitura do QR Code
           if (navigator.vibrate) {
             navigator.vibrate([100, 50, 100]);
           }
@@ -113,10 +78,11 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
 
       setIniciando(false);
 
-      // 5. Aciona a lanterna automaticamente após 800ms
+      // 3. Captura o track de vídeo ativo e inicializa a lanterna
       setTimeout(() => {
-        tentarLigarLanternaAutomatica();
-      }, 800);
+        capturarTrackEAtivarLanterna();
+      }, 700);
+
     } catch (err) {
       console.error('Falha ao iniciar câmera:', err);
       setIniciando(false);
@@ -138,60 +104,127 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
     }
   }
 
-  // Tenta ligar a lanterna (Torch)
-  async function tentarLigarLanternaAutomatica() {
-    await aplicarEstadoLanterna(true);
-  }
+  // Tenta vincular o track e ligar a lanterna automaticamente
+  async function capturarTrackEAtivarLanterna() {
+    let trackEncontrado = null;
 
-  async function alternarLanterna() {
-    await aplicarEstadoLanterna(!lanternaAtiva);
-  }
-
-  async function aplicarEstadoLanterna(ligar) {
-    let sucesso = false;
-
-    // Método 1: Via Html5Qrcode applyVideoConstraints
-    if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
-      try {
-        await html5QrCodeRef.current.applyVideoConstraints({
-          advanced: [{ torch: ligar }]
-        });
-        sucesso = true;
-      } catch (e) {
-        // Pode falhar se o browser preferir via MediaStreamTrack direta
+    // Busca o track diretamente no elemento de vídeo criado pelo html5-qrcode
+    const videoElements = document.querySelectorAll(`#${containerId} video, video`);
+    for (const v of videoElements) {
+      if (v.srcObject && v.srcObject.getVideoTracks) {
+        const tracks = v.srcObject.getVideoTracks();
+        if (tracks.length > 0) {
+          trackEncontrado = tracks[0];
+          activeTrackRef.current = trackEncontrado;
+          break;
+        }
       }
     }
 
-    // Método 2: Via Track nativo do elemento de vídeo
+    // Verifica capabilities oficiais
     try {
-      const videoEl = document.querySelector(`#${containerId} video`);
-      if (videoEl && videoEl.srcObject) {
-        const tracks = videoEl.srcObject.getVideoTracks();
-        if (tracks && tracks.length > 0) {
-          const track = tracks[0];
-          const caps = track.getCapabilities ? track.getCapabilities() : {};
-          if (caps && caps.torch) {
+      if (html5QrCodeRef.current) {
+        const caps = html5QrCodeRef.current.getRunningTrackCameraCapabilities();
+        if (caps && caps.torchFeature) {
+          const torch = caps.torchFeature();
+          if (torch.isSupported()) {
             setSuportaLanterna(true);
+            await torch.apply(true);
+            setLanternaAtiva(true);
+            return;
           }
-          await track.applyConstraints({
-            advanced: [{ torch: ligar }]
-          });
-          sucesso = true;
         }
       }
     } catch (e) {
-      console.warn('Controle nativo de lanterna falhou:', e);
+      console.warn('Erro ao checar torchFeature inicial:', e);
     }
 
-    if (sucesso) {
-      setLanternaAtiva(ligar);
+    // Fallback: via MediaStreamTrack
+    if (trackEncontrado) {
+      try {
+        const caps = trackEncontrado.getCapabilities ? trackEncontrado.getCapabilities() : {};
+        if (caps.torch) {
+          setSuportaLanterna(true);
+          await trackEncontrado.applyConstraints({
+            advanced: [{ torch: true }]
+          });
+          setLanternaAtiva(true);
+          return;
+        }
+      } catch (e) {
+        console.warn('Erro ao acionar constraints nativas da lanterna:', e);
+      }
+    }
+
+    // Tenta aplicação direta
+    await alternarLanternaFisica(true, false);
+  }
+
+  // Alterna o estado físico da lanterna (Torch)
+  async function alternarLanternaFisica(novoEstado, mostrarAlertaErro = true) {
+    let ligou = false;
+
+    // Método 1: Html5Qrcode torchFeature oficial
+    try {
+      if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
+        const caps = html5QrCodeRef.current.getRunningTrackCameraCapabilities();
+        if (caps && caps.torchFeature) {
+          const torch = caps.torchFeature();
+          if (torch.isSupported()) {
+            await torch.apply(novoEstado);
+            ligou = true;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Método 1 (torchFeature) falhou:', e);
+    }
+
+    // Método 2: Todos os VideoTracks ativos no DOM
+    if (!ligou) {
+      const videos = document.querySelectorAll('video');
+      for (const v of videos) {
+        if (v.srcObject && v.srcObject.getVideoTracks) {
+          for (const track of v.srcObject.getVideoTracks()) {
+            try {
+              await track.applyConstraints({
+                advanced: [{ torch: novoEstado }]
+              });
+              ligou = true;
+              activeTrackRef.current = track;
+            } catch (err) {
+              // Continua para o próximo track
+            }
+          }
+        }
+      }
+    }
+
+    // Método 3: applyVideoConstraints do scanner
+    if (!ligou && html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
+      try {
+        await html5QrCodeRef.current.applyVideoConstraints({
+          advanced: [{ torch: novoEstado }]
+        });
+        ligou = true;
+      } catch (err) {}
+    }
+
+    if (ligou) {
+      setLanternaAtiva(novoEstado);
       setSuportaLanterna(true);
+      setAvisoLanterna(null);
+    } else if (mostrarAlertaErro) {
+      setAvisoLanterna(
+        'Este sensor de câmera não liberou o controle de flash (Torch). Alguns dispositivos reservam o LED para o app nativo.'
+      );
+      setTimeout(() => setAvisoLanterna(null), 4500);
     }
   }
 
   function finalizarCamera() {
     try {
-      aplicarEstadoLanterna(false);
+      alternarLanternaFisica(false, false);
       if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
         html5QrCodeRef.current.stop().catch(() => {});
       }
@@ -206,7 +239,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
 
   return (
     <div className="flex-1 flex flex-col justify-between relative bg-[#2a2a2a] overflow-hidden select-none">
-      {/* Alerta de Conexão HTTP Insegura (Quando aberto via IP local sem HTTPS) */}
+      {/* Alerta de Conexão HTTP Insegura */}
       {inseguro && (
         <div className="bg-amber-500/20 border-b border-amber-500/40 p-2.5 px-4 text-xs text-amber-300 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -215,6 +248,13 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
               Acesso HTTP detectado. Para liberar a câmera do celular, acerte o túnel <strong>HTTPS</strong>.
             </span>
           </div>
+        </div>
+      )}
+
+      {/* Aviso temporário se a lanterna física não responder */}
+      {avisoLanterna && (
+        <div className="bg-zinc-900/95 border-b border-zinc-700 p-2 px-4 text-[11px] text-amber-300 text-center animate-fade-in">
+          {avisoLanterna}
         </div>
       )}
 
@@ -268,13 +308,13 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
 
         {/* CONTROLES: LANTERNA E ALTERNATIVA */}
         <div className="mt-4 flex items-center justify-center gap-3">
-          {/* Botão de Lanterna (Torch) */}
+          {/* Botão de Lanterna (Torch) com controle físico real */}
           <button
             type="button"
-            onClick={alternarLanterna}
+            onClick={() => alternarLanternaFisica(!lanternaAtiva, true)}
             className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all active:scale-95 shadow-lg ${
               lanternaAtiva
-                ? 'bg-amber-500 text-zinc-950 shadow-amber-500/30 ring-2 ring-amber-400'
+                ? 'bg-amber-500 text-zinc-950 shadow-amber-500/30 ring-2 ring-amber-400 font-black'
                 : 'bg-zinc-900 border border-zinc-700 text-zinc-300 hover:text-white'
             }`}
           >
@@ -306,12 +346,12 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
 
       {/* RODAPÉ DO APP: LIMPO E SEM OS BOTÕES DE SIMULAÇÃO REMOVIDOS */}
       <footer className="bg-[#1e1e1e] border-t border-zinc-800 p-3 text-center">
-        <p className="text-[11px] text-zinc-400">
-          Aponte a câmera para a placa QR da máquina na linha
+        <p className="text-[11px] text-zinc-400 font-mono">
+          Vanguard Fast Call • Aponte para a placa QR da máquina
         </p>
       </footer>
 
-      {/* MODAL PARA DIGITAÇÃO MANUAL DE TAG (CASO A CÂMERA FÍSICA ESTEJA INDISPONÍVEL) */}
+      {/* MODAL PARA DIGITAÇÃO MANUAL DE TAG */}
       {modalTagManual && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-xs w-full p-4 space-y-3 shadow-2xl">
