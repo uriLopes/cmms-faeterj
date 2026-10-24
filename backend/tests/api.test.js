@@ -209,6 +209,17 @@ async function runTests() {
       'POST /api/pecas/:id/entrada atualiza saldo do almoxarifado'
     );
 
+    // 18. Motor de Indicadores & Métricas Industriais (MTBF, MTTR, Disponibilidade, Pareto)
+    const resMetricas = await request('GET', '/api/metricas/dashboard', null, tokenPCM);
+    assert(
+      resMetricas.status === 200 &&
+      resMetricas.data.resumo_geral &&
+      resMetricas.data.resumo_geral.mttr_medio_minutos !== undefined &&
+      resMetricas.data.resumo_geral.disponibilidade_percentual !== undefined &&
+      Array.isArray(resMetricas.data.pareto_subsistemas),
+      'GET /api/metricas/dashboard calcula MTBF, MTTR, Disponibilidade e Pareto de falhas'
+    );
+
   } catch (err) {
     console.error('Erro durante os testes:', err);
     failed++;

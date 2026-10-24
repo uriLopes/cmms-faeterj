@@ -5,6 +5,7 @@ import {
   Wrench,
   Boxes,
   Activity,
+  BarChart3,
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
@@ -151,6 +152,27 @@ export default function Home() {
               </h4>
               <p className="text-xs text-slate-400 mt-1">
                 Controle de peças com modo reserva pendente e alerta de estoque mínimo.
+              </p>
+            </div>
+
+            {/* Card 5: Motor de Indicadores & Métricas Industriais (Concluído) */}
+            <div
+              onClick={() => navigate('/indicadores')}
+              className="bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 p-4 rounded-xl cursor-pointer transition-all hover:bg-slate-900 group sm:col-span-2"
+            >
+              <div className="flex items-start justify-between">
+                <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-indigo-400">
+                  <BarChart3 className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded">
+                  Etapa 08 • Ativo
+                </span>
+              </div>
+              <h4 className="font-bold text-sm text-white mt-3 group-hover:text-indigo-400 transition-colors">
+                Motor de Indicadores & Métricas Industriais (MTBF / MTTR / Pareto)
+              </h4>
+              <p className="text-xs text-slate-400 mt-1">
+                Cálculo automatizado de confiabilidade, MTTR Líquido Puro, Disponibilidade WCM e Curva 80/20 por subsistema.
               </p>
             </div>
           </div>

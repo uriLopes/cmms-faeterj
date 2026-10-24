@@ -4,6 +4,7 @@ import OperadorChamado from './pages/OperadorChamado';
 import CockpitPCM from './pages/CockpitPCM';
 import MantenedorPainel from './pages/MantenedorPainel';
 import AlmoxarifadoPainel from './pages/AlmoxarifadoPainel';
+import IndicadoresPainel from './pages/IndicadoresPainel';
 
 function App() {
   return (
@@ -20,6 +21,9 @@ function App() {
         <Route path="/almoxarifado" element={<AlmoxarifadoPainel />} />
         <Route path="/estoque" element={<AlmoxarifadoPainel />} />
         <Route path="/pecas" element={<AlmoxarifadoPainel />} />
+        <Route path="/indicadores" element={<IndicadoresPainel />} />
+        <Route path="/metricas" element={<IndicadoresPainel />} />
+        <Route path="/analytics" element={<IndicadoresPainel />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
