@@ -7,6 +7,9 @@ const router = Router();
 // Listagem de peças e saldo (acesso liberado a técnicos, almoxarife e PCM)
 router.get('/pecas', authenticateToken, pecaController.listarPecas);
 
+// Fila geral de requisições de peças em campo (para o Almoxarifado)
+router.get('/pecas-os/requisicoes', authenticateToken, pecaController.listarRequisicoes);
+
 // Peças de uma OS
 router.get('/chamados/:id/pecas', authenticateToken, pecaController.listarPecasPorOS);
 
@@ -24,6 +27,14 @@ router.patch(
   authenticateToken,
   authorizeRoles(['almoxarife', 'admin']),
   pecaController.baixarPecaAlmoxarifado
+);
+
+// Almoxarife registra entrada de estoque / reposição
+router.post(
+  '/pecas/:id/entrada',
+  authenticateToken,
+  authorizeRoles(['almoxarife', 'admin']),
+  pecaController.entradaEstoque
 );
 
 module.exports = router;

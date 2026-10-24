@@ -211,6 +211,101 @@ const pecaController = {
       console.error('[Pecas] Erro ao listar peças da OS:', error);
       return res.status(500).json({ erro: 'Erro ao consultar peças da OS.' });
     }
+  },
+
+  /**
+   * GET /api/pecas-os/requisicoes
+   * Fila geral de requisições de peças em campo (para o painel do almoxarife)
+   */
+  async listarRequisicoes(req, res) {
+    try {
+      const { status } = req.query; // 'reserva_pendente' ou 'baixado_almoxarifado'
+
+      const query = db('pecas_utilizadas_os as pu')
+        .join('pecas as p', 'pu.peca_id', 'p.id')
+        .join('chamados_os as c', 'pu.chamado_id', 'c.id')
+        .join('ativos_postos as a', 'c.ativo_id', 'a.id')
+        .join('linhas as l', 'a.linha_id', 'l.id')
+        .leftJoin('usuarios as u_sol', 'pu.solicitado_por_id', 'u_sol.id')
+        .leftJoin('usuarios as u_ate', 'pu.atendido_por_id', 'u_ate.id')
+        .select(
+          'pu.id',
+          'pu.chamado_id',
+          'c.numero_os',
+          'c.status as chamado_status',
+          'a.tag_patrimonio',
+          'a.nome as ativo_nome',
+          'a.criticidade as ativo_criticidade',
+          'l.nome as linha_nome',
+          'p.id as peca_id',
+          'p.codigo_sap',
+          'p.descricao as peca_descricao',
+          'p.categoria as peca_categoria',
+          'p.localizacao_almoxarifado',
+          'p.quantidade_estoque',
+          'p.quantidade_minima',
+          'pu.quantidade as quantidade_solicitada',
+          'p.unidade_medida',
+          'pu.status_movimentacao',
+          'u_sol.nome as solicitado_por_nome',
+          'u_ate.nome as atendido_por_nome',
+          'pu.created_at',
+          'pu.data_baixa'
+        );
+
+      if (status) {
+        query.where('pu.status_movimentacao', status);
+      }
+
+      const requisicoes = await query.orderBy('pu.created_at', 'desc');
+      return res.status(200).json(requisicoes);
+    } catch (error) {
+      console.error('[Pecas] Erro ao listar requisições gerais:', error);
+      return res.status(500).json({ erro: 'Erro ao consultar requisições de peças.' });
+    }
+  },
+
+  /**
+   * POST /api/pecas/:id/entrada
+   * Entrada de estoque ou reposição pelo almoxarife
+   */
+  async entradaEstoque(req, res) {
+    try {
+      const peca_id = Number(req.params.id);
+      const { quantidade, observacao } = req.body;
+
+      if (!quantidade || quantidade <= 0) {
+        return res.status(400).json({ erro: 'Quantidade deve ser maior que zero.' });
+      }
+
+      const peca = await db('pecas').where({ id: peca_id, ativo: true }).first();
+      if (!peca) {
+        return res.status(404).json({ erro: 'Peça não encontrada.' });
+      }
+
+      await db('pecas')
+        .where({ id: peca_id })
+        .increment('quantidade_estoque', Number(quantidade));
+
+      const pecaAtualizada = await db('pecas').where({ id: peca_id }).first();
+
+      const io = req.app.get('io');
+      if (io) {
+        io.emit('estoque_atualizado', {
+          peca: pecaAtualizada,
+          entrada: Number(quantidade),
+          observacao
+        });
+      }
+
+      return res.status(200).json({
+        mensagem: 'Entrada de estoque realizada com sucesso.',
+        peca: pecaAtualizada
+      });
+    } catch (error) {
+      console.error('[Pecas] Erro na entrada de estoque:', error);
+      return res.status(500).json({ erro: 'Erro ao registrar entrada de estoque.' });
+    }
   }
 };
 

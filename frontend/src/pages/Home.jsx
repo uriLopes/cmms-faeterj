@@ -133,20 +133,23 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Card 4: Almoxarifado & Estoque */}
-            <div className="bg-slate-900/40 border border-slate-800/60 p-4 rounded-xl opacity-80">
+            {/* Card 4: Almoxarifado & Estoque (Concluído) */}
+            <div
+              onClick={() => navigate('/almoxarifado')}
+              className="bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 p-4 rounded-xl cursor-pointer transition-all hover:bg-slate-900 group"
+            >
               <div className="flex items-start justify-between">
                 <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-400">
                   <Boxes className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-800 text-slate-400 rounded">
-                  Etapa 07
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded">
+                  Etapa 07 • Ativo
                 </span>
               </div>
-              <h4 className="font-bold text-sm text-slate-200 mt-3">
+              <h4 className="font-bold text-sm text-white mt-3 group-hover:text-amber-400 transition-colors">
                 Almoxarifado & Sobressalentes
               </h4>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-400 mt-1">
                 Controle de peças com modo reserva pendente e alerta de estoque mínimo.
               </p>
             </div>

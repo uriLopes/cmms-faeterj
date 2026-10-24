@@ -59,3 +59,5 @@ export const soundAlert = {
     }
   }
 };
+
+export const playTowerAlarm = () => soundAlert.tocarAlarmeEmergencia();

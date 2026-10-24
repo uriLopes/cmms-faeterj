@@ -1,6 +1,7 @@
 require('dotenv').config();
 const http = require('http');
 const db = require('../src/database/db');
+const { server } = require('../src/server');
 
 const BASE_PORT = process.env.PORT || 3001;
 
@@ -191,6 +192,23 @@ async function runTests() {
       'GET /api/chamados/:id consolida marcos T0-T3, pausas, peças e apontamento técnico'
     );
 
+    // 16. Fila Geral de Requisições do Almoxarifado
+    const resReqs = await request('GET', '/api/pecas-os/requisicoes', null, tokenAlmoxarife);
+    assert(
+      resReqs.status === 200 && Array.isArray(resReqs.data),
+      'GET /api/pecas-os/requisicoes lista fila unificada de sobressalentes da fábrica'
+    );
+
+    // 17. Entrada de Estoque / Reposição pelo Almoxarifado
+    const resEntrada = await request('POST', `/api/pecas/1/entrada`, {
+      quantidade: 5,
+      observacao: 'Reposição lote emergencial Stellantis'
+    }, tokenAlmoxarife);
+    assert(
+      resEntrada.status === 200 && resEntrada.data.peca.quantidade_estoque > 0,
+      'POST /api/pecas/:id/entrada atualiza saldo do almoxarifado'
+    );
+
   } catch (err) {
     console.error('Erro durante os testes:', err);
     failed++;
@@ -198,6 +216,7 @@ async function runTests() {
     console.log('-'.repeat(75));
     console.log(`TOTAL: ${passed + failed} testes | PASSOU: ${passed} | FALHOU: ${failed}`);
     console.log('='.repeat(75));
+    if (server && server.close) server.close();
     await db.destroy();
     process.exit(failed > 0 ? 1 : 0);
   }
