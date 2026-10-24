@@ -377,7 +377,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
       {/* RODAPÉ DO APP: LIMPO E SEM OS BOTÕES DE SIMULAÇÃO REMOVIDOS */}
       <footer className="bg-[#1e1e1e] border-t border-zinc-800 p-3 text-center">
         <p className="text-[11px] text-zinc-400 font-mono">
-          Vanguard Fast Call • Aponte para a placa QR da máquina
+          Vanguard Trigger • Aponte para a placa QR da máquina
         </p>
       </footer>
 

@@ -1,7 +1,7 @@
 {
-  "name": "Vanguard Fast Call",
-  "short_name": "Fast Call",
-  "description": "Corp.Vanguard Industrial Maintenance Systems • Abertura Ágil de Chamados de Linha",
+  "name": "Vanguard Trigger",
+  "short_name": "VG Trigger",
+  "description": "Corp.Vanguard Industrial Maintenance Systems • Disparo Ágil de Chamados de Linha",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
