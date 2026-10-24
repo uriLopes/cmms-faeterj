@@ -1,76 +1,35 @@
 import { useState, useEffect } from 'react';
 import {
-  QrCode,
-  CheckCircle2,
-  AlertTriangle,
+  Check,
+  CheckSquare,
   Send,
   ArrowLeft,
   Camera,
-  User,
-  Wrench,
-  Clock,
-  Sparkles,
-  Check,
-  CheckSquare,
-  Square,
   RefreshCw,
+  CheckCircle2,
   Edit2,
-  Download,
-  Smartphone
+  X
 } from 'lucide-react';
-import QRScanner from './components/QRScanner';
+import ScannerCamera from './components/ScannerCamera';
 import VanguardLogo from './components/VanguardLogo';
 
 export default function App() {
-  // Tela atual: 'inicio' | 'scanner' | 'gabarito' | 'sucesso'
-  const [tela, setTela] = useState('inicio');
+  // O app já abre DIRETAMENTE na tela do scanner (Zero cliques intermediários)
+  const [tela, setTela] = useState('scanner'); // 'scanner' | 'gabarito' | 'sucesso'
 
-  // Suporte a PWA / Instalação no Celular
-  const [installPrompt, setInstallPrompt] = useState(null);
-  const [isStandalone, setIsStandalone] = useState(false);
-
-  useEffect(() => {
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-      setIsStandalone(true);
-    }
-
-    const handler = (e) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  async function handleInstalarApp() {
-    if (installPrompt) {
-      installPrompt.prompt();
-      const { outcome } = await installPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setInstallPrompt(null);
-      }
-    } else {
-      alert(
-        'Como instalar no celular:\n\n' +
-        '• No Android (Chrome/Edge): Toque nos 3 pontinhos no canto superior e selecione "Instalar aplicativo" ou "Adicionar à tela inicial".\n\n' +
-        '• No iPhone (Safari): Toque no botão Compartilhar (ícone do quadrado com a seta para cima) e escolha "Adicionar à Tela de Início".'
-      );
-    }
-  }
-
-  // Identificação do Operador (Armazenada no aparelho)
-  const [matricula, setMatricula] = useState(
-    localStorage.getItem('cmms_operador_re') || 'RE-5001'
+  // Identificação do Operador: Nome + Identifiant (Código da Fábrica)
+  // Conforme padrão do chão de fábrica e mockup: Jhon Doe - 226244
+  const [identifiant, setIdentifiant] = useState(
+    localStorage.getItem('cmms_operador_identifiant') || '226244'
   );
   const [nomeOperador, setNomeOperador] = useState(
-    localStorage.getItem('cmms_operador_nome') || 'João Silva'
+    localStorage.getItem('cmms_operador_nome') || 'Jhon Doe'
   );
-  const [editandoOperador, setEditandoOperador] = useState(false);
+  const [modalEditarOperador, setModalEditarOperador] = useState(false);
 
   // Dados do Ativo escaneado
   const [ativoData, setAtivoData] = useState(null);
   const [carregandoAtivo, setCarregandoAtivo] = useState(false);
-  const [erroAtivo, setErroAtivo] = useState(null);
 
   // Gabarito de Sintomas (Múltipla Escolha / Conferes)
   const [sintomasDisponiveis, setSintomasDisponiveis] = useState([]);
@@ -81,7 +40,7 @@ export default function App() {
   const [enviando, setEnviando] = useState(false);
   const [chamadoCriado, setChamadoCriado] = useState(null);
 
-  // Lista padrão de sintomas industriais (fallback ágil)
+  // Lista padrão de sintomas de fábrica (Gabarito de Conferes)
   const sintomasPadrao = [
     { id: 2, descricao: 'Vazamento Pneumático / Queda de Pressão de Ar', categoria: 'pneumatica' },
     { id: 1, descricao: 'Falha de Alimentação / Peça Travada no Posto', categoria: 'mecanica' },
@@ -92,34 +51,29 @@ export default function App() {
     { id: 7, descricao: 'Outro Defeito / Anomalia Mecânica', categoria: 'geral' }
   ];
 
-  // Salva RE no localStorage ao alterar
-  function salvarOperador(re, nome) {
-    setMatricula(re);
+  function salvarOperador(codigo, nome) {
+    setIdentifiant(codigo);
     setNomeOperador(nome);
-    localStorage.setItem('cmms_operador_re', re);
+    localStorage.setItem('cmms_operador_identifiant', codigo);
     localStorage.setItem('cmms_operador_nome', nome);
-    setEditandoOperador(false);
+    setModalEditarOperador(false);
   }
 
-  // 1. AÇÃO: Sucesso na Leitura do QR Code
+  // 1. AÇÃO: QR Code Lido com Sucesso
   async function handleQRScanned(qrContent) {
     setTela('gabarito');
     setCarregandoAtivo(true);
-    setErroAtivo(null);
     setSintomasSelecionados([]);
     setObservacaoTexto('');
 
     try {
-      // Extrai o token se vier como URL completa
       let token = qrContent;
       if (qrContent.includes('/')) {
         token = qrContent.split('/').pop();
       }
 
       const res = await fetch(`/api/ativos/qr/${encodeURIComponent(token)}`);
-      if (!res.ok) {
-        throw new Error('Máquina não identificada pelo QR Code.');
-      }
+      if (!res.ok) throw new Error('Máquina não localizada.');
       const data = await res.json();
       setAtivoData(data.ativo);
 
@@ -129,8 +83,8 @@ export default function App() {
         setSintomasDisponiveis(sintomasPadrao);
       }
     } catch (err) {
-      console.warn('Erro ao resolver QR Code:', err);
-      // Fallback amigável caso offline ou token de teste
+      console.warn('Fallback de ativo:', err);
+      // Fallback seguro caso offline
       setAtivoData({
         id: 1,
         tag_patrimonio: 'MV3-ROB-04',
@@ -145,7 +99,7 @@ export default function App() {
     }
   }
 
-  // 2. AÇÃO: Toggle de seleção de sintoma no Gabarito (Marcar o "Confere")
+  // 2. AÇÃO: Marcar/Desmarcar Confere no Gabarito
   function toggleSintoma(sintoma) {
     if (sintomasSelecionados.some((s) => s.id === sintoma.id)) {
       setSintomasSelecionados(sintomasSelecionados.filter((s) => s.id !== sintoma.id));
@@ -154,10 +108,10 @@ export default function App() {
     }
   }
 
-  // 3. AÇÃO: Enviar Chamado ($T_0$)
+  // 3. AÇÃO: Confirmar e Enviar Chamado ($T_0$)
   async function handleEnviarChamado() {
     if (sintomasSelecionados.length === 0 && !observacaoTexto.trim()) {
-      alert('Marque pelo menos um problema no gabarito.');
+      alert('Marque no gabarito pelo menos um sintoma da falha.');
       return;
     }
 
@@ -166,7 +120,7 @@ export default function App() {
       const sintomaPrincipal = sintomasSelecionados[0];
       const descricaoConsolidada = [
         ...sintomasSelecionados.map((s) => s.descricao),
-        observacaoTexto.trim() ? `Observação: ${observacaoTexto.trim()}` : ''
+        observacaoTexto.trim() ? `Obs: ${observacaoTexto.trim()}` : ''
       ].filter(Boolean).join(' | ');
 
       const res = await fetch('/api/chamados', {
@@ -174,17 +128,14 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ativo_id: ativoData?.id || 1,
-          operador_matricula: matricula,
+          operador_matricula: identifiant,
           operador_nome: nomeOperador,
           sintoma_id: sintomaPrincipal?.id || 1,
           descricao_sintoma: descricaoConsolidada
         })
       });
 
-      if (!res.ok) {
-        throw new Error('Falha ao registrar chamado no servidor.');
-      }
-
+      if (!res.ok) throw new Error('Falha ao registrar chamado.');
       const data = await res.json();
       setChamadoCriado(data.chamado);
       setTela('sucesso');
@@ -196,164 +147,106 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between max-w-md mx-auto p-4 sm:p-5 relative select-none">
-      {/* OVERLAY DO SCANNER DE QR CODE (MODAL FULLSCREEN) */}
-      {tela === 'scanner' && (
-        <QRScanner
-          onScanSuccess={(content) => handleQRScanned(content)}
-          onClose={() => setTela('inicio')}
-        />
-      )}
+    <div className="min-h-screen bg-black text-slate-100 flex flex-col justify-between max-w-md mx-auto relative select-none">
+      {/* HEADER SUPERIOR (EXATAMENTE COMO NO WIREFRAME DO USUÁRIO) */}
+      <header className="bg-black pt-3 pb-3 px-4 text-center border-b border-zinc-900 shrink-0">
+        {/* Ícone Central da Vanguard */}
+        <div className="flex justify-center mb-1.5">
+          <VanguardLogo variant="icon" size="lg" />
+        </div>
 
-      {/* TELA 1: INÍCIO (LAUNCHER MOBILE) */}
-      {tela === 'inicio' && (
-        <div className="flex-1 flex flex-col justify-between pt-2 pb-4">
-          {/* Header Superior */}
-          <div className="space-y-3">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-800/80">
-              <VanguardLogo variant="horizontal" size="sm" />
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Operador</span>
-              </div>
-            </div>
+        {/* Linha do Operador: Nome - Identifiant */}
+        <div
+          onClick={() => setModalEditarOperador(true)}
+          className="cursor-pointer inline-flex items-center gap-1.5 hover:opacity-80 active:scale-95 transition-all"
+          title="Toque para alterar nome ou Identifiant da fábrica"
+        >
+          <h2 className="text-sm font-black text-white tracking-wide">
+            Operador: {nomeOperador} - {identifiant}
+          </h2>
+          <Edit2 className="w-3 h-3 text-zinc-500" />
+        </div>
+      </header>
 
-            {/* Identificação do Operador */}
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between shadow-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-                  <User className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 block">
-                    Operador no Posto
-                  </span>
-                  <h3 className="font-bold text-sm text-white">{nomeOperador}</h3>
-                  <span className="font-mono text-xs text-indigo-400">{matricula}</span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setEditandoOperador(!editandoOperador)}
-                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 active:scale-95"
-                title="Trocar Matrícula"
-              >
-                <Edit2 className="w-4 h-4" />
+      {/* MODAL DE EDIÇÃO DE IDENTIFIANT / OPERADOR */}
+      {modalEditarOperador && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-xs w-full p-4 space-y-3 shadow-2xl">
+            <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
+              <span className="font-bold text-xs text-white">Identificação da Fábrica</span>
+              <button onClick={() => setModalEditarOperador(false)} className="text-zinc-400 hover:text-white">
+                <X className="w-4 h-4" />
               </button>
             </div>
-
-            {/* Modal simples de troca de matrícula */}
-            {editandoOperador && (
-              <div className="bg-slate-900 border border-indigo-500/40 rounded-2xl p-3.5 space-y-2.5 animate-fadeIn">
-                <span className="text-xs font-bold text-indigo-300 block">Identificação Rápida:</span>
-                <input
-                  type="text"
-                  value={matricula}
-                  onChange={(e) => setMatricula(e.target.value)}
-                  placeholder="Ex: RE-5001"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white font-mono uppercase focus:outline-none focus:border-indigo-500"
-                />
-                <input
-                  type="text"
-                  value={nomeOperador}
-                  onChange={(e) => setNomeOperador(e.target.value)}
-                  placeholder="Nome do Operador"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
-                />
-                <button
-                  type="button"
-                  onClick={() => salvarOperador(matricula, nomeOperador)}
-                  className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md"
-                >
-                  Salvar no Aparelho
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* BOTÃO CENTRAL DE ESCANEAR QR CODE (FOCO TOTAL) */}
-          <div className="my-auto py-8 text-center space-y-4">
-            <div className="relative inline-block">
-              {/* Halos pulsantes de toque */}
-              <div className="absolute inset-0 rounded-3xl bg-rose-600/30 blur-2xl animate-pulse"></div>
-
-              <button
-                type="button"
-                onClick={() => setTela('scanner')}
-                className="relative w-48 h-48 sm:w-52 sm:h-52 bg-gradient-to-br from-rose-600 via-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white rounded-3xl flex flex-col items-center justify-center p-4 shadow-2xl shadow-rose-600/40 border-2 border-rose-400/40 active:scale-95 transition-all mx-auto"
-              >
-                <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mb-2 border border-white/20">
-                  <QrCode className="w-12 h-12 text-white" />
-                </div>
-                <span className="font-black text-base uppercase tracking-wider text-white">
-                  Escanear
-                </span>
-                <span className="text-[11px] font-medium text-rose-100 uppercase tracking-widest mt-0.5">
-                  QR Code da Máquina
-                </span>
-              </button>
+            <div className="space-y-2 text-xs">
+              <label className="text-zinc-400 block font-semibold">Nome do Operador:</label>
+              <input
+                type="text"
+                value={nomeOperador}
+                onChange={(e) => setNomeOperador(e.target.value)}
+                placeholder="Ex: Jhon Doe"
+                className="w-full bg-black border border-zinc-700 rounded-xl p-2.5 text-white"
+              />
+              <label className="text-zinc-400 block font-semibold pt-1">Identifiant (Código da Fábrica):</label>
+              <input
+                type="text"
+                value={identifiant}
+                onChange={(e) => setIdentifiant(e.target.value)}
+                placeholder="Ex: 226244"
+                className="w-full bg-black border border-zinc-700 rounded-xl p-2.5 text-white font-mono"
+              />
             </div>
-
-            <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
-              Dê <strong>dois toques</strong> na tela para ler o QR Code da máquina parada e reportar a anomalia.
-            </p>
-          </div>
-
-          {/* Botão de Instalar como Aplicativo (se não estiver em standalone) */}
-          {!isStandalone && (
-            <div className="mb-3">
-              <button
-                type="button"
-                onClick={handleInstalarApp}
-                className="w-full py-2.5 px-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold text-slate-300 hover:text-white transition-all active:scale-95 shadow-md"
-              >
-                <Smartphone className="w-4 h-4 text-rose-400" />
-                <span>Instalar como App no Celular</span>
-                <Download className="w-3.5 h-3.5 text-slate-400 ml-auto" />
-              </button>
-            </div>
-          )}
-
-          {/* Rodapé institucional */}
-          <div className="text-center text-[10px] text-slate-500 border-t border-slate-900 pt-3">
-            CMMS FAETERJ • App do Operador • Fricção Zero
+            <button
+              onClick={() => salvarOperador(identifiant, nomeOperador)}
+              className="w-full py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow-lg"
+            >
+              Salvar Identifiant
+            </button>
           </div>
         </div>
       )}
 
-      {/* TELA 2: GABARITO DE SINTOMAS & CONFERES (PÓS-QR CODE) */}
+      {/* TELA 1: SCANNER DIRETO (CÂMERA ATIVA AO ABRIR O APP + LANTERNA AUTOMÁTICA) */}
+      {tela === 'scanner' && (
+        <ScannerCamera
+          onScanSuccess={handleQRScanned}
+          nomeOperador={nomeOperador}
+          matricula={identifiant}
+        />
+      )}
+
+      {/* TELA 2: GABARITO DE SINTOMAS COM CONFERES (PÓS-LEITURA DO QR CODE) */}
       {tela === 'gabarito' && (
-        <div className="flex-1 flex flex-col justify-between pt-1 pb-2 space-y-3">
+        <div className="flex-1 flex flex-col justify-between p-4 bg-zinc-950 space-y-3">
           <div>
-            {/* Barra de voltar */}
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+            {/* Barra de Retorno ao Scanner */}
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
               <button
                 type="button"
-                onClick={() => setTela('inicio')}
-                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white"
+                onClick={() => setTela('scanner')}
+                className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Voltar / Cancelar</span>
+                <span>Voltar à Câmera</span>
               </button>
               <button
                 type="button"
                 onClick={() => setTela('scanner')}
-                className="text-[11px] text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1"
+                className="text-xs text-red-400 font-bold flex items-center gap-1"
               >
                 <Camera className="w-3.5 h-3.5" />
-                <span>Re-escanear</span>
+                <span>Escanear Outra</span>
               </button>
             </div>
 
             {/* Cartão de Identificação da Máquina */}
             {carregandoAtivo ? (
-              <div className="py-8 text-center text-xs text-slate-400 flex flex-col items-center gap-2">
-                <RefreshCw className="w-6 h-6 text-rose-500 animate-spin" />
-                <span>Identificando máquina e posto...</span>
+              <div className="py-8 text-center text-xs text-zinc-400 flex flex-col items-center gap-2">
+                <RefreshCw className="w-6 h-6 text-red-500 animate-spin" />
+                <span>Identificando máquina...</span>
               </div>
             ) : (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 mt-3 space-y-1 shadow-xl">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-3.5 mt-2 space-y-1 shadow-lg">
                 <div className="flex items-center justify-between">
                   <span className="font-mono font-black text-lg text-white tracking-wider">
                     {ativoData?.tag_patrimonio}
@@ -361,36 +254,34 @@ export default function App() {
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
                       ativoData?.criticidade === 'A'
-                        ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
+                        ? 'bg-red-500/20 text-red-400 border-red-500/40'
                         : 'bg-amber-500/20 text-amber-400 border-amber-500/40'
                     }`}
                   >
                     Criticidade {ativoData?.criticidade}
                   </span>
                 </div>
-                <h2 className="text-xs font-semibold text-slate-200">
-                  {ativoData?.nome}
-                </h2>
-                <p className="text-[11px] text-slate-400">
+                <h3 className="text-xs font-semibold text-zinc-200">{ativoData?.nome}</h3>
+                <p className="text-[11px] text-zinc-400">
                   {ativoData?.linha_nome} • {ativoData?.posto_trabalho}
                 </p>
               </div>
             )}
 
-            {/* GABARITO DE SINTOMAS COM CONFERES (MÚLTIPLA ESCOLHA) */}
-            <div className="mt-4 space-y-2">
+            {/* GABARITO DE SINTOMAS: LISTINHA COM CONFERES */}
+            <div className="mt-3 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                  <CheckSquare className="w-4 h-4 text-rose-400" />
+                <span className="text-xs font-black uppercase tracking-wider text-zinc-200 flex items-center gap-1.5">
+                  <CheckSquare className="w-4 h-4 text-red-500" />
                   Marque o que está acontecendo:
                 </span>
-                <span className="text-[10px] font-mono text-slate-400">
-                  {sintomasSelecionados.length} marcado(s)
+                <span className="text-[10px] font-mono text-zinc-400">
+                  {sintomasSelecionados.length} selecionado(s)
                 </span>
               </div>
 
               {/* Lista dos Conferes */}
-              <div className="space-y-2 max-h-[46vh] overflow-y-auto pr-1">
+              <div className="space-y-1.5 max-h-[46vh] overflow-y-auto pr-1">
                 {sintomasDisponiveis.map((item) => {
                   const isChecked = sintomasSelecionados.some((s) => s.id === item.id);
 
@@ -398,19 +289,19 @@ export default function App() {
                     <div
                       key={item.id}
                       onClick={() => toggleSintoma(item)}
-                      className={`p-3.5 rounded-2xl border text-xs cursor-pointer transition-all flex items-center justify-between select-none active:scale-98 ${
+                      className={`p-3.5 rounded-xl border text-xs cursor-pointer transition-all flex items-center justify-between active:scale-98 ${
                         isChecked
-                          ? 'bg-rose-600/20 border-rose-500 shadow-md shadow-rose-950/40 text-white'
-                          : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700'
+                          ? 'bg-red-950/40 border-red-500 shadow-md text-white ring-1 ring-red-500'
+                          : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700'
                       }`}
                     >
                       <div className="flex items-center gap-3 pr-2">
-                        {/* Ícone do Confere */}
+                        {/* Confere Tátil */}
                         <div
-                          className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                          className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 transition-all ${
                             isChecked
-                              ? 'bg-rose-600 text-white'
-                              : 'bg-slate-950 border border-slate-700 text-transparent'
+                              ? 'bg-red-600 text-white'
+                              : 'bg-black border border-zinc-700 text-transparent'
                           }`}
                         >
                           <Check className="w-4 h-4 stroke-[3]" />
@@ -421,7 +312,7 @@ export default function App() {
                         </span>
                       </div>
 
-                      <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-slate-950 text-slate-400 shrink-0 border border-slate-800">
+                      <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-black text-zinc-500 shrink-0">
                         {item.categoria}
                       </span>
                     </div>
@@ -429,29 +320,29 @@ export default function App() {
                 })}
               </div>
 
-              {/* Campo Opcional de Detalhes em Texto */}
+              {/* Campo de Texto Opcional */}
               <div className="pt-2">
                 <input
                   type="text"
                   value={observacaoTexto}
                   onChange={(e) => setObservacaoTexto(e.target.value)}
                   placeholder="Alguma observação extra? (Opcional)"
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
                 />
               </div>
             </div>
           </div>
 
-          {/* BOTÃO GRANDE DE ENVIAR PARA A MANUTENÇÃO */}
+          {/* BOTÃO CONFIRMAR E ENVIAR ($T_0$) */}
           <div className="pt-2">
             <button
               type="button"
               disabled={enviando || sintomasSelecionados.length === 0}
               onClick={handleEnviarChamado}
-              className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-2xl active:scale-95 transition-all ${
+              className={`w-full py-4 rounded-xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-2xl active:scale-95 transition-all ${
                 sintomasSelecionados.length > 0
-                  ? 'bg-gradient-to-r from-rose-600 via-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white shadow-rose-600/40 border border-rose-400/40 animate-pulse'
-                  : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                  ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/40 border border-red-500 animate-pulse'
+                  : 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-700'
               }`}
             >
               {enviando ? (
@@ -462,7 +353,7 @@ export default function App() {
               ) : (
                 <>
                   <Send className="w-5 h-5" />
-                  <span>Chamar Manutenção Agora ($T_0$)</span>
+                  <span>Confirmar e Enviar ($T_0$)</span>
                 </>
               )}
             </button>
@@ -472,9 +363,9 @@ export default function App() {
 
       {/* TELA 3: SUCESSO / CONFIRMAÇÃO IMEDIATA */}
       {tela === 'sucesso' && (
-        <div className="flex-1 flex flex-col justify-between py-6 text-center">
+        <div className="flex-1 flex flex-col justify-between p-6 bg-zinc-950 text-center">
           <div className="my-auto space-y-4">
-            <div className="w-20 h-20 bg-emerald-500/20 border-2 border-emerald-500 rounded-3xl flex items-center justify-center mx-auto text-emerald-400 shadow-2xl shadow-emerald-500/20 animate-bounce">
+            <div className="w-20 h-20 bg-emerald-500/20 border-2 border-emerald-500 rounded-3xl flex items-center justify-center mx-auto text-emerald-400 shadow-2xl animate-bounce">
               <CheckCircle2 className="w-12 h-12" />
             </div>
 
@@ -483,32 +374,30 @@ export default function App() {
                 Marco T₀ Registrado
               </span>
               <h2 className="text-xl font-black text-white mt-1">
-                Chamado Aberto com Sucesso!
+                Chamado Enviado à Manutenção!
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
-                A equipe de manutenção e o Team Leader já foram alertados.
+              <p className="text-xs text-zinc-400 mt-1">
+                O Team Leader e a equipe técnica já receberam o alerta no Cockpit.
               </p>
             </div>
 
-            {/* Cartão de Resumo da OS */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-left space-y-2 max-w-xs mx-auto shadow-lg text-xs font-mono">
-              <div className="flex justify-between border-b border-slate-800 pb-2">
-                <span className="text-slate-400">Número da OS:</span>
-                <span className="text-white font-bold text-sm">
-                  {chamadoCriado?.numero_os}
-                </span>
+            {/* Dossiê da OS */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-left space-y-2 max-w-xs mx-auto shadow-lg text-xs font-mono">
+              <div className="flex justify-between border-b border-zinc-800 pb-2">
+                <span className="text-zinc-400">Número da OS:</span>
+                <span className="text-white font-bold text-sm">{chamadoCriado?.numero_os}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Máquina:</span>
+                <span className="text-zinc-400">Máquina:</span>
                 <span className="text-white">{ativoData?.tag_patrimonio}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Posto:</span>
-                <span className="text-slate-300">{ativoData?.posto_trabalho}</span>
+                <span className="text-zinc-400">Posto:</span>
+                <span className="text-zinc-300">{ativoData?.posto_trabalho}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Operador:</span>
-                <span className="text-slate-300">{nomeOperador}</span>
+                <span className="text-zinc-400">Operador:</span>
+                <span className="text-zinc-300">{nomeOperador} ({identifiant})</span>
               </div>
             </div>
           </div>
@@ -516,13 +405,14 @@ export default function App() {
           <button
             type="button"
             onClick={() => {
-              setTela('inicio');
+              setTela('scanner'); // Volta direto para a câmera pronta para a próxima máquina
               setChamadoCriado(null);
               setAtivoData(null);
             }}
-            className="w-full py-4 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold text-xs uppercase tracking-wider rounded-2xl shadow-xl active:scale-95 transition-all"
+            className="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
           >
-            Concluir / Voltar ao Início
+            <Camera className="w-4 h-4" />
+            <span>Escanear Próxima Máquina</span>
           </button>
         </div>
       )}
