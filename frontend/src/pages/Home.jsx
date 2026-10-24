@@ -91,20 +91,23 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Card 2: Cockpit PCM & TL (Próximo) */}
-            <div className="bg-slate-900/40 border border-slate-800/60 p-4 rounded-xl opacity-80">
+            {/* Card 2: Cockpit PCM & TL (Ativo) */}
+            <div
+              onClick={() => navigate('/cockpit')}
+              className="bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 p-4 rounded-xl cursor-pointer transition-all hover:bg-slate-900 group"
+            >
               <div className="flex items-start justify-between">
                 <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-indigo-400">
                   <LayoutDashboard className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-800 text-slate-400 rounded">
-                  Etapa 05 • Próxima
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded">
+                  Etapa 05 • Ativo
                 </span>
               </div>
-              <h4 className="font-bold text-sm text-slate-200 mt-3">
+              <h4 className="font-bold text-sm text-white mt-3 group-hover:text-indigo-400 transition-colors">
                 Cockpit Manutenção & TL
               </h4>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-400 mt-1">
                 Painel em tempo real, matriz GUT, alarme sonoro e atribuição $T_1$.
               </p>
             </div>
