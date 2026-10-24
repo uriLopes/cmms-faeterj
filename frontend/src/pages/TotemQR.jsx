@@ -1,50 +1,31 @@
 import { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import { io } from 'socket.io-client';
-import {
-  Maximize2,
-  Minimize2,
-  ExternalLink,
-  CheckCircle2,
-  Sparkles
-} from 'lucide-react';
-import VanguardLogo from '../components/VanguardLogo';
+import { CheckCircle2, Sparkles } from 'lucide-react';
 
 const MAQUINAS = [
   {
     id: 1,
     tag: 'MV3-ROB-04',
     setor: 'Chaparia',
-    nome: 'Robô de Solda a Ponto KUKA KR210',
-    linha: 'Chaparia - Linha MV3',
-    posto: 'Posto 40 - Geometria Lateral',
     token: 'qr_mv3_rob_04_token_hash_faeterj_2026'
   },
   {
     id: 2,
     tag: 'HC1-APT-02',
     setor: 'Montagem Final',
-    nome: 'Apertadeira Pneumática Atlas Copco QST',
-    linha: 'Montagem Final - Linha HC1',
-    posto: 'Posto 12 - Fixação de Amortecedor LD',
     token: 'qr_hc1_apt_02_token_hash_faeterj_2026'
   },
   {
     id: 3,
     tag: 'BNC-CNV-01',
     setor: 'Tapeçaria & Assentos',
-    nome: 'Transportador de Roletes Montagem Bancos',
-    linha: 'Tapeçaria & Assentos - Linha 01',
-    posto: 'Posto 01 - Abastecimento de Estruturas',
     token: 'qr_bnc_cnv_01_token_hash_faeterj_2026'
   },
   {
     id: 4,
     tag: 'PIN-CAB-01',
     setor: 'Pintura Automotiva',
-    nome: 'Cabine de Aplicação KTL Eletrostática',
-    linha: 'Pintura Automotiva - Linha 01',
-    posto: 'Posto 08 - Tanque de Imersão e Cura',
     token: 'qr_pnt_cab_01_token_hash_faeterj_2026'
   }
 ];
@@ -52,17 +33,16 @@ const MAQUINAS = [
 export default function TotemQR() {
   const [maquinaAtiva, setMaquinaAtiva] = useState(MAQUINAS[0]);
   const [ultimoDisparo, setUltimoDisparo] = useState(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const canvasRef = useRef(null);
 
-  // Renderiza o QR Code no Canvas de alta fidelidade
+  // Renderiza o QR Code no Canvas com alta densidade e nitidez
   useEffect(() => {
     if (canvasRef.current && maquinaAtiva) {
       QRCode.toCanvas(
         canvasRef.current,
         maquinaAtiva.token,
         {
-          width: 290,
+          width: 300,
           margin: 1,
           color: {
             dark: '#000000',
@@ -77,20 +57,19 @@ export default function TotemQR() {
     }
   }, [maquinaAtiva]);
 
-  // Teclas de atalho para a apresentação do TCC (1 a 4 para trocar de máquina rapidamente)
+  // Teclas de atalho para apresentação (1 a 4 alternam sem precisar de mouse)
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === '1') setMaquinaAtiva(MAQUINAS[0]);
       if (e.key === '2') setMaquinaAtiva(MAQUINAS[1]);
       if (e.key === '3') setMaquinaAtiva(MAQUINAS[2]);
       if (e.key === '4') setMaquinaAtiva(MAQUINAS[3]);
-      if (e.key.toLowerCase() === 'f') toggleFullscreen();
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Conexão WebSocket em tempo real para capturar o disparo do operador no celular
+  // Escuta WebSocket do backend em tempo real para feedback do disparo T0
   useEffect(() => {
     const socket = io('http://localhost:3001');
 
@@ -109,7 +88,7 @@ export default function TotemQR() {
 
       setUltimoDisparo(registro);
 
-      // Efeito sonoro discreto de confirmação
+      // Sinal sonoro sutil
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = audioCtx.createOscillator();
@@ -123,7 +102,6 @@ export default function TotemQR() {
         osc.stop(audioCtx.currentTime + 0.35);
       } catch (e) {}
 
-      // Remove o aviso após 7 segundos
       setTimeout(() => {
         setUltimoDisparo(null);
       }, 7000);
@@ -134,51 +112,23 @@ export default function TotemQR() {
     };
   }, []);
 
-  function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-      setIsFullscreen(true);
-    } else {
-      if (document.exitFullscreen) document.exitFullscreen();
-      setIsFullscreen(false);
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col justify-center items-center p-6 relative select-none font-sans overflow-hidden">
-      {/* BOTÕES DISCRETOS DE UTILITÁRIOS (Canto superior direito) */}
-      <div className="absolute top-4 right-4 flex items-center gap-3 z-30">
-        <a
-          href="/cockpit"
-          target="_blank"
-          rel="noreferrer"
-          className="text-[11px] font-mono text-zinc-500 hover:text-white px-2.5 py-1 rounded bg-zinc-950/80 border border-zinc-900 flex items-center gap-1.5 transition-colors"
-          title="Abrir Cockpit PCM da Manutenção em nova aba"
-        >
-          <span>Cockpit</span>
-          <ExternalLink className="w-3 h-3" />
-        </a>
-
-        <button
-          onClick={toggleFullscreen}
-          className="text-zinc-500 hover:text-white p-1.5 rounded bg-zinc-950/80 border border-zinc-900 transition-colors"
-          title="Tela Cheia para Apresentação do TCC (Tecla F)"
-        >
-          {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-        </button>
-      </div>
-
-      {/* ÁREA CENTRAL PRINCIPAL: EXATAMENTE COMO NO DESIGN DO CANVA */}
-      <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20 my-auto py-6">
-        {/* LADO ESQUERDO: LOGO CORP.VANGUARD + QR CODE COM MOLDURA VERMELHA */}
-        <div className="flex flex-col items-start space-y-7">
-          {/* LOGO OFICIAL CORP.VANGUARD (HORIZONTAL COM SUBTÍTULO) */}
-          <div className="pl-1">
-            <VanguardLogo variant="full" size="lg" />
+    <div className="min-h-screen bg-black text-white flex flex-col justify-center items-center p-6 sm:p-10 relative select-none font-sans overflow-hidden">
+      {/* ÁREA CENTRAL PRINCIPAL: 100% FIEL AO WIREFRAME DO CANVA */}
+      <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20 my-auto">
+        {/* LADO ESQUERDO: LOGO ORIGINAL CORP.VANGUARD + QR CODE COM MOLDURA VERMELHA */}
+        <div className="flex flex-col items-start space-y-6">
+          {/* LOGO ORIGINAL EXTRAÍDO DIRETAMENTE DO MATERIAL DE MARCA */}
+          <div>
+            <img
+              src="/brand/corp-vanguard-logo-official-transparent.png?v=4"
+              alt="Corp.Vanguard - Industrial Maintenance Systems"
+              className="h-14 sm:h-16 w-auto object-contain block"
+            />
           </div>
 
           {/* QUADRO DO QR CODE COM BORDA VERMELHA EXATA DO CANVA */}
-          <div className="p-3 bg-red-600 rounded-lg shadow-[0_0_40px_rgba(220,38,38,0.3)]">
+          <div className="p-3 bg-red-600 rounded-lg shadow-[0_0_40px_rgba(220,38,38,0.35)]">
             <div className="bg-white p-3 rounded flex flex-col items-center">
               {/* CANVAS DO QR CODE */}
               <canvas
@@ -194,9 +144,9 @@ export default function TotemQR() {
           </div>
         </div>
 
-        {/* LADO DIREITO: LISTA VERTICAL DE SELEÇÃO DE MÁQUINAS */}
+        {/* LADO DIREITO: LISTA VERTICAL DE SELEÇÃO DE MÁQUINAS (CANVA) */}
         <div className="w-full max-w-xs flex flex-col gap-3.5">
-          {MAQUINAS.map((maq, index) => {
+          {MAQUINAS.map((maq) => {
             const isSelected = maq.id === maquinaAtiva.id;
 
             return (
@@ -242,11 +192,6 @@ export default function TotemQR() {
           </div>
         </div>
       )}
-
-      {/* RODAPÉ DISCRETO PARA APRESENTAÇÃO */}
-      <footer className="text-center text-[11px] text-zinc-600 font-mono mt-auto pt-4">
-        Corp.Vanguard • Pressione 1, 2, 3 ou 4 para alternar a máquina • Tecla F para Tela Cheia
-      </footer>
     </div>
   );
 }
