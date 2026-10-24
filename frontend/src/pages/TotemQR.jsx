@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import { io } from 'socket.io-client';
-import { CheckCircle2, Sparkles } from 'lucide-react';
+import { CheckCircle2, Sparkles, Maximize2, Minimize2 } from 'lucide-react';
 
 const MAQUINAS = [
   {
@@ -33,6 +33,7 @@ const MAQUINAS = [
 export default function TotemQR() {
   const [maquinaAtiva, setMaquinaAtiva] = useState(MAQUINAS[0]);
   const [ultimoDisparo, setUltimoDisparo] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const canvasRef = useRef(null);
 
   // Renderiza o QR Code no Canvas com alta densidade e nitidez
@@ -42,7 +43,7 @@ export default function TotemQR() {
         canvasRef.current,
         maquinaAtiva.token,
         {
-          width: 300,
+          width: 320,
           margin: 1,
           color: {
             dark: '#000000',
@@ -57,13 +58,14 @@ export default function TotemQR() {
     }
   }, [maquinaAtiva]);
 
-  // Teclas de atalho para apresentação (1 a 4 alternam sem precisar de mouse)
+  // Teclas de atalho para apresentação (1 a 4 alternam sem precisar de mouse; F para tela cheia)
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === '1') setMaquinaAtiva(MAQUINAS[0]);
       if (e.key === '2') setMaquinaAtiva(MAQUINAS[1]);
       if (e.key === '3') setMaquinaAtiva(MAQUINAS[2]);
       if (e.key === '4') setMaquinaAtiva(MAQUINAS[3]);
+      if (e.key.toLowerCase() === 'f') toggleFullscreen();
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -112,18 +114,44 @@ export default function TotemQR() {
     };
   }, []);
 
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col justify-center items-center p-6 sm:p-10 relative select-none font-sans overflow-hidden">
+      {/* BOTÃO EXPANDIR / TELA CHEIA (CANTO SUPERIOR DIREITO) */}
+      <div className="absolute top-4 right-4 z-30">
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          className="text-zinc-500 hover:text-white p-2.5 rounded-xl bg-zinc-950/80 hover:bg-zinc-900 border border-zinc-800 transition-all active:scale-95 cursor-pointer shadow-lg"
+          title="Expandir para Tela Cheia (Tecla F)"
+        >
+          {isFullscreen ? (
+            <Minimize2 className="w-5 h-5 text-zinc-300" />
+          ) : (
+            <Maximize2 className="w-5 h-5 text-zinc-300" />
+          )}
+        </button>
+      </div>
+
       {/* ÁREA CENTRAL PRINCIPAL: 100% FIEL AO WIREFRAME DO CANVA */}
       <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20 my-auto">
         {/* LADO ESQUERDO: LOGO ORIGINAL CORP.VANGUARD + QR CODE COM MOLDURA VERMELHA */}
         <div className="flex flex-col items-start space-y-6">
-          {/* LOGO ORIGINAL EXTRAÍDO DIRETAMENTE DO MATERIAL DE MARCA */}
-          <div>
+          {/* LOGO ORIGINAL EM TAMANHO AMPLO E NÍTIDO (LARGURA ALINHADA AO QUADRO DO QR) */}
+          <div className="w-full max-w-[340px] sm:max-w-[365px]">
             <img
-              src="/brand/corp-vanguard-logo-official-transparent.png?v=4"
+              src="/brand/corp-vanguard-logo-official-transparent.png?v=5"
               alt="Corp.Vanguard - Industrial Maintenance Systems"
-              className="h-14 sm:h-16 w-auto object-contain block"
+              className="w-full h-auto object-contain block drop-shadow-[0_2px_12px_rgba(255,255,255,0.08)]"
             />
           </div>
 
