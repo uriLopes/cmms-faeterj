@@ -89,6 +89,24 @@ exports.seed = async function(knex) {
       matricula: '231045',
       senha_hash: null,
       perfil: 'operador'
+    },
+    {
+      nome: 'Alucard',
+      matricula: '221317',
+      senha_hash: null,
+      perfil: 'operador'
+    },
+    {
+      nome: 'Killer Bee',
+      matricula: '679902',
+      senha_hash: null,
+      perfil: 'operador'
+    },
+    {
+      nome: 'Picasso',
+      matricula: '018561',
+      senha_hash: null,
+      perfil: 'operador'
     }
   ]);
 
