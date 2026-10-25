@@ -72,27 +72,37 @@ const authController = {
   },
 
   /**
-   * POST /api/auth/operador-check
-   * Identificação ágil e Fricção Zero para operador no chão de fábrica
-   * Permite validação da matrícula/RE antes de abrir o chamado
+   * POST /api/auth/operador-check ou GET /api/auth/operador/:matricula
+   * Identificação ágil e validação de matrícula/Identifiant do operador
+   * Retorna os dados cadastrais oficiais para evitar digitação livre de nomes
    */
   async operadorCheck(req, res) {
     try {
-      const { matricula } = req.body;
+      const matricula = req.params.matricula || req.body?.matricula;
 
       if (!matricula) {
         return res.status(400).json({
-          erro: 'A matrícula do operador é obrigatória.'
+          valido: false,
+          erro: 'A matrícula/Identifiant do operador é obrigatória.'
         });
       }
 
+      const mat = String(matricula).trim();
+      const semPrefixo = mat.replace(/^RE-?/i, '').trim();
+
       const usuario = await db('usuarios')
-        .where({ matricula: matricula.trim(), ativo: true })
+        .where({ ativo: true })
+        .andWhere(function() {
+          this.where('matricula', mat)
+            .orWhere('matricula', `RE-${semPrefixo}`)
+            .orWhere('matricula', semPrefixo);
+        })
         .first();
 
       if (usuario) {
         return res.status(200).json({
           valido: true,
+          cadastrado: true,
           operador: {
             id: usuario.id,
             nome: usuario.nome,
@@ -102,15 +112,11 @@ const authController = {
         });
       }
 
-      // Se não estiver previamente cadastrado, aceita para não bloquear a fábrica
-      return res.status(200).json({
-        valido: true,
-        operador: {
-          id: null,
-          nome: `Operador RE-${matricula.trim()}`,
-          matricula: matricula.trim(),
-          perfil: 'operador'
-        }
+      // Se não estiver previamente cadastrado
+      return res.status(404).json({
+        valido: false,
+        cadastrado: false,
+        erro: `Identifiant "${mat}" não cadastrado no sistema fabril. Procure o Team Leader.`
       });
     } catch (error) {
       console.error('[Auth] Erro no check do operador:', error);

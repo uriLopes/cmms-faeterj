@@ -95,12 +95,36 @@ const ativoController = {
         });
       }
 
-      // Verifica se há alguma OS aberta ou em atendimento neste momento
-      const osAtiva = await db('chamados_os')
-        .where({ ativo_id: ativo.id })
-        .whereIn('status', ['aberto', 'atribuido', 'em_deslocamento', 'em_reparo', 'pausado_peca'])
-        .orderBy('id', 'desc')
+      // Verifica se há alguma OS aberta ou em atendimento neste momento (Trava de duplicidade)
+      let osAtivaInfo = null;
+      const osAtiva = await db('chamados_os as c')
+        .leftJoin('sintomas_falha as s', 'c.sintoma_id', 's.id')
+        .select(
+          'c.id',
+          'c.numero_os',
+          'c.status',
+          'c.prioridade',
+          'c.operador_matricula',
+          'c.operador_nome',
+          'c.descricao_sintoma',
+          'c.t0_abertura',
+          's.descricao as sintoma_nome'
+        )
+        .where({ 'c.ativo_id': ativo.id })
+        .whereIn('c.status', ['aberto', 'atribuido', 'em_deslocamento', 'em_reparo', 'pausado_peca'])
+        .orderBy('c.id', 'desc')
         .first();
+
+      if (osAtiva) {
+        const agora = new Date();
+        const t0 = new Date(osAtiva.t0_abertura);
+        const minutos = Math.max(1, Math.round((agora.getTime() - t0.getTime()) / (1000 * 60)));
+        osAtivaInfo = {
+          ...osAtiva,
+          minutos_aberto: minutos,
+          descricao_exibicao: osAtiva.descricao_sintoma || osAtiva.sintoma_nome || 'Falha reportada na linha'
+        };
+      }
 
       // Catálogo de sintomas para abertura imediata
       const sintomas = await db('sintomas_falha')
@@ -109,8 +133,8 @@ const ativoController = {
 
       return res.status(200).json({
         ativo,
-        em_atendimento: Boolean(osAtiva),
-        os_ativa: osAtiva || null,
+        em_atendimento: Boolean(osAtivaInfo),
+        os_ativa: osAtivaInfo,
         sintomas
       });
     } catch (error) {

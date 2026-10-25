@@ -526,6 +526,49 @@ export default function CockpitPCM() {
                       </p>
                     </div>
 
+                    {/* Impacto da Máquina (Trigger Flag) */}
+                    {item.status_impacto && (
+                      <div className="mt-2 flex items-center gap-1.5">
+                        <span
+                          className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider inline-flex items-center gap-1 ${
+                            item.status_impacto === 'maquina_parada'
+                              ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                              : item.status_impacto === 'operando_com_restricao'
+                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                              : 'bg-sky-500/20 text-sky-300 border-sky-500/40'
+                          }`}
+                        >
+                          {item.status_impacto === 'maquina_parada'
+                            ? '🔴 Máquina Parada (Crítico)'
+                            : item.status_impacto === 'operando_com_restricao'
+                            ? '🟡 Com Restrição / Anomalia'
+                            : '🔵 Melhoria / Baixa'}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Foto da Peça / Evidência */}
+                    {item.foto_anexo && (
+                      <div className="mt-2 relative group cursor-pointer" onClick={() => abrirDossieOS(item)}>
+                        <img
+                          src={item.foto_anexo}
+                          alt="Evidência do operador"
+                          className="w-full h-24 object-cover rounded-xl border border-slate-700/80 group-hover:opacity-90 transition-all"
+                        />
+                        <span className="absolute bottom-1.5 right-1.5 bg-black/80 backdrop-blur-sm text-[9px] text-emerald-300 font-bold px-2 py-0.5 rounded border border-emerald-500/30">
+                          📸 Evidência Anexada
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Áudio de Ruído Mecânico */}
+                    {item.audio_anexo && (
+                      <div className="mt-2 bg-slate-950/80 border border-slate-800 rounded-xl p-2 flex items-center gap-2">
+                        <Volume2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <audio src={item.audio_anexo} controls className="h-6 w-full" />
+                      </div>
+                    )}
+
                     {/* Operador e Técnico Responsável */}
                     <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-400">
                       <span>Op: {item.operador_nome || item.operador_matricula}</span>
@@ -735,6 +778,32 @@ export default function CockpitPCM() {
                     </div>
                   )}
                 </div>
+
+                {/* Evidências Fotográficas e de Áudio do Vanguard Trigger */}
+                {(modalDossie.foto_anexo || modalDossie.audio_anexo) && (
+                  <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 space-y-2">
+                    <h4 className="font-bold text-slate-200 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                      <ShieldAlert className="w-4 h-4 text-emerald-400" />
+                      Evidências Registradas pelo Operador (Vanguard Trigger):
+                    </h4>
+                    {modalDossie.foto_anexo && (
+                      <div className="mt-1">
+                        <span className="text-[10px] text-slate-400 block mb-1">Foto da Peça / Painel de Alarme:</span>
+                        <img
+                          src={modalDossie.foto_anexo}
+                          alt="Evidência da peça"
+                          className="w-full max-h-72 object-contain rounded-xl border border-slate-800 bg-black"
+                        />
+                      </div>
+                    )}
+                    {modalDossie.audio_anexo && (
+                      <div className="mt-2">
+                        <span className="text-[10px] text-slate-400 block mb-1">Gravação de Ruído Anormal:</span>
+                        <audio src={modalDossie.audio_anexo} controls className="h-8 w-full" />
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* 2. Apontamento Técnico de Encerramento */}
                 {modalDossie.apontamento ? (

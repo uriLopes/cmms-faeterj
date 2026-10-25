@@ -71,6 +71,24 @@ exports.seed = async function(knex) {
       matricula: 'RE-5001',
       senha_hash: null, // Sem senha: entra pelo QR Code com crachá
       perfil: 'operador'
+    },
+    {
+      nome: 'Jhon Doe',
+      matricula: '226244',
+      senha_hash: null,
+      perfil: 'operador'
+    },
+    {
+      nome: 'Márcio Souza',
+      matricula: '228190',
+      senha_hash: null,
+      perfil: 'operador'
+    },
+    {
+      nome: 'Lucas Andrade',
+      matricula: '231045',
+      senha_hash: null,
+      perfil: 'operador'
     }
   ]);
 

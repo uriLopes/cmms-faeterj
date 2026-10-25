@@ -49,7 +49,10 @@ const chamadoController = {
         sintoma_id,
         descricao_sintoma,
         tipo_manutencao,
-        prioridade
+        prioridade,
+        status_impacto,
+        foto_anexo,
+        audio_anexo
       } = req.body;
 
       if (!operador_matricula) {
@@ -68,30 +71,47 @@ const chamadoController = {
         return res.status(404).json({ erro: 'Ativo/posto não encontrado.' });
       }
 
-      // Prioridade automática baseada na criticidade do ativo se não informada
+      // Impacto operacional imediato (3 Estados do Vanguard Trigger)
+      // A. Máquina Parada (Crítico / Emergência)
+      // B. Operando com Restrição / Anomalia (Alerta)
+      // C. Melhoria / Falha Estética (Baixa prioridade)
       let prioridadeFinal = prioridade;
-      if (!prioridadeFinal) {
-        if (ativo.criticidade === 'A') prioridadeFinal = 'critica';
-        else if (ativo.criticidade === 'B') prioridadeFinal = 'alta';
-        else prioridadeFinal = 'media';
+      let tipoManutencaoFinal = tipo_manutencao || 'corretiva_emergencial';
+      let statusOperacionalAtivo = 'parado_quebra';
+
+      if (status_impacto === 'operando_com_restricao') {
+        prioridadeFinal = 'alta';
+        tipoManutencaoFinal = 'corretiva_programada';
+        statusOperacionalAtivo = 'alerta_preditivo';
+      } else if (status_impacto === 'melhoria_estetica') {
+        prioridadeFinal = 'baixa';
+        tipoManutencaoFinal = 'preventiva';
+        statusOperacionalAtivo = 'em_operacao';
+      } else {
+        prioridadeFinal = 'critica';
+        tipoManutencaoFinal = 'corretiva_emergencial';
+        statusOperacionalAtivo = 'parado_quebra';
       }
 
       const numero_os = await gerarNumeroOS();
       const t0 = new Date();
 
-      // Transação: cria OS e atualiza status da máquina para parado_quebra
+      // Transação: cria OS e atualiza status da máquina
       let novoChamadoId;
       await db.transaction(async (trx) => {
         const [id] = await trx('chamados_os').insert({
           numero_os,
           ativo_id: ativo.id,
-          tipo_manutencao: tipo_manutencao || 'corretiva_emergencial',
+          tipo_manutencao: tipoManutencaoFinal,
           prioridade: prioridadeFinal,
           status: 'aberto',
+          status_impacto: status_impacto || 'maquina_parada',
           operador_matricula: operador_matricula.trim(),
           operador_nome: operador_nome || `Operador RE-${operador_matricula.trim()}`,
           sintoma_id: sintoma_id || null,
           descricao_sintoma: descricao_sintoma || null,
+          foto_anexo: foto_anexo || null,
+          audio_anexo: audio_anexo || null,
           t0_abertura: t0,
           created_at: t0,
           updated_at: t0
@@ -103,7 +123,7 @@ const chamadoController = {
         await trx('ativos_postos')
           .where({ id: ativo.id })
           .update({
-            status_operacional: 'parado_quebra',
+            status_operacional: statusOperacionalAtivo,
             updated_at: t0
           });
       });
@@ -165,6 +185,9 @@ const chamadoController = {
           'm.id as mantenedor_id',
           'm.nome as mantenedor_nome',
           'c.chamado_invalido',
+          'c.status_impacto',
+          'c.foto_anexo',
+          'c.audio_anexo',
           'c.t0_abertura',
           'c.t1_atribuicao',
           'c.t2_inicio_reparo',
@@ -702,6 +725,9 @@ const chamadoController = {
         'm.id as mantenedor_id',
         'm.nome as mantenedor_nome',
         'tl.nome as team_leader_nome',
+        'c.status_impacto',
+        'c.foto_anexo',
+        'c.audio_anexo',
         'c.chamado_invalido',
         'c.motivo_invalido',
         'c.t0_abertura',
