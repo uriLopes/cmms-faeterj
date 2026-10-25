@@ -359,7 +359,10 @@ export default function App() {
         })
       });
 
-      if (!res.ok) throw new Error('Falha ao registrar chamado.');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.erro || errData.mensagem || `Falha ao registrar chamado (Status ${res.status}).`);
+      }
       const data = await res.json();
       setChamadoCriado(data.chamado);
       setTela('sucesso');
