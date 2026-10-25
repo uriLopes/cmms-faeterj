@@ -374,13 +374,6 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
         </div>
       </div>
 
-      {/* RODAPÉ DO APP: LIMPO E SEM OS BOTÕES DE SIMULAÇÃO REMOVIDOS */}
-      <footer className="bg-[#1e1e1e] border-t border-zinc-800 p-3 text-center">
-        <p className="text-[11px] text-zinc-400 font-mono">
-          Vanguard Trigger • Aponte para a placa QR da máquina
-        </p>
-      </footer>
-
       {/* MODAL PARA DIGITAÇÃO MANUAL DE TAG */}
       {modalTagManual && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">

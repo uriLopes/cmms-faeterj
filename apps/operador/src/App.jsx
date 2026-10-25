@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import ScannerCamera from './components/ScannerCamera';
 import VanguardLogo from './components/VanguardLogo';
+import CameraFotoModal from './components/CameraFotoModal';
 
 export default function App() {
   // Telas: 'scanner' | 'duplicado_aviso' | 'gabarito' | 'sucesso'
@@ -56,15 +57,15 @@ export default function App() {
   const [sintomasSelecionados, setSintomasSelecionados] = useState([]);
   const [observacaoTexto, setObservacaoTexto] = useState('');
 
-  // 5. Anexo de Mídia Rápido (Foto comprimida + Áudio de ruído)
+  // 5. Anexo de Mídia Rápido (Foto in-app + Áudio de ruído)
   const [fotoBase64, setFotoBase64] = useState(null);
+  const [modalFotoAberta, setModalFotoAberta] = useState(false);
   const [audioBase64, setAudioBase64] = useState(null);
   const [gravandoAudio, setGravandoAudio] = useState(false);
   const [tempoGravacao, setTempoGravacao] = useState(0);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerGravacaoRef = useRef(null);
-  const fileInputRef = useRef(null);
 
   // Status de envio e resultado
   const [enviando, setEnviando] = useState(false);
@@ -89,6 +90,43 @@ export default function App() {
         mediaRecorderRef.current.stop();
       }
     };
+  }, []);
+
+  // Salva rascunho de tela no sessionStorage para tolerância a falhas do navegador mobile
+  useEffect(() => {
+    if (tela === 'gabarito' && ativoData) {
+      const draft = {
+        tela: 'gabarito',
+        ativoData,
+        sintomasSelecionados,
+        statusImpacto,
+        observacaoTexto,
+        fotoBase64,
+        audioBase64
+      };
+      sessionStorage.setItem('cmms_trigger_active_draft', JSON.stringify(draft));
+    } else if (tela === 'scanner' || tela === 'sucesso') {
+      sessionStorage.removeItem('cmms_trigger_active_draft');
+    }
+  }, [tela, ativoData, sintomasSelecionados, statusImpacto, observacaoTexto, fotoBase64, audioBase64]);
+
+  // Recupera rascunho se a aba tiver sido restaurada pelo navegador
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('cmms_trigger_active_draft');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.ativoData && parsed.tela === 'gabarito') {
+          setAtivoData(parsed.ativoData);
+          setSintomasSelecionados(parsed.sintomasSelecionados || []);
+          setStatusImpacto(parsed.statusImpacto || 'maquina_parada');
+          setObservacaoTexto(parsed.observacaoTexto || '');
+          setFotoBase64(parsed.fotoBase64 || null);
+          setAudioBase64(parsed.audioBase64 || null);
+          setTela('gabarito');
+        }
+      }
+    } catch (e) {}
   }, []);
 
   function abrirModalOperador() {
@@ -136,6 +174,7 @@ export default function App() {
 
   function voltarAoScanner() {
     processandoQRRef.current = false;
+    sessionStorage.removeItem('cmms_trigger_active_draft');
     setTela('scanner');
     setChamadoCriado(null);
     setAtivoData(null);
@@ -145,46 +184,6 @@ export default function App() {
     setFotoBase64(null);
     setAudioBase64(null);
     setStatusImpacto('maquina_parada');
-  }
-
-  // Captura e compressão rápida de foto (máximo 800px para tráfego instantâneo no chão de fábrica)
-  function handleCapturarFoto(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const maxDim = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          }
-        } else {
-          if (height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
-        setFotoBase64(dataUrl);
-      };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
   }
 
   // Gravação de ruído sonoro rápido (até 10 segundos)
@@ -375,16 +374,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-slate-100 flex flex-col justify-between max-w-md mx-auto relative select-none">
-      {/* Input Oculto de Foto com Acesso Direto à Câmera Traseira */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleCapturarFoto}
-      />
-
       {/* HEADER SUPERIOR */}
       <header className="bg-black pt-3 pb-3 px-4 text-center border-b border-zinc-900 shrink-0">
         {/* Emblema Central da Vanguard */}
@@ -755,17 +744,17 @@ export default function App() {
               </span>
 
               <div className="flex gap-2">
-                {/* Botão de Tirar Foto */}
+                {/* Botão de Tirar Foto (Câmera Integrada In-App sem matar a aba) */}
                 <button
                   type="button"
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => setModalFotoAberta(true)}
                   className={`flex-1 py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
                     fotoBase64
                       ? 'bg-emerald-950/40 border-emerald-500 text-emerald-300'
                       : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700'
                   }`}
                 >
-                  <ImageIcon className="w-3.5 h-3.5" />
+                  <Camera className="w-3.5 h-3.5" />
                   <span>{fotoBase64 ? 'Foto Anexada ✓' : 'Tirar Foto'}</span>
                 </button>
 
@@ -938,6 +927,13 @@ export default function App() {
           </button>
         </div>
       )}
+
+      {/* MODAL DE CÂMERA INTEGRADA (ZERO RECARREGAMENTO DE ABA NO CELULAR) */}
+      <CameraFotoModal
+        isOpen={modalFotoAberta}
+        onClose={() => setModalFotoAberta(false)}
+        onFotoConfirmada={(foto) => setFotoBase64(foto)}
+      />
     </div>
   );
 }
