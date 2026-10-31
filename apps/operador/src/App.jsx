@@ -21,7 +21,9 @@ import {
   ShieldAlert,
   SlidersHorizontal,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  FileText,
+  AlertCircle
 } from 'lucide-react';
 import ScannerCamera from './components/ScannerCamera';
 import VanguardLogo from './components/VanguardLogo';
@@ -90,6 +92,10 @@ export default function App() {
   const [dashboardAberto, setDashboardAberto] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [chamadoCriado, setChamadoCriado] = useState(null);
+
+  // 6. Homebar Flutuante e Ações Rápidas (Inspirada na referência @jsav.design)
+  const [abaAtivaHomebar, setAbaAtivaHomebar] = useState(null); // null | 'camera' | 'audio' | 'registro'
+  const [avisoValidacaoHomebar, setAvisoValidacaoHomebar] = useState(null);
 
   // Lista padrão de sintomas de fábrica
   const sintomasPadrao = [
@@ -193,6 +199,8 @@ export default function App() {
   function voltarAoScanner() {
     processandoQRRef.current = false;
     sessionStorage.removeItem('cmms_trigger_active_draft');
+    setAbaAtivaHomebar(null);
+    setAvisoValidacaoHomebar(null);
     setDashboardAberto(false);
     setTela('scanner');
     setChamadoCriado(null);
@@ -276,6 +284,8 @@ export default function App() {
     processandoQRRef.current = true;
 
     setCarregandoAtivo(true);
+    setAbaAtivaHomebar(null);
+    setAvisoValidacaoHomebar(null);
     setSintomasSelecionados([]);
     setObservacaoTexto('');
     setFotoBase64(null);
@@ -384,12 +394,48 @@ export default function App() {
       const data = await res.json();
       setChamadoCriado(data.chamado);
       setDashboardAberto(false);
+      setAbaAtivaHomebar(null);
+      setAvisoValidacaoHomebar(null);
       setTela('sucesso');
     } catch (err) {
       alert(err.message || 'Erro ao enviar chamado. Tente novamente.');
     } finally {
       setEnviando(false);
     }
+  }
+
+  // Ações da Homebar Flutuante (@jsav.design)
+  function handleCliqueHomebar(aba) {
+    setAvisoValidacaoHomebar(null);
+
+    if (aba === 'camera') {
+      if (!fotoBase64) {
+        setModalFotoAberta(true);
+      } else {
+        setAbaAtivaHomebar((prev) => (prev === 'camera' ? null : 'camera'));
+      }
+    } else if (aba === 'audio') {
+      if (gravandoAudio) {
+        pararGravacaoAudio();
+      } else if (!audioBase64) {
+        iniciarGravacaoAudio();
+        setAbaAtivaHomebar('audio');
+      } else {
+        setAbaAtivaHomebar((prev) => (prev === 'audio' ? null : 'audio'));
+      }
+    } else if (aba === 'registro') {
+      setAbaAtivaHomebar((prev) => (prev === 'registro' ? null : 'registro'));
+    }
+  }
+
+  function handleDisparoHomebar() {
+    const podeDisparar = sintomasSelecionados.length > 0 || observacaoTexto.trim() || fotoBase64;
+    if (!podeDisparar) {
+      setAvisoValidacaoHomebar('Selecione ao menos 1 sintoma acima');
+      setTimeout(() => setAvisoValidacaoHomebar(null), 3500);
+      return;
+    }
+    handleEnviarChamado();
   }
 
   return (
@@ -617,7 +663,7 @@ export default function App() {
           </div>
 
           {/* CORPO DO HUD: SINTOMAS E IMPACTO (LIMPO, SEM ROLAGEM EXCESSIVA) */}
-          <div className="p-4 space-y-5 flex-1 pb-24">
+          <div className="p-4 space-y-5 flex-1 pb-32">
             {/* 1. SEÇÃO POSSÍVEL PROBLEMA */}
             <div className="space-y-2.5">
               <h2 className="text-sm font-semibold text-white tracking-wide">
@@ -756,226 +802,300 @@ export default function App() {
             </div>
           </div>
 
-          {/* DOCK INFERIOR COMPACTO DO HUD (CHAMADA DO DASHBOARD) */}
-          <div className="sticky bottom-0 left-0 right-0 p-3.5 bg-gradient-to-t from-[#161616] via-[#161616]/95 to-transparent pt-5 border-t border-zinc-800/80 z-15">
-            <button
-              type="button"
-              onClick={() => setDashboardAberto(true)}
-              className="w-full py-3.5 px-4 bg-[#262626] hover:bg-[#303030] border border-zinc-700 rounded-[2px] shadow-2xl flex items-center justify-between transition-all active:scale-[0.99] group cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-[2px] bg-red-600/20 border border-red-500/50 flex items-center justify-center text-red-500 group-hover:scale-105 transition-transform">
-                  <SlidersHorizontal className="w-4 h-4" />
+          {/* Fundo de clique externo quando o cartão contextual estiver aberto */}
+          {abaAtivaHomebar && (
+            <div
+              onClick={() => setAbaAtivaHomebar(null)}
+              className="fixed inset-0 z-30 bg-black/50 backdrop-blur-xs transition-opacity animate-fade-in"
+            ></div>
+          )}
+
+          {/* HOMEBAR FLUTUANTE INSPIRADA DIRETAMENTE NA REFERÊNCIA (@jsav.design) */}
+          <div className="fixed bottom-4 sm:bottom-6 left-0 right-0 z-40 px-4 pointer-events-none">
+            <div className="max-w-[340px] mx-auto pointer-events-auto flex flex-col gap-2.5">
+              {/* Aviso Flutuante de Validação (Toast) */}
+              {avisoValidacaoHomebar && (
+                <div className="bg-amber-500 text-zinc-950 font-bold text-xs py-2 px-4 rounded-full text-center shadow-2xl animate-fade-in flex items-center justify-center gap-2 mx-auto">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{avisoValidacaoHomebar}</span>
                 </div>
-                <div className="text-left">
-                  <div className="flex items-center gap-2">
-                    <span className="text-white font-bold text-xs font-mono uppercase tracking-wider">
-                      Dashboard de Ações
-                    </span>
-                    {(fotoBase64 || audioBase64 || observacaoTexto.trim()) && (
-                      <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
-                    )}
-                  </div>
-                  <span className="text-zinc-200 text-[11px] block mt-0.5">
-                    {fotoBase64 || audioBase64 || observacaoTexto.trim()
-                      ? [
-                          fotoBase64 && '1 foto',
-                          audioBase64 && '1 áudio',
-                          observacaoTexto.trim() && 'Nota escrita'
-                        ].filter(Boolean).join(' • ')
-                      : 'Câmera, áudio, registro e envio do ticket'}
-                  </span>
-                </div>
-              </div>
+              )}
 
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#161616] border border-zinc-700 rounded-[2px] text-zinc-200 group-hover:text-white">
-                <span className="text-[11px] font-mono font-bold uppercase tracking-wide">Abrir</span>
-                <ChevronUp className="w-3.5 h-3.5 text-white" />
-              </div>
-            </button>
-          </div>
-
-          {/* BOTTOM SHEET: DASHBOARD RETRÁTIL (CÂMERA, ÁUDIO, REGISTRO ESCRITO E ENVIAR TICKET) */}
-          {dashboardAberto && (
-            <div className="fixed inset-0 z-50 flex flex-col justify-end">
-              {/* Backdrop escurecido */}
-              <div
-                onClick={() => setDashboardAberto(false)}
-                className="absolute inset-0 bg-black/80 backdrop-blur-xs transition-opacity animate-fade-in"
-              ></div>
-
-              {/* Painel do Dashboard Deslizante */}
-              <div className="relative bg-[#1a1a1a] border-t-2 border-zinc-600 rounded-t-xl max-w-md w-full mx-auto p-4 sm:p-5 shadow-2xl flex flex-col gap-4 animate-slide-up max-h-[85vh] overflow-y-auto">
-                {/* Pílula de Arraste Superior */}
-                <div
-                  onClick={() => setDashboardAberto(false)}
-                  className="w-12 h-1.5 bg-zinc-600 hover:bg-zinc-400 rounded-full mx-auto cursor-pointer transition-colors"
-                ></div>
-
-                {/* Cabeçalho do Dashboard */}
-                <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-                  <div className="flex items-center gap-2">
-                    <SlidersHorizontal className="w-4 h-4 text-red-500" />
-                    <h3 className="font-mono text-xs font-bold text-white uppercase tracking-wider">
-                      Dashboard de Disparo • {ativoData?.tag_patrimonio || 'MV3-ROB-04'}
-                    </h3>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setDashboardAberto(false)}
-                    className="p-1 text-zinc-200 hover:text-white transition-transform active:scale-90"
-                    title="Recolher Dashboard"
-                  >
-                    <ChevronDown className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* 1. MÍDIAS COMPLEMENTARES: CÂMERA E ÁUDIO */}
-                <div className="space-y-2">
-                  <span className="text-[11px] font-mono font-bold uppercase text-zinc-200 tracking-wider block">
-                    1. Mídias da Falha
-                  </span>
-                  <div className="grid grid-cols-2 gap-3">
-                    {/* Botão Câmera 📷 */}
-                    <button
-                      type="button"
-                      onClick={() => setModalFotoAberta(true)}
-                      className={`py-3 px-3 bg-[#161616] border rounded-[2px] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 ${
-                        fotoBase64
-                          ? 'border-emerald-500 text-emerald-400 shadow-md shadow-emerald-950/40 bg-emerald-950/20'
-                          : 'border-zinc-700 text-white hover:border-zinc-500'
-                      }`}
-                      title="Tirar Foto da Falha"
-                    >
-                      <Camera className="w-5 h-5" />
-                      <span className="text-xs font-bold font-mono">
-                        {fotoBase64 ? 'Foto Anexada ✓' : 'Tirar Foto'}
+              {/* CARD CONTEXTUAL FLUTUANTE: CÂMERA */}
+              {abaAtivaHomebar === 'camera' && (
+                <div className="bg-[#18181b] border border-zinc-700 rounded-2xl p-4 shadow-2xl animate-slide-up space-y-3">
+                  <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                    <div className="flex items-center gap-2">
+                      <Camera className="w-4 h-4 text-white" />
+                      <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
+                        Foto da Anomalia
                       </span>
-                    </button>
-
-                    {/* Botão Microfone 🎙️ */}
+                    </div>
                     <button
                       type="button"
-                      onClick={iniciarGravacaoAudio}
-                      className={`py-3 px-3 bg-[#161616] border rounded-[2px] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 ${
-                        gravandoAudio
-                          ? 'bg-red-600 border-red-500 text-white animate-pulse'
-                          : audioBase64
-                          ? 'border-emerald-500 text-emerald-400 bg-emerald-950/20'
-                          : 'border-zinc-700 text-white hover:border-zinc-500'
-                      }`}
-                      title="Gravar Áudio de Ruído Mecânico"
+                      onClick={() => setAbaAtivaHomebar(null)}
+                      className="text-zinc-400 hover:text-white p-1 text-xs"
+                      title="Fechar"
                     >
-                      {gravandoAudio ? (
-                        <>
-                          <Square className="w-5 h-5 fill-current" />
-                          <span className="text-xs font-mono font-bold">{tempoGravacao}s/10s</span>
-                        </>
-                      ) : audioBase64 ? (
-                        <>
-                          <Mic className="w-5 h-5" />
-                          <span className="text-xs font-bold font-mono">Áudio Gravado ✓</span>
-                        </>
-                      ) : (
-                        <>
-                          <Mic className="w-5 h-5" />
-                          <span className="text-xs font-bold font-mono">Gravar Áudio</span>
-                        </>
-                      )}
+                      ✕
                     </button>
                   </div>
 
-                  {/* Previews das mídias se houver */}
-                  {(fotoBase64 || audioBase64) && (
-                    <div className="flex flex-col gap-2 pt-1">
-                      {fotoBase64 && (
-                        <div className="flex items-center justify-between bg-[#161616] border border-zinc-800 p-2 rounded-[2px]">
-                          <div className="flex items-center gap-2">
-                            <img
-                              src={fotoBase64}
-                              alt="Anomalia"
-                              className="w-12 h-12 object-cover rounded-[2px] border border-zinc-700"
-                            />
-                            <span className="text-xs text-emerald-400 font-mono font-bold">Foto da anomalia anexada</span>
-                          </div>
+                  {fotoBase64 ? (
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={fotoBase64}
+                        alt="Foto Anexada"
+                        className="w-16 h-16 object-cover rounded-[2px] border border-zinc-700"
+                      />
+                      <div className="flex-1 space-y-2">
+                        <span className="text-xs text-[#10B981] font-mono font-bold block">
+                          Foto anexada ao ticket ✓
+                        </span>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setModalFotoAberta(true)}
+                            className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-xs rounded-[2px] font-semibold border border-zinc-700 active:scale-95 transition-all"
+                          >
+                            Tirar outra
+                          </button>
                           <button
                             type="button"
                             onClick={() => setFotoBase64(null)}
-                            className="p-1.5 text-zinc-400 hover:text-red-400"
-                            title="Remover foto"
+                            className="px-3 py-1.5 bg-red-950/40 text-red-400 hover:text-red-300 text-xs rounded-[2px] font-semibold flex items-center gap-1 border border-red-900/40 active:scale-95 transition-all"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Excluir</span>
                           </button>
                         </div>
-                      )}
-
-                      {audioBase64 && (
-                        <div className="flex items-center gap-2 bg-[#161616] border border-zinc-800 rounded-[2px] p-2">
-                          <audio src={audioBase64} controls className="h-7 w-full" />
-                          <button
-                            type="button"
-                            onClick={() => setAudioBase64(null)}
-                            className="p-1.5 text-zinc-400 hover:text-red-400"
-                            title="Excluir áudio"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-2 space-y-2">
+                      <p className="text-xs text-zinc-300">
+                        Nenhuma foto anexada. Registre uma evidência visual da falha.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setModalFotoAberta(true)}
+                        className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs rounded-[2px] flex items-center justify-center gap-2 border border-zinc-700 shadow-md active:scale-95 transition-all"
+                      >
+                        <Camera className="w-4 h-4 text-emerald-400" />
+                        <span>Abrir Câmera</span>
+                      </button>
                     </div>
                   )}
                 </div>
+              )}
 
-                {/* 2. REGISTRO ESCRITO (OBSERVAÇÃO COMPLEMENTAR) */}
-                <div className="space-y-1.5">
-                  <span className="text-[11px] font-mono font-bold uppercase text-zinc-200 tracking-wider block">
-                    2. Registro Escrito
-                  </span>
-                  <div className="bg-[#141414] border border-zinc-700 rounded-[2px] px-3.5 py-3 flex items-center justify-between gap-2 shadow-inner focus-within:border-zinc-500">
-                    <input
-                      type="text"
-                      value={observacaoTexto}
-                      onChange={(e) => setObservacaoTexto(e.target.value)}
-                      placeholder="Registro escrito / detalhes da anomalia (opcional)..."
-                      className="bg-transparent text-white placeholder-zinc-400 text-xs sm:text-sm font-medium w-full focus:outline-none"
-                    />
-                    <Edit2 className="w-4 h-4 text-white shrink-0" />
+              {/* CARD CONTEXTUAL FLUTUANTE: ÁUDIO */}
+              {abaAtivaHomebar === 'audio' && (
+                <div className="bg-[#18181b] border border-zinc-700 rounded-2xl p-4 shadow-2xl animate-slide-up space-y-3">
+                  <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                    <div className="flex items-center gap-2">
+                      <Mic className="w-4 h-4 text-white" />
+                      <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
+                        Ruído Mecânico (Áudio)
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setAbaAtivaHomebar(null)}
+                      className="text-zinc-400 hover:text-white p-1 text-xs"
+                      title="Fechar"
+                    >
+                      ✕
+                    </button>
                   </div>
-                </div>
 
-                {/* 3. BOTÃO DE AÇÃO DOMINANTE: ENVIAR TICKET */}
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    disabled={enviando || (sintomasSelecionados.length === 0 && !observacaoTexto.trim() && !fotoBase64)}
-                    onClick={handleEnviarChamado}
-                    className={`w-full py-4 rounded-[2px] font-bold text-base sm:text-lg tracking-wider uppercase shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
-                      sintomasSelecionados.length > 0 || observacaoTexto.trim() || fotoBase64
-                        ? 'bg-red-600 hover:bg-red-500 text-white cursor-pointer shadow-red-950/50'
-                        : 'bg-zinc-800 text-zinc-400 cursor-not-allowed border border-zinc-700'
-                    }`}
-                  >
-                    {enviando ? (
-                      <>
-                        <RefreshCw className="w-5 h-5 animate-spin text-white" />
-                        <span>Enviando Ticket...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-5 h-5" />
-                        <span>Enviar Ticket</span>
-                      </>
-                    )}
-                  </button>
-                  {sintomasSelecionados.length === 0 && !observacaoTexto.trim() && !fotoBase64 && (
-                    <span className="text-[10px] text-zinc-400 font-mono text-center block mt-1.5">
-                      * Selecione ao menos 1 sintoma no HUD ou anexe foto/registro
-                    </span>
+                  {gravandoAudio ? (
+                    <div className="flex flex-col items-center gap-3 py-2">
+                      <div className="flex items-center gap-2 text-red-500 font-mono font-black text-sm animate-pulse">
+                        <span className="w-3 h-3 rounded-full bg-red-600 animate-ping"></span>
+                        <span>Gravando ruído: {tempoGravacao}s / 10s</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={pararGravacaoAudio}
+                        className="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-[2px] flex items-center gap-2 shadow-lg active:scale-95 transition-all"
+                      >
+                        <Square className="w-4 h-4 fill-current" />
+                        <span>Parar e Salvar</span>
+                      </button>
+                    </div>
+                  ) : audioBase64 ? (
+                    <div className="space-y-2.5">
+                      <div className="flex items-center gap-2">
+                        <audio src={audioBase64} controls className="h-8 flex-1" />
+                        <button
+                          type="button"
+                          onClick={() => setAudioBase64(null)}
+                          className="p-2 bg-red-950/40 text-red-400 hover:text-red-300 rounded-[2px] border border-red-900/40 active:scale-95 transition-all"
+                          title="Excluir gravação"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="flex justify-between items-center pt-1">
+                        <span className="text-[11px] text-[#10B981] font-mono font-bold">
+                          Áudio anexado ao ticket ✓
+                        </span>
+                        <button
+                          type="button"
+                          onClick={iniciarGravacaoAudio}
+                          className="text-xs text-zinc-300 hover:text-white underline font-mono"
+                        >
+                          Gravar de novo
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-2 space-y-2">
+                      <p className="text-xs text-zinc-300">
+                        Grave até 10 segundos do ruído sonoro da máquina para a equipe técnica.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={iniciarGravacaoAudio}
+                        className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs rounded-[2px] flex items-center justify-center gap-2 border border-zinc-700 shadow-md active:scale-95 transition-all"
+                      >
+                        <Mic className="w-4 h-4 text-red-400" />
+                        <span>Iniciar Gravação (10s)</span>
+                      </button>
+                    </div>
                   )}
                 </div>
-              </div>
+              )}
+
+              {/* CARD CONTEXTUAL FLUTUANTE: REGISTRO ESCRITO */}
+              {abaAtivaHomebar === 'registro' && (
+                <div className="bg-[#18181b] border border-zinc-700 rounded-2xl p-4 shadow-2xl animate-slide-up space-y-3">
+                  <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-white" />
+                      <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
+                        Registro Escrito / Detalhes
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setAbaAtivaHomebar(null)}
+                      className="text-zinc-400 hover:text-white p-1 text-xs"
+                      title="Fechar"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    <textarea
+                      rows={3}
+                      autoFocus
+                      value={observacaoTexto}
+                      onChange={(e) => setObservacaoTexto(e.target.value)}
+                      placeholder="Descreva detalhes específicos da falha, sintomas secundários ou orientações para a manutenção..."
+                      className="w-full bg-[#121214] border border-zinc-700 rounded-[2px] p-2.5 text-xs sm:text-sm text-white placeholder-zinc-400 focus:outline-none focus:border-white resize-none"
+                    />
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[11px] font-mono text-zinc-400">
+                        {observacaoTexto.trim() ? `${observacaoTexto.trim().length} caracteres` : 'Opcional'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setAbaAtivaHomebar(null)}
+                        className="px-3.5 py-1.5 bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs rounded-[2px] flex items-center gap-1 shadow active:scale-95 transition-all"
+                      >
+                        <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                        <span>Confirmar</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* A CÁPSULA DA HOMEBAR: 4 ITENS FIÉIS AO DESIGN SYSTEM (@jsav.design) */}
+              <nav className="h-[64px] bg-[#121214] border border-zinc-700/80 rounded-full px-2.5 py-1.5 flex items-center justify-between shadow-[0_12px_40px_rgba(0,0,0,0.85)] backdrop-blur-md">
+                {/* 1. CÂMERA */}
+                <button
+                  type="button"
+                  onClick={() => handleCliqueHomebar('camera')}
+                  className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                    abaAtivaHomebar === 'camera'
+                      ? 'bg-white text-zinc-950 shadow-md scale-105'
+                      : 'text-zinc-300 hover:text-white active:scale-95'
+                  }`}
+                  title="Câmera da falha"
+                >
+                  <Camera className={`w-5 h-5 ${abaAtivaHomebar === 'camera' ? 'stroke-[2.5]' : ''}`} />
+                  {fotoBase64 && abaAtivaHomebar !== 'camera' && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-[#121214]"></span>
+                  )}
+                </button>
+
+                {/* 2. ÁUDIO */}
+                <button
+                  type="button"
+                  onClick={() => handleCliqueHomebar('audio')}
+                  className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                    gravandoAudio
+                      ? 'bg-red-600 text-white animate-pulse shadow-red-900/50'
+                      : abaAtivaHomebar === 'audio'
+                      ? 'bg-white text-zinc-950 shadow-md scale-105'
+                      : 'text-zinc-300 hover:text-white active:scale-95'
+                  }`}
+                  title="Gravar áudio do ruído"
+                >
+                  {gravandoAudio ? (
+                    <span className="text-[11px] font-mono font-black">{tempoGravacao}s</span>
+                  ) : (
+                    <Mic className={`w-5 h-5 ${abaAtivaHomebar === 'audio' ? 'stroke-[2.5]' : ''}`} />
+                  )}
+                  {audioBase64 && !gravandoAudio && abaAtivaHomebar !== 'audio' && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-[#121214]"></span>
+                  )}
+                </button>
+
+                {/* 3. REGISTRO ESCRITO */}
+                <button
+                  type="button"
+                  onClick={() => handleCliqueHomebar('registro')}
+                  className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                    abaAtivaHomebar === 'registro'
+                      ? 'bg-white text-zinc-950 shadow-md scale-105'
+                      : 'text-zinc-300 hover:text-white active:scale-95'
+                  }`}
+                  title="Registro escrito complementar"
+                >
+                  <FileText className={`w-5 h-5 ${abaAtivaHomebar === 'registro' ? 'stroke-[2.5]' : ''}`} />
+                  {observacaoTexto.trim() && abaAtivaHomebar !== 'registro' && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-[#121214]"></span>
+                  )}
+                </button>
+
+                {/* 4. ENVIAR TICKET */}
+                <button
+                  type="button"
+                  disabled={enviando}
+                  onClick={handleDisparoHomebar}
+                  className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                    enviando
+                      ? 'bg-zinc-800 text-white'
+                      : (sintomasSelecionados.length > 0 || observacaoTexto.trim() || fotoBase64)
+                      ? 'bg-[#EF4444] text-white shadow-lg shadow-red-950/60 hover:bg-[#dc2626] active:scale-95'
+                      : 'text-zinc-500 hover:text-zinc-300 active:scale-95'
+                  }`}
+                  title="Enviar Ticket para Manutenção"
+                >
+                  {enviando ? (
+                    <RefreshCw className="w-5 h-5 animate-spin text-white" />
+                  ) : (
+                    <Send className="w-5 h-5 ml-0.5 stroke-[2.2]" />
+                  )}
+                </button>
+              </nav>
             </div>
-          )}
+          </div>
         </div>
       )}
 
