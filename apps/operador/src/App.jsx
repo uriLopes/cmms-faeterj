@@ -427,18 +427,19 @@ export default function App() {
       {/* HEADER SUPERIOR (IDENTIFICAÇÃO DO OPERADOR EM BLOCO ESTENDIDO COM CINZA TRANSLÚCIDO #212121) */}
       {/* HEADER SUPERIOR: EXIBIDO APENAS NO SCANNER */}
       {tela === 'scanner' && (
-        <header className="bg-transparent relative z-20 pt-3 pb-2 px-4 shrink-0 border-none">
-          <div
+        <header className="bg-transparent relative z-20 pt-3 pb-1 px-4 shrink-0 border-none flex justify-center">
+          <button
+            type="button"
             onClick={abrirModalOperador}
-            className="w-full cursor-pointer flex items-center justify-center gap-2 py-2.5 px-4 rounded-[2px] bg-zinc-900/80 backdrop-blur-md hover:bg-zinc-800/80 active:scale-[0.99] border border-zinc-700/60 transition-all text-xs shadow-lg"
+            className="cursor-pointer inline-flex items-center justify-center gap-2 py-1.5 px-4 rounded-[2px] bg-zinc-900/90 backdrop-blur-md hover:bg-zinc-800 active:scale-95 border border-zinc-700 transition-all text-xs shadow-lg"
             title="Toque para validar ou alterar Identifiant da fábrica"
           >
-            <span className="font-semibold text-white text-xs font-bold">
+            <span className="font-semibold text-white text-xs">
               Operador: <strong className="text-white font-bold">{nomeOperador}</strong>{' '}
               <span className="text-zinc-200 font-mono text-[11px]">({identifiant})</span>
             </span>
             <Edit2 className="w-3.5 h-3.5 text-zinc-200 ml-0.5" />
-          </div>
+          </button>
         </header>
       )}
 
