@@ -18,7 +18,10 @@ import {
   Square,
   Trash2,
   Volume2,
-  ShieldAlert
+  ShieldAlert,
+  SlidersHorizontal,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 import ScannerCamera from './components/ScannerCamera';
 import VanguardLogo from './components/VanguardLogo';
@@ -84,6 +87,7 @@ export default function App() {
   const timerGravacaoRef = useRef(null);
 
   // Status de envio e resultado
+  const [dashboardAberto, setDashboardAberto] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [chamadoCriado, setChamadoCriado] = useState(null);
 
@@ -189,6 +193,7 @@ export default function App() {
   function voltarAoScanner() {
     processandoQRRef.current = false;
     sessionStorage.removeItem('cmms_trigger_active_draft');
+    setDashboardAberto(false);
     setTela('scanner');
     setChamadoCriado(null);
     setAtivoData(null);
@@ -378,6 +383,7 @@ export default function App() {
       }
       const data = await res.json();
       setChamadoCriado(data.chamado);
+      setDashboardAberto(false);
       setTela('sucesso');
     } catch (err) {
       alert(err.message || 'Erro ao enviar chamado. Tente novamente.');
@@ -597,11 +603,11 @@ export default function App() {
         </div>
       )}
 
-      {/* TELA 2: GABARITO SIMPLIFICADO FIEL AO WIREFRAME DO OPERADOR */}
+      {/* TELA 2: HUD DO OPERADOR COM BOTTOM SHEET RETRÁTIL (DASHBOARD DE DISPARO) */}
       {tela === 'gabarito' && (
-        <div className="flex-1 flex flex-col justify-between bg-[#262626] overflow-y-auto">
+        <div className="flex-1 flex flex-col justify-between bg-[#212121] overflow-y-auto relative">
           {/* TOPO: BANNER DA MÁQUINA (EX: MV3-ROB-04) */}
-          <div className="bg-[#161616] py-3.5 px-4 border-b border-zinc-800 flex items-center justify-between shrink-0">
+          <div className="bg-[#161616] py-3.5 px-4 border-b border-zinc-800 flex items-center justify-between shrink-0 sticky top-0 z-20">
             <button
               type="button"
               onClick={voltarAoScanner}
@@ -610,9 +616,14 @@ export default function App() {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <h1 className="font-mono font-black text-lg sm:text-xl text-white tracking-widest uppercase">
-              {ativoData?.tag_patrimonio || 'MV3-ROB-04'}
-            </h1>
+            <div className="text-center">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 block">
+                Equipamento Selecionado
+              </span>
+              <h1 className="font-mono font-black text-lg sm:text-xl text-white tracking-widest uppercase">
+                {ativoData?.tag_patrimonio || 'MV3-ROB-04'}
+              </h1>
+            </div>
             <button
               type="button"
               onClick={voltarAoScanner}
@@ -623,8 +634,8 @@ export default function App() {
             </button>
           </div>
 
-          {/* CORPO DO FORMULÁRIO */}
-          <div className="p-4 space-y-5 flex-1">
+          {/* CORPO DO HUD: SINTOMAS E IMPACTO (LIMPO, SEM ROLAGEM EXCESSIVA) */}
+          <div className="p-4 space-y-5 flex-1 pb-24">
             {/* 1. SEÇÃO POSSÍVEL PROBLEMA */}
             <div className="space-y-2.5">
               <h2 className="text-sm font-semibold text-white tracking-wide">
@@ -662,7 +673,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* 2. SEÇÃO IMPACTO DO PROBLEMA PARA A LINHA */}
+            {/* 2. SEÇÃO IMPACTO DO PROBLEMA NA LINHA */}
             <div className="space-y-3 pt-1">
               <h2 className="text-sm font-semibold text-white tracking-wide">
                 Impacto do Problema na Linha
@@ -670,7 +681,7 @@ export default function App() {
 
               {/* BANNERS BOOKMARK DE IMPACTO (UIVERSE.IO + CORES DO SEGUNDO CÉREBRO) */}
               <div className="flex items-center justify-around py-3.5 px-3 bg-[#161616] border border-zinc-800 rounded-[2px] shadow-inner">
-                {/* 1. Banner Vermelho - Máquina Parada (#EF4444) */}
+                {/* 1. Banner Vermelho - ALTO (#EF4444) */}
                 <label
                   className="ui-bookmark"
                   style={{ '--icon-primary-color': '#EF4444' }}
@@ -700,7 +711,7 @@ export default function App() {
                   </span>
                 </label>
 
-                {/* 2. Banner Âmbar - Com Restrição (#F59E0B) */}
+                {/* 2. Banner Âmbar - MÉDIO (#F59E0B) */}
                 <label
                   className="ui-bookmark"
                   style={{ '--icon-primary-color': '#F59E0B' }}
@@ -730,7 +741,7 @@ export default function App() {
                   </span>
                 </label>
 
-                {/* 3. Banner Verde - Melhoria (#10B981) */}
+                {/* 3. Banner Verde - BAIXO (#10B981) */}
                 <label
                   className="ui-bookmark"
                   style={{ '--icon-primary-color': '#10B981' }}
@@ -760,127 +771,229 @@ export default function App() {
                   </span>
                 </label>
               </div>
-
-
-            </div>
-
-            {/* 3. MÍDIAS (CÂMERA E MICROFONE) */}
-            <div className="space-y-2 pt-1">
-              <div className="flex gap-3">
-                {/* Botão Câmera 📷 */}
-                <button
-                  type="button"
-                  onClick={() => setModalFotoAberta(true)}
-                  className={`flex-1 py-3.5 bg-[#161616] border rounded-[2px] flex items-center justify-center gap-2 transition-all active:scale-95 ${
-                    fotoBase64
-                      ? 'border-emerald-500 text-emerald-400 shadow-md shadow-emerald-950/40'
-                      : 'border-zinc-800 text-white hover:border-zinc-700'
-                  }`}
-                  title="Tirar Foto"
-                >
-                  <Camera className="w-5 h-5" />
-                  {fotoBase64 && <span className="text-xs font-bold font-mono">1 foto ✓</span>}
-                </button>
-
-                {/* Botão Microfone 🎙️ */}
-                <button
-                  type="button"
-                  onClick={iniciarGravacaoAudio}
-                  className={`flex-1 py-3.5 bg-[#161616] border rounded-[2px] flex items-center justify-center gap-2 transition-all active:scale-95 ${
-                    gravandoAudio
-                      ? 'bg-red-600 border-red-500 text-white animate-pulse'
-                      : audioBase64
-                      ? 'border-emerald-500 text-emerald-400'
-                      : 'border-zinc-800 text-white hover:border-zinc-700'
-                  }`}
-                  title="Gravar Áudio"
-                >
-                  {gravandoAudio ? (
-                    <>
-                      <Square className="w-4 h-4 fill-current" />
-                      <span className="text-xs font-mono font-bold">{tempoGravacao}s/10s</span>
-                    </>
-                  ) : audioBase64 ? (
-                    <>
-                      <Mic className="w-5 h-5" />
-                      <span className="text-xs font-bold font-mono">Áudio ✓</span>
-                    </>
-                  ) : (
-                    <Mic className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-
-              {/* Preview da foto se houver */}
-              {fotoBase64 && (
-                <div className="relative inline-block mt-1">
-                  <img
-                    src={fotoBase64}
-                    alt="Foto da anomalia"
-                    className="w-20 h-20 object-cover rounded-[2px] border border-zinc-700 shadow-md"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setFotoBase64(null)}
-                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-500"
-                    title="Remover foto"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              )}
-
-              {/* Player do áudio gravado se houver */}
-              {audioBase64 && (
-                <div className="flex items-center gap-2 bg-[#161616] border border-zinc-800 rounded-[2px] p-2 mt-1">
-                  <audio src={audioBase64} controls className="h-7 w-full" />
-                  <button
-                    type="button"
-                    onClick={() => setAudioBase64(null)}
-                    className="p-1.5 text-zinc-400 hover:text-red-400"
-                    title="Excluir áudio"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* 4. REGISTRO ESCRITO (COM ÍCONE DE LÁPIS) */}
-            <div className="bg-[#161616] border border-zinc-800 rounded-[2px] px-3.5 py-3 flex items-center justify-between gap-2 shadow-inner">
-              <input
-                type="text"
-                value={observacaoTexto}
-                onChange={(e) => setObservacaoTexto(e.target.value)}
-                placeholder="Registro escrito (opcional)..."
-                className="bg-transparent text-white placeholder-zinc-300 text-xs sm:text-sm font-medium w-full focus:outline-none"
-              />
-              <Edit2 className="w-4 h-4 text-white shrink-0" />
             </div>
           </div>
 
-          {/* 5. BOTÃO ENVIAR TICKET */}
-          <div className="p-4 pt-1 bg-[#262626] border-t border-zinc-800/80 shrink-0">
+          {/* DOCK INFERIOR COMPACTO DO HUD (CHAMADA DO DASHBOARD) */}
+          <div className="sticky bottom-0 left-0 right-0 p-3.5 bg-gradient-to-t from-[#161616] via-[#161616]/95 to-transparent pt-5 border-t border-zinc-800/80 z-15">
             <button
               type="button"
-              disabled={enviando || (sintomasSelecionados.length === 0 && !observacaoTexto.trim() && !fotoBase64)}
-              onClick={handleEnviarChamado}
-              className={`w-full py-4 bg-[#161616] border font-bold text-base sm:text-lg tracking-wide rounded-[2px] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
-                sintomasSelecionados.length > 0 || observacaoTexto.trim() || fotoBase64
-                  ? 'border-zinc-700 hover:border-zinc-500 hover:bg-zinc-900 cursor-pointer text-white'
-                  : 'border-zinc-800 text-zinc-400 cursor-not-allowed bg-zinc-950/80'
-              }`}
+              onClick={() => setDashboardAberto(true)}
+              className="w-full py-3.5 px-4 bg-[#262626] hover:bg-[#303030] border border-zinc-700 rounded-[2px] shadow-2xl flex items-center justify-between transition-all active:scale-[0.99] group cursor-pointer"
             >
-              {enviando ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin text-white" />
-                  <span>enviando ticket...</span>
-                </>
-              ) : (
-                <span>enviar ticket</span>
-              )}
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-[2px] bg-red-600/20 border border-red-500/50 flex items-center justify-center text-red-500 group-hover:scale-105 transition-transform">
+                  <SlidersHorizontal className="w-4 h-4" />
+                </div>
+                <div className="text-left">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white font-bold text-xs font-mono uppercase tracking-wider">
+                      Dashboard de Ações
+                    </span>
+                    {(fotoBase64 || audioBase64 || observacaoTexto.trim()) && (
+                      <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
+                    )}
+                  </div>
+                  <span className="text-zinc-200 text-[11px] block mt-0.5">
+                    {fotoBase64 || audioBase64 || observacaoTexto.trim()
+                      ? [
+                          fotoBase64 && '1 foto',
+                          audioBase64 && '1 áudio',
+                          observacaoTexto.trim() && 'Nota escrita'
+                        ].filter(Boolean).join(' • ')
+                      : 'Câmera, áudio, registro e envio do ticket'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#161616] border border-zinc-700 rounded-[2px] text-zinc-200 group-hover:text-white">
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wide">Abrir</span>
+                <ChevronUp className="w-3.5 h-3.5 text-white" />
+              </div>
             </button>
           </div>
+
+          {/* BOTTOM SHEET: DASHBOARD RETRÁTIL (CÂMERA, ÁUDIO, REGISTRO ESCRITO E ENVIAR TICKET) */}
+          {dashboardAberto && (
+            <div className="fixed inset-0 z-50 flex flex-col justify-end">
+              {/* Backdrop escurecido */}
+              <div
+                onClick={() => setDashboardAberto(false)}
+                className="absolute inset-0 bg-black/80 backdrop-blur-xs transition-opacity animate-fade-in"
+              ></div>
+
+              {/* Painel do Dashboard Deslizante */}
+              <div className="relative bg-[#1a1a1a] border-t-2 border-zinc-600 rounded-t-xl max-w-md w-full mx-auto p-4 sm:p-5 shadow-2xl flex flex-col gap-4 animate-slide-up max-h-[85vh] overflow-y-auto">
+                {/* Pílula de Arraste Superior */}
+                <div
+                  onClick={() => setDashboardAberto(false)}
+                  className="w-12 h-1.5 bg-zinc-600 hover:bg-zinc-400 rounded-full mx-auto cursor-pointer transition-colors"
+                ></div>
+
+                {/* Cabeçalho do Dashboard */}
+                <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal className="w-4 h-4 text-red-500" />
+                    <h3 className="font-mono text-xs font-bold text-white uppercase tracking-wider">
+                      Dashboard de Disparo • {ativoData?.tag_patrimonio || 'MV3-ROB-04'}
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDashboardAberto(false)}
+                    className="p-1 text-zinc-200 hover:text-white transition-transform active:scale-90"
+                    title="Recolher Dashboard"
+                  >
+                    <ChevronDown className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* 1. MÍDIAS COMPLEMENTARES: CÂMERA E ÁUDIO */}
+                <div className="space-y-2">
+                  <span className="text-[11px] font-mono font-bold uppercase text-zinc-200 tracking-wider block">
+                    1. Mídias da Falha
+                  </span>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Botão Câmera 📷 */}
+                    <button
+                      type="button"
+                      onClick={() => setModalFotoAberta(true)}
+                      className={`py-3 px-3 bg-[#161616] border rounded-[2px] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 ${
+                        fotoBase64
+                          ? 'border-emerald-500 text-emerald-400 shadow-md shadow-emerald-950/40 bg-emerald-950/20'
+                          : 'border-zinc-700 text-white hover:border-zinc-500'
+                      }`}
+                      title="Tirar Foto da Falha"
+                    >
+                      <Camera className="w-5 h-5" />
+                      <span className="text-xs font-bold font-mono">
+                        {fotoBase64 ? 'Foto Anexada ✓' : 'Tirar Foto'}
+                      </span>
+                    </button>
+
+                    {/* Botão Microfone 🎙️ */}
+                    <button
+                      type="button"
+                      onClick={iniciarGravacaoAudio}
+                      className={`py-3 px-3 bg-[#161616] border rounded-[2px] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 ${
+                        gravandoAudio
+                          ? 'bg-red-600 border-red-500 text-white animate-pulse'
+                          : audioBase64
+                          ? 'border-emerald-500 text-emerald-400 bg-emerald-950/20'
+                          : 'border-zinc-700 text-white hover:border-zinc-500'
+                      }`}
+                      title="Gravar Áudio de Ruído Mecânico"
+                    >
+                      {gravandoAudio ? (
+                        <>
+                          <Square className="w-5 h-5 fill-current" />
+                          <span className="text-xs font-mono font-bold">{tempoGravacao}s/10s</span>
+                        </>
+                      ) : audioBase64 ? (
+                        <>
+                          <Mic className="w-5 h-5" />
+                          <span className="text-xs font-bold font-mono">Áudio Gravado ✓</span>
+                        </>
+                      ) : (
+                        <>
+                          <Mic className="w-5 h-5" />
+                          <span className="text-xs font-bold font-mono">Gravar Áudio</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Previews das mídias se houver */}
+                  {(fotoBase64 || audioBase64) && (
+                    <div className="flex flex-col gap-2 pt-1">
+                      {fotoBase64 && (
+                        <div className="flex items-center justify-between bg-[#161616] border border-zinc-800 p-2 rounded-[2px]">
+                          <div className="flex items-center gap-2">
+                            <img
+                              src={fotoBase64}
+                              alt="Anomalia"
+                              className="w-12 h-12 object-cover rounded-[2px] border border-zinc-700"
+                            />
+                            <span className="text-xs text-emerald-400 font-mono font-bold">Foto da anomalia anexada</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setFotoBase64(null)}
+                            className="p-1.5 text-zinc-400 hover:text-red-400"
+                            title="Remover foto"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+
+                      {audioBase64 && (
+                        <div className="flex items-center gap-2 bg-[#161616] border border-zinc-800 rounded-[2px] p-2">
+                          <audio src={audioBase64} controls className="h-7 w-full" />
+                          <button
+                            type="button"
+                            onClick={() => setAudioBase64(null)}
+                            className="p-1.5 text-zinc-400 hover:text-red-400"
+                            title="Excluir áudio"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. REGISTRO ESCRITO (OBSERVAÇÃO COMPLEMENTAR) */}
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-mono font-bold uppercase text-zinc-200 tracking-wider block">
+                    2. Registro Escrito
+                  </span>
+                  <div className="bg-[#141414] border border-zinc-700 rounded-[2px] px-3.5 py-3 flex items-center justify-between gap-2 shadow-inner focus-within:border-zinc-500">
+                    <input
+                      type="text"
+                      value={observacaoTexto}
+                      onChange={(e) => setObservacaoTexto(e.target.value)}
+                      placeholder="Registro escrito / detalhes da anomalia (opcional)..."
+                      className="bg-transparent text-white placeholder-zinc-400 text-xs sm:text-sm font-medium w-full focus:outline-none"
+                    />
+                    <Edit2 className="w-4 h-4 text-white shrink-0" />
+                  </div>
+                </div>
+
+                {/* 3. BOTÃO DE AÇÃO DOMINANTE: ENVIAR TICKET */}
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    disabled={enviando || (sintomasSelecionados.length === 0 && !observacaoTexto.trim() && !fotoBase64)}
+                    onClick={handleEnviarChamado}
+                    className={`w-full py-4 rounded-[2px] font-bold text-base sm:text-lg tracking-wider uppercase shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
+                      sintomasSelecionados.length > 0 || observacaoTexto.trim() || fotoBase64
+                        ? 'bg-red-600 hover:bg-red-500 text-white cursor-pointer shadow-red-950/50'
+                        : 'bg-zinc-800 text-zinc-400 cursor-not-allowed border border-zinc-700'
+                    }`}
+                  >
+                    {enviando ? (
+                      <>
+                        <RefreshCw className="w-5 h-5 animate-spin text-white" />
+                        <span>Enviando Ticket...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5" />
+                        <span>Enviar Ticket</span>
+                      </>
+                    )}
+                  </button>
+                  {sintomasSelecionados.length === 0 && !observacaoTexto.trim() && !fotoBase64 && (
+                    <span className="text-[10px] text-zinc-400 font-mono text-center block mt-1.5">
+                      * Selecione ao menos 1 sintoma no HUD ou anexe foto/registro
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
