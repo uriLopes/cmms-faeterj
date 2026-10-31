@@ -25,6 +25,21 @@ import VanguardLogo from './components/VanguardLogo';
 import CameraFotoModal from './components/CameraFotoModal';
 
 export default function App() {
+  // 0. Splash Screen inicial com animação Uiverse.io (#EF4444)
+  const [splashVisivel, setSplashVisivel] = useState(true);
+  const [splashOpacidade, setSplashOpacidade] = useState(true);
+
+  useEffect(() => {
+    // Transição limpa e sólida para evitar qualquer oscilação de cor entre branco e cinza
+    const timerRemover = setTimeout(() => {
+      setSplashVisivel(false);
+    }, 1500);
+
+    return () => {
+      clearTimeout(timerRemover);
+    };
+  }, []);
+
   // Telas: 'scanner' | 'duplicado_aviso' | 'gabarito' | 'sucesso'
   const [tela, setTela] = useState('scanner');
   const processandoQRRef = useRef(false);
@@ -41,6 +56,7 @@ export default function App() {
   const [operadorEncontrado, setOperadorEncontrado] = useState(null);
   const [validandoOperador, setValidandoOperador] = useState(false);
   const [erroOperador, setErroOperador] = useState(null);
+  const [sucessoOperador, setSucessoOperador] = useState(null);
 
   // 2. Dados do Ativo escaneado e Trava de Duplicidade
   const [ativoData, setAtivoData] = useState(null);
@@ -130,46 +146,44 @@ export default function App() {
   }, []);
 
   function abrirModalOperador() {
-    setCodigoInput(identifiant);
-    setOperadorEncontrado({ nome: nomeOperador, matricula: identifiant });
+    setCodigoInput('');
     setErroOperador(null);
+    setSucessoOperador(null);
     setModalEditarOperador(true);
   }
 
-  // Validação estrita de Identifiant no Banco de Dados
-  async function buscarOperadorPorCodigo(cod) {
+  // Validação direta e instantânea de Identifiant (Estados: Repouso, Sucesso Verde, Erro Vermelho)
+  async function validarEConfirmarOperador(cod) {
     const limpo = String(cod || '').trim();
-    if (!limpo) {
-      setOperadorEncontrado(null);
-      setErroOperador(null);
-      return;
-    }
+    if (!limpo) return;
     setValidandoOperador(true);
     setErroOperador(null);
+    setSucessoOperador(null);
     try {
       const res = await fetch(`/api/auth/operador/${encodeURIComponent(limpo)}`);
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.erro || `Identifiant "${limpo}" não localizado no cadastro industrial.`);
+        throw new Error('Usuário não encontrado!');
       }
       const data = await res.json();
-      setOperadorEncontrado(data.operador);
-      setErroOperador(null);
+      if (!data.operador) throw new Error('Usuário não encontrado!');
+
+      setSucessoOperador(data.operador.nome);
+      setIdentifiant(data.operador.matricula);
+      setNomeOperador(data.operador.nome);
+      localStorage.setItem('cmms_operador_identifiant', data.operador.matricula);
+      localStorage.setItem('cmms_operador_nome', data.operador.nome);
+
+      // Fecha suavemente após 1.4s para o operador visualizar a saudação de sucesso
+      setTimeout(() => {
+        setModalEditarOperador(false);
+        setSucessoOperador(null);
+      }, 1400);
     } catch (err) {
-      setOperadorEncontrado(null);
-      setErroOperador(err.message || 'Código não cadastrado no banco da fábrica.');
+      setSucessoOperador(null);
+      setErroOperador('Usuário não encontrado!');
     } finally {
       setValidandoOperador(false);
     }
-  }
-
-  function confirmarNovoOperador() {
-    if (!operadorEncontrado) return;
-    setIdentifiant(operadorEncontrado.matricula);
-    setNomeOperador(operadorEncontrado.nome);
-    localStorage.setItem('cmms_operador_identifiant', operadorEncontrado.matricula);
-    localStorage.setItem('cmms_operador_nome', operadorEncontrado.nome);
-    setModalEditarOperador(false);
   }
 
   function voltarAoScanner() {
@@ -373,111 +387,135 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-slate-100 flex flex-col justify-between max-w-md mx-auto relative select-none">
-      {/* HEADER SUPERIOR */}
-      <header className="bg-black pt-3 pb-3 px-4 text-center border-b border-zinc-900 shrink-0">
-        {/* Emblema Central da Vanguard */}
-        <div className="flex justify-center mb-1.5">
-          <VanguardLogo variant="icon" size="lg" />
-        </div>
-
-        {/* Linha do Operador: Nome - Identifiant */}
+    <div className={`${tela === 'scanner' ? 'h-screen' : 'min-h-screen'} bg-[#212121] text-slate-100 flex flex-col justify-between max-w-md mx-auto relative select-none overflow-hidden`}>
+      {/* SPLASH SCREEN INICIAL COM LOGO CORP. VANGUARD E LOADER #EF4444 */}
+      {splashVisivel && (
         <div
-          onClick={abrirModalOperador}
-          className="cursor-pointer inline-flex items-center gap-1.5 hover:opacity-80 active:scale-95 transition-all"
-          title="Toque para validar Identifiant da fábrica"
+          className="fixed inset-0 z-50 bg-[#212121] flex flex-col items-center justify-center select-none"
         >
-          <h2 className="text-sm font-black text-white tracking-wide">
-            Operador: {nomeOperador} - {identifiant}
-          </h2>
-          <Edit2 className="w-3 h-3 text-zinc-500" />
-        </div>
-      </header>
+          <div className="flex flex-col items-center gap-2.5">
+            {/* Logo Oficial Corp.Vanguard */}
+            <img
+              src="/brand/corp-vanguard-wordmark-transparent.png?v=20"
+              alt="Corp.Vanguard"
+              className="w-60 sm:w-72 max-w-[85vw] object-contain"
+            />
 
-      {/* MODAL DE VALIDAÇÃO DE IDENTIFIANT (SEM DIGITAÇÃO LIVRE DE NOME) */}
-      {modalEditarOperador && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-xs w-full p-4 space-y-3 shadow-2xl">
-            <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
-              <span className="font-bold text-xs text-white">Identificação do Operador</span>
-              <button
-                onClick={() => setModalEditarOperador(false)}
-                className="text-zinc-400 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            {/* Subtítulo Trigger */}
+            <span className="text-white font-mono text-xs font-bold uppercase tracking-[0.3em] mt-1">
+              Trigger
+            </span>
+
+            {/* Animação dos Retângulos em Vermelho Industrial #EF4444 */}
+            <div className="loaderRectangle mt-3">
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* HEADER SUPERIOR (SOMENTE A LOGO, SEM BORDAS) */}
+      {/* HEADER SUPERIOR (IDENTIFICAÇÃO DO OPERADOR EM BLOCO ESTENDIDO COM CINZA TRANSLÚCIDO #212121) */}
+      {/* HEADER SUPERIOR: EXIBIDO APENAS NO SCANNER */}
+      {tela === 'scanner' && (
+        <header className="bg-transparent relative z-20 pt-3 pb-2 px-4 shrink-0 border-none">
+          <div
+            onClick={abrirModalOperador}
+            className="w-full cursor-pointer flex items-center justify-center gap-2 py-2.5 px-4 rounded-[2px] bg-zinc-900/80 backdrop-blur-md hover:bg-zinc-800/80 active:scale-[0.99] border border-zinc-700/60 transition-all text-xs shadow-lg"
+            title="Toque para validar ou alterar Identifiant da fábrica"
+          >
+            <span className="font-semibold text-white text-xs font-bold">
+              Operador: <strong className="text-white font-bold">{nomeOperador}</strong>{' '}
+              <span className="text-zinc-200 font-mono text-[11px]">({identifiant})</span>
+            </span>
+            <Edit2 className="w-3.5 h-3.5 text-zinc-200 ml-0.5" />
+          </div>
+        </header>
+      )}
 
-            <p className="text-[11px] text-zinc-400 leading-tight">
-              Digite apenas o <strong>Identifiant</strong> (matrícula/crachá). O sistema consulta o banco de dados oficial e valida o nome automaticamente:
-            </p>
-
-            <div className="space-y-2 text-xs">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  autoFocus
-                  value={codigoInput}
-                  onChange={(e) => {
-                    setCodigoInput(e.target.value);
-                    setOperadorEncontrado(null);
-                    setErroOperador(null);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') buscarOperadorPorCodigo(codigoInput);
-                  }}
-                  placeholder="Ex: 226244 ou 5001"
-                  className="flex-1 bg-black border border-zinc-700 rounded-xl p-2.5 text-white font-mono text-center tracking-wider text-sm focus:outline-none focus:border-red-500"
-                />
+      {/* MODAL ULTRA-MINIMALISTA DE IDENTIFIANT (3 ESTADOS: REPOUSO, SUCESSO VERDE #10B981, ERRO VERMELHO #EF4444) */}
+      {modalEditarOperador && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-[#212121] border border-zinc-700 rounded-[2px] max-w-[310px] w-full overflow-hidden shadow-2xl flex flex-col">
+            {/* Bloco Superior: Fechar + Linha de Ação */}
+            <div className="p-4 space-y-3">
+              {/* Fechar no canto superior direito */}
+              <div className="flex justify-end">
                 <button
                   type="button"
-                  disabled={validandoOperador || !codigoInput.trim()}
-                  onClick={() => buscarOperadorPorCodigo(codigoInput)}
-                  className="px-3 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs rounded-xl flex items-center gap-1 shrink-0"
+                  onClick={() => {
+                    setModalEditarOperador(false);
+                    setErroOperador(null);
+                    setSucessoOperador(null);
+                  }}
+                  className="text-zinc-200 hover:text-white font-bold text-lg leading-none p-1 transition-transform active:scale-90"
+                  title="Fechar"
                 >
-                  {validandoOperador ? (
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <span>Validar</span>
-                  )}
+                  ✕
                 </button>
               </div>
 
-              {/* Resultado da Validação no Banco de Dados */}
-              {operadorEncontrado && (
-                <div className="bg-emerald-950/40 border border-emerald-500/50 rounded-xl p-3 text-left space-y-1">
-                  <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs">
-                    <CheckCircle2 className="w-4 h-4 shrink-0" />
-                    <span>Colaborador Cadastrado:</span>
-                  </div>
-                  <p className="text-white font-black text-sm pl-5">
-                    {operadorEncontrado.nome}
-                  </p>
-                  <p className="text-[10px] text-zinc-400 pl-5 font-mono">
-                    Matrícula: {operadorEncontrado.matricula} • Perfil: {operadorEncontrado.perfil || 'Operador'}
-                  </p>
+              {/* Linha com input Floating Label Uiverse.io (ClawHack1) e botão validar */}
+              <div className="flex gap-2.5 items-center pt-1.5">
+                <div
+                  className={`ui-identifiant-input flex-1 min-w-0 ${
+                    erroOperador ? 'has-error' : ''
+                  } ${sucessoOperador ? 'has-success' : ''}`}
+                >
+                  <input
+                    type="text"
+                    id="identifiant-field"
+                    required
+                    autoComplete="off"
+                    autoFocus
+                    value={codigoInput}
+                    onChange={(e) => {
+                      setCodigoInput(e.target.value);
+                      setErroOperador(null);
+                      setSucessoOperador(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') validarEConfirmarOperador(codigoInput);
+                    }}
+                  />
+                  <label htmlFor="identifiant-field">Identifiant</label>
                 </div>
-              )}
 
-              {erroOperador && (
-                <div className="bg-red-950/40 border border-red-500/50 rounded-xl p-2.5 text-xs text-red-300 flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
-                  <span className="text-[11px] leading-tight">{erroOperador}</span>
-                </div>
-              )}
+                <button
+                  type="button"
+                  disabled={validandoOperador || !codigoInput.trim()}
+                  onClick={() => validarEConfirmarOperador(codigoInput)}
+                  className="bg-[#525252] hover:bg-[#616161] text-white font-medium text-xs sm:text-sm rounded-[2px] px-3.5 h-[42px] transition-all flex items-center justify-center min-w-[75px] shrink-0 active:scale-95 disabled:opacity-40"
+                >
+                  {validandoOperador ? (
+                    <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                  ) : (
+                    'Validar'
+                  )}
+                </button>
+              </div>
             </div>
 
-            <button
-              disabled={!operadorEncontrado}
-              onClick={confirmarNovoOperador}
-              className={`w-full py-2.5 font-bold text-xs rounded-xl shadow-lg transition-all ${
-                operadorEncontrado
-                  ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30'
-                  : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-              }`}
-            >
-              Confirmar Identifiant
-            </button>
+            {/* ESTADO 2: SUCESSO VERDE (#10B981) - Olá, [Nome]! */}
+            {sucessoOperador && (
+              <div className="bg-[#10B981] py-3.5 px-3 text-center transition-all animate-fadeIn">
+                <p className="text-white font-extrabold text-sm sm:text-base leading-tight">
+                  Olá, {sucessoOperador}!
+                </p>
+              </div>
+            )}
+
+            {/* ESTADO 3: ERRO VERMELHO (#EF4444) - Usuário não encontrado! */}
+            {erroOperador && (
+              <div className="bg-[#EF4444] py-3.5 px-3 text-center transition-all animate-fadeIn">
+                <p className="text-white font-extrabold text-sm sm:text-base leading-tight">
+                  {erroOperador}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -496,7 +534,7 @@ export default function App() {
         <div className="flex-1 flex flex-col justify-between p-5 bg-zinc-950 space-y-4">
           <div className="space-y-4 my-auto">
             {/* Ícone de Alerta */}
-            <div className="w-16 h-16 bg-amber-500/20 border-2 border-amber-500 rounded-2xl flex items-center justify-center mx-auto text-amber-400 shadow-2xl animate-pulse">
+            <div className="w-16 h-16 bg-amber-500/20 border-2 border-amber-500 rounded-[2px] flex items-center justify-center mx-auto text-amber-400 shadow-2xl animate-pulse">
               <ShieldAlert className="w-9 h-9" />
             </div>
 
@@ -507,29 +545,29 @@ export default function App() {
               <h2 className="text-lg font-black text-white leading-tight">
                 Chamado já em andamento para esta máquina!
               </h2>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-zinc-200 font-medium">
                 A equipe técnica já foi notificada. Evite tickets repetidos na troca de turno.
               </p>
             </div>
 
             {/* Dossiê do Chamado Ativo */}
-            <div className="bg-zinc-900 border border-amber-500/40 rounded-2xl p-4 text-xs font-mono space-y-2 shadow-xl">
+            <div className="bg-zinc-900 border border-amber-500/40 rounded-[2px] p-4 text-xs font-mono space-y-2 shadow-xl">
               <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
-                <span className="text-zinc-400">Ordem de Serviço:</span>
+                <span className="text-zinc-200 font-semibold">Ordem de Serviço:</span>
                 <span className="text-amber-400 font-black text-sm">{chamadoAtivoAlerta?.numero_os}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-zinc-400">Tempo Aberto:</span>
+                <span className="text-zinc-200 font-semibold">Tempo Aberto:</span>
                 <span className="text-white font-bold">
                   Aberto há {chamadoAtivoAlerta?.minutos_aberto || 1} min
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-zinc-400">Operador Solicitante:</span>
+                <span className="text-zinc-200 font-semibold">Operador Solicitante:</span>
                 <span className="text-zinc-200">{chamadoAtivoAlerta?.operador_nome}</span>
               </div>
               <div className="pt-1 border-t border-zinc-800/80">
-                <span className="text-zinc-500 block text-[10px] uppercase">Problema Reportado:</span>
+                <span className="text-zinc-200 block text-[10px] uppercase font-bold">Problema Reportado:</span>
                 <p className="text-zinc-200 font-sans text-xs mt-0.5">
                   "{chamadoAtivoAlerta?.descricao_exibicao}"
                 </p>
@@ -542,7 +580,7 @@ export default function App() {
             <button
               type="button"
               onClick={voltarAoScanner}
-              className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
+              className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-[2px] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
             >
               <Check className="w-4 h-4 stroke-[3]" />
               <span>Voltar ao Scanner (Ciente)</span>
@@ -551,7 +589,7 @@ export default function App() {
             <button
               type="button"
               onClick={prosseguirComReforco}
-              className="w-full py-2.5 bg-zinc-900 border border-zinc-700 hover:border-zinc-500 text-zinc-400 hover:text-white font-bold text-[11px] rounded-xl transition-all"
+              className="w-full py-2.5 bg-zinc-900 border border-zinc-700 hover:border-zinc-500 text-zinc-200 hover:text-white font-bold text-[11px] rounded-[2px] transition-all"
             >
               Agravou o problema? Abrir Reforço de OS
             </button>
@@ -559,176 +597,64 @@ export default function App() {
         </div>
       )}
 
-      {/* TELA 2: GABARITO DE SINTOMAS COM CONFERES (PÓS-LEITURA DO QR CODE) */}
+      {/* TELA 2: GABARITO SIMPLIFICADO FIEL AO WIREFRAME DO OPERADOR */}
       {tela === 'gabarito' && (
-        <div className="flex-1 flex flex-col justify-between p-3.5 bg-zinc-950 space-y-2.5 overflow-y-auto">
-          <div>
-            {/* Barra de Retorno ao Scanner */}
-            <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
-              <button
-                type="button"
-                onClick={voltarAoScanner}
-                className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Voltar à Câmera</span>
-              </button>
-              <button
-                type="button"
-                onClick={voltarAoScanner}
-                className="text-xs text-red-400 font-bold flex items-center gap-1"
-              >
-                <Camera className="w-3.5 h-3.5" />
-                <span>Escanear Outra</span>
-              </button>
-            </div>
+        <div className="flex-1 flex flex-col justify-between bg-[#262626] overflow-y-auto">
+          {/* TOPO: BANNER DA MÁQUINA (EX: MV3-ROB-04) */}
+          <div className="bg-[#161616] py-3.5 px-4 border-b border-zinc-800 flex items-center justify-between shrink-0">
+            <button
+              type="button"
+              onClick={voltarAoScanner}
+              className="text-zinc-200 hover:text-white p-1 transition-all active:scale-90"
+              title="Voltar ao scanner"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <h1 className="font-mono font-black text-lg sm:text-xl text-white tracking-widest uppercase">
+              {ativoData?.tag_patrimonio || 'MV3-ROB-04'}
+            </h1>
+            <button
+              type="button"
+              onClick={voltarAoScanner}
+              className="text-zinc-200 hover:text-white p-1 font-bold text-base transition-all active:scale-90"
+              title="Cancelar e escanear outra"
+            >
+              ✕
+            </button>
+          </div>
 
-            {/* Cartão de Identificação da Máquina */}
-            {carregandoAtivo ? (
-              <div className="py-6 text-center text-xs text-zinc-400 flex flex-col items-center gap-2">
-                <RefreshCw className="w-6 h-6 text-red-500 animate-spin" />
-                <span>Identificando máquina...</span>
-              </div>
-            ) : (
-              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-3 mt-2 space-y-1 shadow-lg">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono font-black text-base text-white tracking-wider">
-                    {ativoData?.tag_patrimonio}
-                  </span>
-                  <span
-                    className={`text-[9px] font-bold px-2 py-0.5 rounded border ${
-                      ativoData?.criticidade === 'A'
-                        ? 'bg-red-500/20 text-red-400 border-red-500/40'
-                        : 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-                    }`}
-                  >
-                    Criticidade {ativoData?.criticidade}
-                  </span>
-                </div>
-                <h3 className="text-xs font-semibold text-zinc-200">{ativoData?.nome}</h3>
-                <p className="text-[10px] text-zinc-400">
-                  {ativoData?.linha_nome} • {ativoData?.posto_trabalho}
-                </p>
-              </div>
-            )}
-
-            {/* SELETOR OBRIGATÓRIO: FLAG DE CRITICIDADE / STATUS DA MÁQUINA */}
-            <div className="mt-3 space-y-1.5">
-              <span className="text-[11px] font-black uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
-                <AlertOctagon className="w-3.5 h-3.5 text-red-500" />
-                Impacto Operacional da Máquina:
-              </span>
-              <div className="grid grid-cols-3 gap-1.5">
-                {/* 1. Máquina Parada */}
-                <button
-                  type="button"
-                  onClick={() => setStatusImpacto('maquina_parada')}
-                  className={`p-2 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-0.5 active:scale-95 ${
-                    statusImpacto === 'maquina_parada'
-                      ? 'bg-red-950/70 border-red-500 text-white shadow-lg shadow-red-900/40 ring-2 ring-red-500'
-                      : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  <Flame
-                    className={`w-4 h-4 ${
-                      statusImpacto === 'maquina_parada' ? 'text-red-400 animate-pulse' : 'text-zinc-500'
-                    }`}
-                  />
-                  <span className="text-[10px] font-black leading-tight">Máquina Parada</span>
-                  <span className="text-[8px] uppercase font-mono px-1 py-0.5 rounded bg-red-900/50 text-red-300">
-                    Crítico ($T_0$)
-                  </span>
-                </button>
-
-                {/* 2. Operando com Restrição */}
-                <button
-                  type="button"
-                  onClick={() => setStatusImpacto('operando_com_restricao')}
-                  className={`p-2 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-0.5 active:scale-95 ${
-                    statusImpacto === 'operando_com_restricao'
-                      ? 'bg-amber-950/70 border-amber-500 text-white shadow-lg shadow-amber-900/40 ring-2 ring-amber-500'
-                      : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  <AlertTriangle
-                    className={`w-4 h-4 ${
-                      statusImpacto === 'operando_com_restricao' ? 'text-amber-400' : 'text-zinc-500'
-                    }`}
-                  />
-                  <span className="text-[10px] font-black leading-tight">Com Restrição</span>
-                  <span className="text-[8px] uppercase font-mono px-1 py-0.5 rounded bg-amber-900/50 text-amber-300">
-                    Alerta
-                  </span>
-                </button>
-
-                {/* 3. Melhoria / Falha Estética */}
-                <button
-                  type="button"
-                  onClick={() => setStatusImpacto('melhoria_estetica')}
-                  className={`p-2 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-0.5 active:scale-95 ${
-                    statusImpacto === 'melhoria_estetica'
-                      ? 'bg-sky-950/70 border-sky-500 text-white shadow-lg shadow-sky-900/40 ring-2 ring-sky-500'
-                      : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  <Wrench
-                    className={`w-4 h-4 ${
-                      statusImpacto === 'melhoria_estetica' ? 'text-sky-400' : 'text-zinc-500'
-                    }`}
-                  />
-                  <span className="text-[10px] font-black leading-tight">Melhoria</span>
-                  <span className="text-[8px] uppercase font-mono px-1 py-0.5 rounded bg-sky-900/50 text-sky-300">
-                    Baixa
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* GABARITO DE SINTOMAS: LISTINHA COM CONFERES */}
-            <div className="mt-3 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-black uppercase tracking-wider text-zinc-200 flex items-center gap-1.5">
-                  <CheckSquare className="w-3.5 h-3.5 text-red-500" />
-                  Marque o que está acontecendo:
-                </span>
-                <span className="text-[9px] font-mono text-zinc-400">
-                  {sintomasSelecionados.length} selecionado(s)
-                </span>
-              </div>
-
-              {/* Lista dos Conferes */}
-              <div className="space-y-1 max-h-[30vh] overflow-y-auto pr-1">
+          {/* CORPO DO FORMULÁRIO */}
+          <div className="p-4 space-y-5 flex-1">
+            {/* 1. SEÇÃO POSSÍVEL PROBLEMA */}
+            <div className="space-y-2.5">
+              <h2 className="text-sm font-semibold text-white tracking-wide">
+                Possível Problema
+              </h2>
+              <div className="space-y-2">
                 {sintomasDisponiveis.map((item) => {
                   const isChecked = sintomasSelecionados.some((s) => s.id === item.id);
-
                   return (
                     <div
                       key={item.id}
                       onClick={() => toggleSintoma(item)}
-                      className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all flex items-center justify-between active:scale-98 ${
+                      className={`p-3 bg-[#161616] border transition-all cursor-pointer rounded-[2px] flex items-center gap-3 active:scale-[0.99] ${
                         isChecked
-                          ? 'bg-red-950/40 border-red-500 shadow-md text-white ring-1 ring-red-500'
-                          : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700'
+                          ? 'border-white/50 ring-1 ring-white/30'
+                          : 'border-zinc-800 hover:border-zinc-700'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5 pr-2">
-                        <div
-                          className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all ${
-                            isChecked
-                              ? 'bg-red-600 text-white'
-                              : 'bg-black border border-zinc-700 text-transparent'
-                          }`}
-                        >
-                          <Check className="w-3.5 h-3.5 stroke-[3]" />
-                        </div>
-
-                        <span className="font-semibold text-[11px] leading-snug">
-                          {item.descricao}
-                        </span>
+                      {/* Caixa de Confere Quadrada (Cinza #525252 no repouso) */}
+                      <div
+                        className={`w-6 h-6 rounded-[2px] flex items-center justify-center shrink-0 transition-all ${
+                          isChecked
+                            ? 'bg-white text-black font-bold'
+                            : 'bg-[#525252] border border-zinc-600'
+                        }`}
+                      >
+                        {isChecked && <Check className="w-4 h-4 stroke-[3]" />}
                       </div>
-
-                      <span className="text-[8px] uppercase font-mono px-1.5 py-0.5 rounded bg-black text-zinc-500 shrink-0">
-                        {item.categoria}
+                      <span className="text-xs sm:text-sm font-medium text-white leading-snug">
+                        {item.descricao}
                       </span>
                     </div>
                   );
@@ -736,66 +662,162 @@ export default function App() {
               </div>
             </div>
 
-            {/* ANEXO DE MÍDIA RÁPIDO (FOTO DA PEÇA / GRAVAÇÃO DE RUÍDO) */}
-            <div className="mt-3 space-y-2 border-t border-zinc-800/80 pt-2">
-              <span className="text-[11px] font-black uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
-                <Camera className="w-3.5 h-3.5 text-zinc-400" />
-                Evidência Rápida (Foto ou Áudio):
-              </span>
+            {/* 2. SEÇÃO IMPACTO DO PROBLEMA PARA A LINHA */}
+            <div className="space-y-3 pt-1">
+              <h2 className="text-sm font-semibold text-white tracking-wide">
+                Impacto do Problema na Linha
+              </h2>
 
-              <div className="flex gap-2">
-                {/* Botão de Tirar Foto (Câmera Integrada In-App sem matar a aba) */}
+              {/* BANNERS BOOKMARK DE IMPACTO (UIVERSE.IO + CORES DO SEGUNDO CÉREBRO) */}
+              <div className="flex items-center justify-around py-3.5 px-3 bg-[#161616] border border-zinc-800 rounded-[2px] shadow-inner">
+                {/* 1. Banner Vermelho - Máquina Parada (#EF4444) */}
+                <label
+                  className="ui-bookmark"
+                  style={{ '--icon-primary-color': '#EF4444' }}
+                  title="Alto (Máquina Parada)"
+                >
+                  <input
+                    type="radio"
+                    name="impacto-banner"
+                    checked={statusImpacto === 'maquina_parada'}
+                    onChange={() => setStatusImpacto('maquina_parada')}
+                  />
+                  <div className="bookmark">
+                    <svg viewBox="0 0 32 32">
+                      <g>
+                        <path d="M27 4v27a1 1 0 0 1-1.625.781L16 24.281l-9.375 7.5A1 1 0 0 1 5 31V4a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4z"></path>
+                      </g>
+                    </svg>
+                  </div>
+                  <span
+                    className={`text-[10px] sm:text-[11px] font-mono mt-2 transition-colors whitespace-nowrap ${
+                      statusImpacto === 'maquina_parada'
+                        ? 'font-black text-[#EF4444]'
+                        : 'text-zinc-200 font-bold'
+                    }`}
+                  >
+                    ALTO
+                  </span>
+                </label>
+
+                {/* 2. Banner Âmbar - Com Restrição (#F59E0B) */}
+                <label
+                  className="ui-bookmark"
+                  style={{ '--icon-primary-color': '#F59E0B' }}
+                  title="Médio (Operando com Restrição)"
+                >
+                  <input
+                    type="radio"
+                    name="impacto-banner"
+                    checked={statusImpacto === 'operando_com_restricao'}
+                    onChange={() => setStatusImpacto('operando_com_restricao')}
+                  />
+                  <div className="bookmark">
+                    <svg viewBox="0 0 32 32">
+                      <g>
+                        <path d="M27 4v27a1 1 0 0 1-1.625.781L16 24.281l-9.375 7.5A1 1 0 0 1 5 31V4a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4z"></path>
+                      </g>
+                    </svg>
+                  </div>
+                  <span
+                    className={`text-[10px] sm:text-[11px] font-mono mt-2 transition-colors whitespace-nowrap ${
+                      statusImpacto === 'operando_com_restricao'
+                        ? 'font-black text-[#F59E0B]'
+                        : 'text-zinc-200 font-bold'
+                    }`}
+                  >
+                    MÉDIO
+                  </span>
+                </label>
+
+                {/* 3. Banner Verde - Melhoria (#10B981) */}
+                <label
+                  className="ui-bookmark"
+                  style={{ '--icon-primary-color': '#10B981' }}
+                  title="Baixo (Melhoria)"
+                >
+                  <input
+                    type="radio"
+                    name="impacto-banner"
+                    checked={statusImpacto === 'melhoria_estetica'}
+                    onChange={() => setStatusImpacto('melhoria_estetica')}
+                  />
+                  <div className="bookmark">
+                    <svg viewBox="0 0 32 32">
+                      <g>
+                        <path d="M27 4v27a1 1 0 0 1-1.625.781L16 24.281l-9.375 7.5A1 1 0 0 1 5 31V4a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4z"></path>
+                      </g>
+                    </svg>
+                  </div>
+                  <span
+                    className={`text-[10px] sm:text-[11px] font-mono mt-2 transition-colors whitespace-nowrap ${
+                      statusImpacto === 'melhoria_estetica'
+                        ? 'font-black text-[#10B981]'
+                        : 'text-zinc-200 font-bold'
+                    }`}
+                  >
+                    BAIXO
+                  </span>
+                </label>
+              </div>
+
+
+            </div>
+
+            {/* 3. MÍDIAS (CÂMERA E MICROFONE) */}
+            <div className="space-y-2 pt-1">
+              <div className="flex gap-3">
+                {/* Botão Câmera 📷 */}
                 <button
                   type="button"
                   onClick={() => setModalFotoAberta(true)}
-                  className={`flex-1 py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
+                  className={`flex-1 py-3.5 bg-[#161616] border rounded-[2px] flex items-center justify-center gap-2 transition-all active:scale-95 ${
                     fotoBase64
-                      ? 'bg-emerald-950/40 border-emerald-500 text-emerald-300'
-                      : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700'
+                      ? 'border-emerald-500 text-emerald-400 shadow-md shadow-emerald-950/40'
+                      : 'border-zinc-800 text-white hover:border-zinc-700'
                   }`}
+                  title="Tirar Foto"
                 >
-                  <Camera className="w-3.5 h-3.5" />
-                  <span>{fotoBase64 ? 'Foto Anexada ✓' : 'Tirar Foto'}</span>
+                  <Camera className="w-5 h-5" />
+                  {fotoBase64 && <span className="text-xs font-bold font-mono">1 foto ✓</span>}
                 </button>
 
-                {/* Botão de Gravar Ruído */}
+                {/* Botão Microfone 🎙️ */}
                 <button
                   type="button"
                   onClick={iniciarGravacaoAudio}
-                  className={`flex-1 py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
+                  className={`flex-1 py-3.5 bg-[#161616] border rounded-[2px] flex items-center justify-center gap-2 transition-all active:scale-95 ${
                     gravandoAudio
-                      ? 'bg-red-600 text-white animate-pulse border-red-500'
+                      ? 'bg-red-600 border-red-500 text-white animate-pulse'
                       : audioBase64
-                      ? 'bg-emerald-950/40 border-emerald-500 text-emerald-300'
-                      : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700'
+                      ? 'border-emerald-500 text-emerald-400'
+                      : 'border-zinc-800 text-white hover:border-zinc-700'
                   }`}
+                  title="Gravar Áudio"
                 >
                   {gravandoAudio ? (
                     <>
-                      <Square className="w-3.5 h-3.5 fill-current" />
-                      <span>Parar ({tempoGravacao}s/10s)</span>
+                      <Square className="w-4 h-4 fill-current" />
+                      <span className="text-xs font-mono font-bold">{tempoGravacao}s/10s</span>
                     </>
                   ) : audioBase64 ? (
                     <>
-                      <Volume2 className="w-3.5 h-3.5" />
-                      <span>Ruído Gravado ✓</span>
+                      <Mic className="w-5 h-5" />
+                      <span className="text-xs font-bold font-mono">Áudio ✓</span>
                     </>
                   ) : (
-                    <>
-                      <Mic className="w-3.5 h-3.5" />
-                      <span>Gravar Ruído</span>
-                    </>
+                    <Mic className="w-5 h-5" />
                   )}
                 </button>
               </div>
 
-              {/* Preview da Foto Anexada */}
+              {/* Preview da foto se houver */}
               {fotoBase64 && (
                 <div className="relative inline-block mt-1">
                   <img
                     src={fotoBase64}
-                    alt="Evidência da peça"
-                    className="w-20 h-20 object-cover rounded-xl border border-zinc-700 shadow-md"
+                    alt="Foto da anomalia"
+                    className="w-20 h-20 object-cover rounded-[2px] border border-zinc-700 shadow-md"
                   />
                   <button
                     type="button"
@@ -808,9 +830,9 @@ export default function App() {
                 </div>
               )}
 
-              {/* Player do Áudio Gravado */}
+              {/* Player do áudio gravado se houver */}
               {audioBase64 && (
-                <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl p-2 mt-1">
+                <div className="flex items-center gap-2 bg-[#161616] border border-zinc-800 rounded-[2px] p-2 mt-1">
                   <audio src={audioBase64} controls className="h-7 w-full" />
                   <button
                     type="button"
@@ -822,42 +844,40 @@ export default function App() {
                   </button>
                 </div>
               )}
+            </div>
 
-              {/* Campo de Texto Opcional */}
-              <div className="pt-1">
-                <input
-                  type="text"
-                  value={observacaoTexto}
-                  onChange={(e) => setObservacaoTexto(e.target.value)}
-                  placeholder="Alguma observação extra? (Opcional)"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
-                />
-              </div>
+            {/* 4. REGISTRO ESCRITO (COM ÍCONE DE LÁPIS) */}
+            <div className="bg-[#161616] border border-zinc-800 rounded-[2px] px-3.5 py-3 flex items-center justify-between gap-2 shadow-inner">
+              <input
+                type="text"
+                value={observacaoTexto}
+                onChange={(e) => setObservacaoTexto(e.target.value)}
+                placeholder="Registro escrito (opcional)..."
+                className="bg-transparent text-white placeholder-zinc-300 text-xs sm:text-sm font-medium w-full focus:outline-none"
+              />
+              <Edit2 className="w-4 h-4 text-white shrink-0" />
             </div>
           </div>
 
-          {/* BOTÃO CONFIRMAR E ENVIAR ($T_0$) */}
-          <div className="pt-1">
+          {/* 5. BOTÃO ENVIAR TICKET */}
+          <div className="p-4 pt-1 bg-[#262626] border-t border-zinc-800/80 shrink-0">
             <button
               type="button"
-              disabled={enviando || (sintomasSelecionados.length === 0 && !fotoBase64)}
+              disabled={enviando || (sintomasSelecionados.length === 0 && !observacaoTexto.trim() && !fotoBase64)}
               onClick={handleEnviarChamado}
-              className={`w-full py-3.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-2xl active:scale-95 transition-all ${
-                sintomasSelecionados.length > 0 || fotoBase64
-                  ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/40 border border-red-500 animate-pulse'
-                  : 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-700'
+              className={`w-full py-4 bg-[#161616] border font-bold text-base sm:text-lg tracking-wide rounded-[2px] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
+                sintomasSelecionados.length > 0 || observacaoTexto.trim() || fotoBase64
+                  ? 'border-zinc-700 hover:border-zinc-500 hover:bg-zinc-900 cursor-pointer text-white'
+                  : 'border-zinc-800 text-zinc-400 cursor-not-allowed bg-zinc-950/80'
               }`}
             >
               {enviando ? (
                 <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Disparando Chamado ($T_0$)...</span>
+                  <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                  <span>enviando ticket...</span>
                 </>
               ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  <span>Confirmar e Disparar ($T_0$)</span>
-                </>
+                <span>enviar ticket</span>
               )}
             </button>
           </div>
@@ -868,7 +888,7 @@ export default function App() {
       {tela === 'sucesso' && (
         <div className="flex-1 flex flex-col justify-between p-6 bg-zinc-950 text-center">
           <div className="my-auto space-y-4">
-            <div className="w-20 h-20 bg-emerald-500/20 border-2 border-emerald-500 rounded-3xl flex items-center justify-center mx-auto text-emerald-400 shadow-2xl animate-bounce">
+            <div className="w-20 h-20 bg-emerald-500/20 border-2 border-emerald-500 rounded-[2px] flex items-center justify-center mx-auto text-emerald-400 shadow-2xl animate-bounce">
               <CheckCircle2 className="w-12 h-12" />
             </div>
 
@@ -879,38 +899,38 @@ export default function App() {
               <h2 className="text-xl font-black text-white mt-1">
                 Chamado Enviado à Manutenção!
               </h2>
-              <p className="text-xs text-zinc-400 mt-1">
+              <p className="text-xs text-zinc-200 mt-1 font-medium">
                 O Team Leader e a equipe técnica já receberam o alerta no Cockpit.
               </p>
             </div>
 
             {/* Dossiê da OS */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-left space-y-2 max-w-xs mx-auto shadow-lg text-xs font-mono">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-[2px] p-4 text-left space-y-2 max-w-xs mx-auto shadow-lg text-xs font-mono">
               <div className="flex justify-between border-b border-zinc-800 pb-2">
-                <span className="text-zinc-400">Número da OS:</span>
+                <span className="text-zinc-200 font-semibold">Número da OS:</span>
                 <span className="text-white font-bold text-sm">{chamadoCriado?.numero_os}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-400">Impacto:</span>
+                <span className="text-zinc-200 font-semibold">Impacto:</span>
                 <span className="text-red-400 font-bold uppercase">
                   {statusImpacto.replace(/_/g, ' ')}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-400">Máquina:</span>
+                <span className="text-zinc-200 font-semibold">Máquina:</span>
                 <span className="text-white">{ativoData?.tag_patrimonio}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-400">Posto:</span>
-                <span className="text-zinc-300">{ativoData?.posto_trabalho}</span>
+                <span className="text-zinc-200 font-semibold">Posto:</span>
+                <span className="text-white font-bold">{ativoData?.posto_trabalho}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-400">Operador:</span>
-                <span className="text-zinc-300">{nomeOperador} ({identifiant})</span>
+                <span className="text-zinc-200 font-semibold">Operador:</span>
+                <span className="text-white font-bold">{nomeOperador} ({identifiant})</span>
               </div>
               {fotoBase64 && (
                 <div className="flex justify-between items-center pt-1 border-t border-zinc-800">
-                  <span className="text-zinc-400">Anexo:</span>
+                  <span className="text-zinc-200 font-semibold">Anexo:</span>
                   <span className="text-emerald-400 font-bold">1 Foto Anexada</span>
                 </div>
               )}
@@ -920,7 +940,7 @@ export default function App() {
           <button
             type="button"
             onClick={voltarAoScanner}
-            className="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
+            className="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider rounded-[2px] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
           >
             <Camera className="w-4 h-4" />
             <span>Escanear Próxima Máquina</span>

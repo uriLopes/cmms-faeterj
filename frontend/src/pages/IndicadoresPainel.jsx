@@ -109,7 +109,7 @@ export default function IndicadoresPainel() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/')}
-              className="p-1.5 -ml-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors print:hidden"
+              className="p-1.5 -ml-1.5 text-slate-400 hover:text-white rounded-[2px] hover:bg-slate-800 transition-colors print:hidden"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -131,7 +131,7 @@ export default function IndicadoresPainel() {
           <div className="flex items-center gap-2.5 print:hidden">
             <button
               onClick={() => window.print()}
-              className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-all active:scale-95"
+              className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold rounded-[2px] flex items-center gap-1.5 transition-all active:scale-95"
             >
               <Printer className="w-4 h-4 text-slate-400" />
               <span>Imprimir / PDF</span>
@@ -141,7 +141,7 @@ export default function IndicadoresPainel() {
         </div>
 
         {/* Barra de Filtros Operacionais */}
-        <div className="mt-4 bg-slate-900/60 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs print:hidden">
+        <div className="mt-4 bg-slate-900/60 border border-slate-800 rounded-[2px] p-3 flex flex-wrap items-center justify-between gap-3 text-xs print:hidden">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-indigo-400" />
             <span className="font-semibold text-slate-300">Filtros de Análise:</span>
@@ -153,7 +153,7 @@ export default function IndicadoresPainel() {
               <select
                 value={linhaSelecionada}
                 onChange={(e) => setLinhaSelecionada(e.target.value)}
-                className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                className="bg-slate-950 border border-slate-700 rounded-[2px] px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
               >
                 <option value="">Todas as Linhas da Fábrica</option>
                 {linhas.map((l) => (
@@ -169,7 +169,7 @@ export default function IndicadoresPainel() {
               <select
                 value={periodoDias}
                 onChange={(e) => setPeriodoDias(Number(e.target.value))}
-                className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                className="bg-slate-950 border border-slate-700 rounded-[2px] px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
               >
                 <option value={7}>Últimos 7 dias</option>
                 <option value={30}>Últimos 30 dias (Mensal)</option>
@@ -179,7 +179,7 @@ export default function IndicadoresPainel() {
 
             <button
               onClick={carregarDashboard}
-              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+              className="p-1.5 text-slate-400 hover:text-white rounded-[2px] hover:bg-slate-800"
               title="Recarregar"
             >
               <RotateCcw className="w-4 h-4" />
@@ -196,7 +196,7 @@ export default function IndicadoresPainel() {
             {/* BIG NUMBERS: INDICADORES PRINCIPAIS */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {/* CARD 1: DISPONIBILIDADE OPERACIONAL */}
-              <div className={`p-4 rounded-2xl border ${statusWcm.bg} ${statusWcm.borda} space-y-2 relative overflow-hidden`}>
+              <div className={`p-4 rounded-[2px] border ${statusWcm.bg} ${statusWcm.borda} space-y-2 relative overflow-hidden`}>
                 <div className="flex justify-between items-start">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                     <Activity className={`w-3.5 h-3.5 ${statusWcm.cor}`} />
@@ -220,7 +220,7 @@ export default function IndicadoresPainel() {
               </div>
 
               {/* CARD 2: MTTR LÍQUIDO PURO */}
-              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-2">
+              <div className="bg-slate-900 border border-slate-800 p-4 rounded-[2px] space-y-2">
                 <div className="flex justify-between items-start">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
                     <Wrench className="w-3.5 h-3.5" />
@@ -245,7 +245,7 @@ export default function IndicadoresPainel() {
               </div>
 
               {/* CARD 3: MTBF */}
-              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-2">
+              <div className="bg-slate-900 border border-slate-800 p-4 rounded-[2px] space-y-2">
                 <div className="flex justify-between items-start">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5" />
@@ -270,7 +270,7 @@ export default function IndicadoresPainel() {
               </div>
 
               {/* CARD 4: MTTA & DOWNTIME TOTAL */}
-              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-2">
+              <div className="bg-slate-900 border border-slate-800 p-4 rounded-[2px] space-y-2">
                 <div className="flex justify-between items-start">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
                     <Zap className="w-3.5 h-3.5" />
@@ -298,7 +298,7 @@ export default function IndicadoresPainel() {
             {/* SEÇÃO 2: DIAGRAMA DE PARETO (CURVA 80/20) & TOP OFENSORES */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* GRÁFICO DE PARETO POR SUBSISTEMA */}
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">
+              <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 sm:p-5 space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-bold text-sm text-white flex items-center gap-2">
@@ -363,7 +363,7 @@ export default function IndicadoresPainel() {
               </div>
 
               {/* TOP 5 MAIORES OFENSORES DA PLANTA */}
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">
+              <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 sm:p-5 space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-bold text-sm text-white flex items-center gap-2">
@@ -385,7 +385,7 @@ export default function IndicadoresPainel() {
                     {ofensores.map((ofensor, idx) => (
                       <div
                         key={ofensor.ativo_id}
-                        className="bg-slate-950 border border-slate-800 p-3 rounded-xl flex items-center justify-between text-xs"
+                        className="bg-slate-950 border border-slate-800 p-3 rounded-[2px] flex items-center justify-between text-xs"
                       >
                         <div className="flex items-center gap-3">
                           <span className="w-6 h-6 rounded-full bg-rose-500/10 text-rose-400 font-mono font-bold flex items-center justify-center text-xs shrink-0 border border-rose-500/20">
@@ -427,7 +427,7 @@ export default function IndicadoresPainel() {
             </div>
 
             {/* SEÇÃO 3: DESEMPENHO POR LINHA DE PRODUÇÃO */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3">
+            <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 sm:p-5 space-y-3">
               <h3 className="font-bold text-sm text-white flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-indigo-400" />
                 Performance Consolidada por Linha de Produção
@@ -471,9 +471,9 @@ export default function IndicadoresPainel() {
 
             {/* SEÇÃO 4: SINALIZAÇÕES DE REVISÃO PREVENTIVA (FEEDBACK LOOP) */}
             {resumo.revisao_preventiva_sinalizada > 0 && (
-              <div className="bg-gradient-to-r from-amber-950/40 to-slate-900 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between text-xs text-amber-200">
+              <div className="bg-gradient-to-r from-amber-950/40 to-slate-900 border border-amber-500/30 rounded-[2px] p-4 flex items-center justify-between text-xs text-amber-200">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-amber-500/20 rounded-xl text-amber-400">
+                  <div className="p-2 bg-amber-500/20 rounded-[2px] text-amber-400">
                     <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div>

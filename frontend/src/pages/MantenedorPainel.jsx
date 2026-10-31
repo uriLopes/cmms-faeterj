@@ -339,7 +339,7 @@ export default function MantenedorPainel() {
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => navigate('/')}
-              className="p-1.5 -ml-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+              className="p-1.5 -ml-1.5 text-slate-400 hover:text-white rounded-[2px] hover:bg-slate-800"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -367,7 +367,7 @@ export default function MantenedorPainel() {
         {osAtiva ? (
           <div className="pt-4 space-y-4">
             {/* Banner de Voltar à Fila */}
-            <div className="flex justify-between items-center bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-800 text-xs">
+            <div className="flex justify-between items-center bg-slate-900 px-3.5 py-2 rounded-[2px] border border-slate-800 text-xs">
               <span className="text-slate-400 font-mono font-bold text-indigo-400">
                 {osAtiva.numero_os}
               </span>
@@ -381,7 +381,7 @@ export default function MantenedorPainel() {
             </div>
 
             {/* Cartão Central do Maquinário */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-xl relative overflow-hidden">
+            <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 space-y-3 shadow-xl relative overflow-hidden">
               <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center gap-2">
@@ -425,7 +425,7 @@ export default function MantenedorPainel() {
               </div>
 
               {/* Sintoma Reportado pelo Operador */}
-              <div className="bg-slate-950 border border-slate-800/80 rounded-xl p-3 text-xs">
+              <div className="bg-slate-950 border border-slate-800/80 rounded-[2px] p-3 text-xs">
                 <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold block">
                   Problema Reportado pelo Operador:
                 </span>
@@ -439,7 +439,7 @@ export default function MantenedorPainel() {
 
               {/* CRONÔMETRO DE INTERVENÇÃO TÉCNICA ($T_2$) */}
               {osAtiva.status === 'em_reparo' && (
-                <div className="bg-gradient-to-r from-amber-950/40 via-slate-950 to-slate-950 border border-amber-500/30 rounded-xl p-3 text-center space-y-1">
+                <div className="bg-gradient-to-r from-amber-950/40 via-slate-950 to-slate-950 border border-amber-500/30 rounded-[2px] p-3 text-center space-y-1">
                   <span className="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold flex items-center justify-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 animate-spin" />
                     Cronômetro de Reparo Líquido Ativo ($T_2$)
@@ -455,7 +455,7 @@ export default function MantenedorPainel() {
 
               {/* ALERTA DE PAUSA ATIVA */}
               {osAtiva.status === 'pausado_peca' && (
-                <div className="bg-purple-950/40 border border-purple-500/30 rounded-xl p-3 text-xs text-purple-300 space-y-2">
+                <div className="bg-purple-950/40 border border-purple-500/30 rounded-[2px] p-3 text-xs text-purple-300 space-y-2">
                   <div className="flex items-center gap-2 font-bold text-purple-200">
                     <Pause className="w-4 h-4 text-purple-400" />
                     <span>Atendimento Pausado (MTTR Congelado)</span>
@@ -465,7 +465,7 @@ export default function MantenedorPainel() {
                   </p>
                   <button
                     onClick={handleRetomarTrabalho}
-                    className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all"
+                    className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-[2px] text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all"
                   >
                     <Play className="w-3.5 h-3.5" />
                     <span>Retomar Trabalho Agora</span>
@@ -475,7 +475,7 @@ export default function MantenedorPainel() {
             </div>
 
             {/* SEÇÃO: PEÇAS REQUISITADAS NA OS */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+            <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <Boxes className="w-4 h-4 text-amber-400" />
@@ -485,7 +485,7 @@ export default function MantenedorPainel() {
                 </div>
                 <button
                   onClick={abrirCatalogoPecas}
-                  className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold rounded-lg flex items-center gap-1 shadow-md shadow-indigo-600/20 active:scale-95 transition-all"
+                  className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold rounded-[2px] flex items-center gap-1 shadow-md shadow-indigo-600/20 active:scale-95 transition-all"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Requisitar Peça</span>
@@ -501,7 +501,7 @@ export default function MantenedorPainel() {
                   {pecasDaOS.map((p) => (
                     <div
                       key={p.id}
-                      className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs"
+                      className="bg-slate-950 p-2.5 rounded-[2px] border border-slate-800 flex justify-between items-center text-xs"
                     >
                       <div>
                         <span className="font-mono text-white font-bold">{p.codigo_sap}</span>
@@ -528,7 +528,7 @@ export default function MantenedorPainel() {
               {osAtiva.status === 'atribuido' && (
                 <button
                   onClick={handleIniciarReparo}
-                  className="w-full py-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 shadow-xl shadow-amber-600/30 active:scale-98 transition-all"
+                  className="w-full py-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-[2px] text-sm flex items-center justify-center gap-2 shadow-xl shadow-amber-600/30 active:scale-98 transition-all"
                 >
                   <Wrench className="w-5 h-5" />
                   <span>Cheguei no Posto / Iniciar Reparo ($T_2$)</span>
@@ -540,14 +540,14 @@ export default function MantenedorPainel() {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => setModalPausa(true)}
-                      className="py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 border border-slate-700 active:scale-98 transition-all"
+                      className="py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-[2px] text-xs flex items-center justify-center gap-1.5 border border-slate-700 active:scale-98 transition-all"
                     >
                       <Pause className="w-4 h-4 text-purple-400" />
                       <span>Pausar Atendimento</span>
                     </button>
                     <button
                       onClick={abrirCatalogoPecas}
-                      className="py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 border border-slate-700 active:scale-98 transition-all"
+                      className="py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-[2px] text-xs flex items-center justify-center gap-1.5 border border-slate-700 active:scale-98 transition-all"
                     >
                       <Boxes className="w-4 h-4 text-amber-400" />
                       <span>Pedir Peça</span>
@@ -556,7 +556,7 @@ export default function MantenedorPainel() {
 
                   <button
                     onClick={() => setModalConcluir(true)}
-                    className="w-full py-4 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-600/30 active:scale-98 transition-all"
+                    className="w-full py-4 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-bold rounded-[2px] text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-600/30 active:scale-98 transition-all"
                   >
                     <CheckCircle2 className="w-5 h-5" />
                     <span>Concluir Reparo e Liberar Máquina ($T_3$)</span>
@@ -579,7 +579,7 @@ export default function MantenedorPainel() {
               </div>
 
               {meusChamados.length === 0 ? (
-                <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 text-center text-xs text-slate-500">
+                <div className="bg-slate-900/60 border border-slate-800/80 rounded-[2px] p-4 text-center text-xs text-slate-500">
                   Você não possui nenhuma OS em andamento no momento.
                 </div>
               ) : (
@@ -591,7 +591,7 @@ export default function MantenedorPainel() {
                         setOsAtiva(item);
                         carregarPecasOS(item.id);
                       }}
-                      className="bg-slate-900 border border-slate-800 hover:border-indigo-500 p-3.5 rounded-xl cursor-pointer transition-all active:scale-98 shadow-md"
+                      className="bg-slate-900 border border-slate-800 hover:border-indigo-500 p-3.5 rounded-[2px] cursor-pointer transition-all active:scale-98 shadow-md"
                     >
                       <div className="flex justify-between items-start">
                         <div>
@@ -633,7 +633,7 @@ export default function MantenedorPainel() {
               </div>
 
               {chamadosDisponiveis.length === 0 ? (
-                <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 text-center text-xs text-slate-500">
+                <div className="bg-slate-900/60 border border-slate-800/80 rounded-[2px] p-4 text-center text-xs text-slate-500">
                   Nenhum chamado pendente sem técnico no chão de fábrica.
                 </div>
               ) : (
@@ -641,7 +641,7 @@ export default function MantenedorPainel() {
                   {chamadosDisponiveis.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-slate-900 border border-rose-500/30 p-3.5 rounded-xl flex justify-between items-center shadow-md"
+                      className="bg-slate-900 border border-rose-500/30 p-3.5 rounded-[2px] flex justify-between items-center shadow-md"
                     >
                       <div>
                         <div className="flex items-center gap-2">
@@ -662,7 +662,7 @@ export default function MantenedorPainel() {
 
                       <button
                         onClick={() => handleAutoAtribuir(item)}
-                        className="py-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg shadow-md shrink-0 ml-2 active:scale-95 transition-all"
+                        className="py-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-[2px] shadow-md shrink-0 ml-2 active:scale-95 transition-all"
                       >
                         Assumir ($T_1$)
                       </button>
@@ -678,7 +678,7 @@ export default function MantenedorPainel() {
       {/* MODAL 1: REQUISITAR PEÇA SOBRESSALENTE (RESERVA PENDENTE) */}
       {modalPeca && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3.5 shadow-2xl">
+          <div className="bg-slate-900 border border-slate-700 rounded-[2px] max-w-md w-full p-4 space-y-3.5 shadow-2xl">
             <div className="flex justify-between items-center border-b border-slate-800 pb-2.5">
               <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
                 <Boxes className="w-4 h-4 text-amber-400" />
@@ -697,7 +697,7 @@ export default function MantenedorPainel() {
                 value={buscaPeca}
                 onChange={(e) => setBuscaPeca(e.target.value)}
                 placeholder="Buscar por código SAP ou descrição..."
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-950 border border-slate-700 rounded-[2px] pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
               />
             </div>
 
@@ -714,7 +714,7 @@ export default function MantenedorPainel() {
                     <div
                       key={p.id}
                       onClick={() => setPecaSelecionada(p)}
-                      className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
+                      className={`p-2.5 rounded-[2px] border text-xs cursor-pointer transition-all ${
                         isSelected
                           ? 'bg-indigo-600/20 border-indigo-500 ring-1 ring-indigo-500'
                           : 'bg-slate-950 border-slate-800 hover:border-slate-700'
@@ -761,7 +761,7 @@ export default function MantenedorPainel() {
                   type="button"
                   disabled={submetendo}
                   onClick={handleSolicitarPeca}
-                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs shadow-lg active:scale-98 transition-all"
+                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-[2px] text-xs shadow-lg active:scale-98 transition-all"
                 >
                   {submetendo ? 'Requisitando...' : 'Vincular Peça à OS (Reserva Pendente)'}
                 </button>
@@ -774,7 +774,7 @@ export default function MantenedorPainel() {
       {/* MODAL 2: PAUSAR ATENDIMENTO (CONGELA MTTR LÍQUIDO) */}
       {modalPausa && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
+          <div className="bg-slate-900 border border-slate-700 rounded-[2px] max-w-md w-full p-4 space-y-3 shadow-2xl">
             <div className="flex justify-between items-center border-b border-slate-800 pb-2.5">
               <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
                 <Pause className="w-4 h-4 text-purple-400" />
@@ -790,7 +790,7 @@ export default function MantenedorPainel() {
               <select
                 value={motivoPausa}
                 onChange={(e) => setMotivoPausa(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-950 border border-slate-700 text-white rounded-[2px] p-2.5 focus:outline-none focus:border-indigo-500"
               >
                 <option value="aguardando_peca">Aguardando Peça no Almoxarifado</option>
                 <option value="apoio_especialista">Aguardando Apoio de Especialista</option>
@@ -805,7 +805,7 @@ export default function MantenedorPainel() {
                 value={justificativaPausa}
                 onChange={(e) => setJustificativaPausa(e.target.value)}
                 placeholder="Ex: Aguardando almoxarife liberar válvula sobressalente..."
-                className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 text-xs placeholder-slate-600 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-950 border border-slate-700 text-white rounded-[2px] p-2.5 text-xs placeholder-slate-600 focus:outline-none focus:border-indigo-500"
               />
             </div>
 
@@ -813,7 +813,7 @@ export default function MantenedorPainel() {
               <button
                 type="button"
                 onClick={() => setModalPausa(false)}
-                className="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs"
+                className="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-[2px] text-xs"
               >
                 Cancelar
               </button>
@@ -821,7 +821,7 @@ export default function MantenedorPainel() {
                 type="button"
                 disabled={submetendo}
                 onClick={handleConfirmarPausa}
-                className="w-1/2 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs shadow-lg"
+                className="w-1/2 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-[2px] text-xs shadow-lg"
               >
                 {submetendo ? 'Pausando...' : 'Confirmar Pausa'}
               </button>
@@ -833,7 +833,7 @@ export default function MantenedorPainel() {
       {/* MODAL 3: CONCLUIR REPARO ($T_3$) COM ÁRVORE DE FALHAS */}
       {modalConcluir && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-4 sm:p-5 space-y-3.5 shadow-2xl">
+          <div className="bg-slate-900 border border-slate-700 rounded-[2px] max-w-lg w-full max-h-[90vh] overflow-y-auto p-4 sm:p-5 space-y-3.5 shadow-2xl">
             <div className="flex justify-between items-start border-b border-slate-800 pb-2.5">
               <div>
                 <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider">
@@ -852,7 +852,7 @@ export default function MantenedorPainel() {
               <div className="text-center py-6 space-y-4">
                 <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto animate-bounce" />
                 <h4 className="text-lg font-bold text-white">Reparo Concluído com Sucesso!</h4>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs text-left space-y-2 font-mono">
+                <div className="bg-slate-950 p-4 rounded-[2px] border border-slate-800 text-xs text-left space-y-2 font-mono">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Tempo de Reparo Líquido (MTTR):</span>
                     <span className="text-emerald-400 font-bold">
@@ -880,7 +880,7 @@ export default function MantenedorPainel() {
                     setOsAtiva(null);
                     carregarChamados();
                   }}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs"
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-[2px] text-xs"
                 >
                   Retornar à Lista de Chamados
                 </button>
@@ -894,7 +894,7 @@ export default function MantenedorPainel() {
                   <select
                     value={arvoreFalha}
                     onChange={(e) => setArvoreFalha(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 text-xs focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-[2px] p-2.5 text-xs focus:outline-none focus:border-indigo-500"
                   >
                     <option value="mecanica">Mecânica (Estrutural / Rolamentos / Guias)</option>
                     <option value="pneumatica">Pneumática (Válvulas / Cilindros / Mangueiras)</option>
@@ -912,7 +912,7 @@ export default function MantenedorPainel() {
                     value={causaRaiz}
                     onChange={(e) => setCausaRaiz(e.target.value)}
                     placeholder="Ex: Ruptura de mangueira pneumática por fadiga mecânica"
-                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 text-xs placeholder-slate-600 focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-[2px] p-2.5 text-xs placeholder-slate-600 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -925,7 +925,7 @@ export default function MantenedorPainel() {
                     value={acaoExecutada}
                     onChange={(e) => setAcaoExecutada(e.target.value)}
                     placeholder="Ex: Substituição da mangueira de 8mm e reposicionamento da abraçadeira..."
-                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 text-xs placeholder-slate-600 focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-[2px] p-2.5 text-xs placeholder-slate-600 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -946,7 +946,7 @@ export default function MantenedorPainel() {
                   <button
                     type="button"
                     onClick={() => setModalConcluir(false)}
-                    className="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs"
+                    className="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-[2px] text-xs"
                   >
                     Voltar
                   </button>
@@ -954,7 +954,7 @@ export default function MantenedorPainel() {
                     type="button"
                     disabled={submetendo}
                     onClick={handleConfirmarConclusao}
-                    className="w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-emerald-600/30"
+                    className="w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-[2px] text-xs shadow-lg shadow-emerald-600/30"
                   >
                     {submetendo ? 'Gravando T3...' : 'Confirmar e Liberar'}
                   </button>

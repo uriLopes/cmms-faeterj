@@ -4,7 +4,7 @@ import React from 'react';
  * Componente Oficial da Marca Corp.Vanguard
  * Industrial Maintenance Systems
  * 
- * Utiliza o emblema 100% transparente (sem caixa ou fundo cinza) e a tipografia oficial.
+ * Utiliza o novo emblema oficial (arquitetural verde e branco) e wordmark oficial Corp.Vanguard.
  */
 export default function VanguardLogo({
   variant = 'full',
@@ -13,19 +13,20 @@ export default function VanguardLogo({
   light = false
 }) {
   const scale = {
-    sm: { icon: 'w-6 h-6', title: 'text-sm', sub: 'text-[7px]' },
-    md: { icon: 'w-8 h-8', title: 'text-lg', sub: 'text-[8.5px]' },
-    lg: { icon: 'w-11 h-11', title: 'text-2xl', sub: 'text-[10px]' },
-    xl: { icon: 'w-16 h-16', title: 'text-3xl', sub: 'text-xs' }
-  }[size] || { icon: 'w-8 h-8', title: 'text-lg', sub: 'text-[8.5px]' };
+    sm: { icon: 'w-6 h-6', wm: 'h-4', sub: 'text-[7px]' },
+    md: { icon: 'w-8 h-8', wm: 'h-6', sub: 'text-[8.5px]' },
+    lg: { icon: 'w-11 h-11', wm: 'h-8', sub: 'text-[10px]' },
+    xl: { icon: 'w-16 h-16', wm: 'h-11', sub: 'text-xs' },
+    header: { icon: 'w-14 h-14', wm: 'h-10', sub: 'text-xs' }
+  }[size] || { icon: 'w-8 h-8', wm: 'h-6', sub: 'text-[8.5px]' };
 
-  // Ícone oficial transparente sem qualquer fundo, recorte cinza ou bolinha verde
+  // Emblema oficial transparente (verde industrial + branco em alta definição)
   const renderIcon = (
     <div className={`relative ${scale.icon} shrink-0 flex items-center justify-center`}>
       <img
-        src="/brand/vanguard-logo-transparent.png?v=3"
+        src="/brand/vanguard-emblem-transparent.png?v=5"
         alt="Corp.Vanguard"
-        className="w-full h-full object-contain"
+        className="w-full h-full object-contain filter drop-shadow-[0_2px_10px_rgba(115,175,1,0.25)]"
       />
     </div>
   );
@@ -34,31 +35,13 @@ export default function VanguardLogo({
     return <div className={`inline-flex items-center justify-center ${className}`}>{renderIcon}</div>;
   }
 
-  // Wordmark "Corp.Vanguard"
+  // Wordmark oficial recortado
   const renderWordmark = (
-    <div className="flex items-center leading-none tracking-tight select-none">
-      {/* Caixa inclinada "Corp." */}
-      <span
-        className={`px-2 py-0.5 font-black uppercase text-xs sm:text-sm tracking-wide ${
-          light ? 'bg-slate-900 text-white' : 'bg-white text-slate-950'
-        }`}
-        style={{
-          clipPath: 'polygon(0 0, 100% 0, 84% 100%, 0% 100%)',
-          paddingRight: '12px'
-        }}
-      >
-        Corp.
-      </span>
-
-      {/* "Vanguard" em itálico de alta presença */}
-      <span
-        className={`font-black italic tracking-tighter ml-1 ${scale.title} ${
-          light ? 'text-slate-950' : 'text-white'
-        }`}
-      >
-        Vanguard
-      </span>
-    </div>
+    <img
+      src={light ? '/brand/corp-vanguard-wordmark-light.png?v=5' : '/brand/corp-vanguard-wordmark-transparent.png?v=5'}
+      alt="Corp.Vanguard"
+      className={`${scale.wm} object-contain select-none`}
+    />
   );
 
   if (variant === 'wordmark') {

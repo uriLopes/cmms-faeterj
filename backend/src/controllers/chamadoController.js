@@ -157,7 +157,7 @@ const chamadoController = {
    */
   async listar(req, res) {
     try {
-      const { status, linha_id, prioridade, mantenedor_id } = req.query;
+      const { status, linha_id, prioridade, mantenedor_id, ordenar } = req.query;
 
       const query = db('chamados_os as c')
         .join('ativos_postos as a', 'c.ativo_id', 'a.id')
@@ -210,7 +210,7 @@ const chamadoController = {
 
       const chamados = await query.orderBy('c.t0_abertura', 'desc');
 
-      // Calcula tempo decorrido para chamados ainda abertos (downtime em andamento)
+      // Calcula tempo decorrido, Matriz de Priorização Dinâmica e Indicadores de SLA
       const agora = new Date();
       const formatados = chamados.map((item) => {
         let minutos_em_aberto = 0;
@@ -219,11 +219,51 @@ const chamadoController = {
         } else {
           minutos_em_aberto = item.tempo_downtime_total_minutos || diferencaMinutos(item.t0_abertura, item.t3_conclusao_reparo);
         }
+
+        // 1. Matriz de Priorização Industrial (Score ponderado)
+        // Peso Criticidade do Ativo: A = 300, B = 200, C = 100
+        const pesoCriticidade = item.ativo_criticidade === 'A' ? 300 : item.ativo_criticidade === 'B' ? 200 : 100;
+
+        // Peso Impacto Operacional Imediato
+        const pesoImpacto = item.status_impacto === 'maquina_parada'
+          ? 300
+          : item.status_impacto === 'operando_com_restricao'
+            ? 150
+            : 50;
+
+        // Fator de aceleração por tempo decorrido
+        const fatorTempo = item.status_impacto === 'maquina_parada' ? 2.5 : 1.0;
+        const score_prioridade = Math.round(pesoCriticidade + pesoImpacto + (minutos_em_aberto * fatorTempo));
+
+        // 2. SLA de Triagem e Despacho T0 -> T1 (em minutos)
+        // Crítico (A): 15 min | Alerta (B): 30 min | Baixo (C): 60 min
+        const sla_limite_t1 = item.ativo_criticidade === 'A' ? 15 : item.ativo_criticidade === 'B' ? 30 : 60;
+        const sla_estourado = (item.status === 'aberto' && minutos_em_aberto > sla_limite_t1);
+        const sla_restante_minutos = Math.max(0, sla_limite_t1 - minutos_em_aberto);
+
         return {
           ...item,
-          minutos_em_aberto
+          minutos_em_aberto,
+          score_prioridade,
+          sla_limite_t1,
+          sla_estourado,
+          sla_restante_minutos
         };
       });
+
+      // Ordenação: se ordenar='prioridade' (ou padrão nos ativos), prioriza score dos ativos não concluídos
+      if (ordenar === 'prioridade' || !ordenar) {
+        formatados.sort((a, b) => {
+          const aAtivo = a.status !== 'concluido' && a.status !== 'cancelado_invalido';
+          const bAtivo = b.status !== 'concluido' && b.status !== 'cancelado_invalido';
+          if (aAtivo && !bAtivo) return -1;
+          if (!aAtivo && bAtivo) return 1;
+          if (aAtivo && bAtivo) {
+            return b.score_prioridade - a.score_prioridade;
+          }
+          return new Date(b.t0_abertura).getTime() - new Date(a.t0_abertura).getTime();
+        });
+      }
 
       return res.status(200).json(formatados);
     } catch (error) {

@@ -2,24 +2,74 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/manifest.json" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <link rel="icon" type="image/png" href="/favicon.png?v=20" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20" />
+    <link rel="manifest" href="/manifest.json?v=20" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Vanguard Trigger" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#212121" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
     <title>Vanguard Trigger • Corp.Vanguard</title>
+    <style>
+      .loaderRectangle {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0 4px;
+        height: 56px;
+      }
+      .loaderRectangle div {
+        width: 9px;
+        height: 16px;
+        animation: 0.9s ease-in-out infinite;
+        background: #FFFFFF !important;
+        border-radius: 2px;
+        box-shadow: none !important;
+        opacity: 1 !important;
+      }
+      .loaderRectangle div:nth-child(1) { animation-name: rectangleOneAnim; animation-delay: 1s; }
+      .loaderRectangle div:nth-child(2) { animation-name: rectangleTwoAnim; animation-delay: 1.1s; }
+      .loaderRectangle div:nth-child(3) { animation-name: rectangleThreeAnim; animation-delay: 1.2s; }
+      .loaderRectangle div:nth-child(4) { animation-name: rectangleFourAnim; animation-delay: 1.3s; }
+      .loaderRectangle div:nth-child(5) { animation-name: rectangleFiveAnim; animation-delay: 1.4s; }
+      @keyframes rectangleOneAnim { 0% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } 40% { height: 30px; background: #FFFFFF !important; opacity: 1 !important; } 100% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } }
+      @keyframes rectangleTwoAnim { 0% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } 40% { height: 40px; background: #FFFFFF !important; opacity: 1 !important; } 100% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } }
+      @keyframes rectangleThreeAnim { 0% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } 40% { height: 50px; background: #FFFFFF !important; opacity: 1 !important; } 100% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } }
+      @keyframes rectangleFourAnim { 0% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } 40% { height: 40px; background: #FFFFFF !important; opacity: 1 !important; } 100% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } }
+      @keyframes rectangleFiveAnim { 0% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } 40% { height: 30px; background: #FFFFFF !important; opacity: 1 !important; } 100% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } }
+    </style>
   </head>
-  <body class="bg-black text-slate-100 antialiased select-none touch-manipulation">
-    <div id="root"></div>
+  <body class="bg-[#212121] text-slate-100 antialiased select-none touch-manipulation">
+    <div id="root">
+      <div style="position:fixed;inset:0;background:#212121;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font-family:'IBM Plex Sans',system-ui,sans-serif;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+          <img src="/brand/corp-vanguard-wordmark-transparent.png?v=20" alt="Corp.Vanguard" style="width:260px;max-width:85vw;object-fit:contain;" />
+          <span style="color:#ffffff;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;margin-top:4px;">Trigger</span>
+          <div class="loaderRectangle" style="margin-top:12px;">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch((err) => console.log('SW registration failed:', err));
+          navigator.serviceWorker.register('/sw.js?v=23').catch((err) => {
+            console.log('SW registration failed:', err);
+          });
         });
       }
     </script>

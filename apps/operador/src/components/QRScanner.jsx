@@ -68,7 +68,7 @@ export default function QRScanner({ onScanSuccess, onClose }) {
       {/* Topo com botão fechar */}
       <div className="flex items-center justify-between pt-2 pb-4 border-b border-slate-800">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-rose-600/20 border border-rose-500/40 flex items-center justify-center text-rose-400">
+          <div className="w-8 h-8 rounded-[2px] bg-rose-600/20 border border-rose-500/40 flex items-center justify-center text-rose-400">
             <Camera className="w-4 h-4" />
           </div>
           <div>
@@ -86,14 +86,14 @@ export default function QRScanner({ onScanSuccess, onClose }) {
 
       {/* Área da Câmera */}
       <div className="flex-1 flex flex-col items-center justify-center my-4 relative">
-        <div className="w-full max-w-xs aspect-square bg-slate-900/50 rounded-3xl overflow-hidden border-2 border-rose-500/50 relative shadow-2xl shadow-rose-950/40 flex items-center justify-center">
+        <div className="w-full max-w-xs aspect-square bg-slate-900/50 rounded-[2px] overflow-hidden border-2 border-rose-500/50 relative shadow-2xl shadow-rose-950/40 flex items-center justify-center">
           {/* Container onde o html5-qrcode renderiza o vídeo */}
           <div id={scannerContainerId} className="w-full h-full object-cover"></div>
 
           {/* Mira animada */}
           {!scannerError && (
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-              <div className="w-48 h-48 border-2 border-rose-500 rounded-2xl relative animate-pulse">
+              <div className="w-48 h-48 border-2 border-rose-500 rounded-[2px] relative animate-pulse">
                 <span className="absolute -top-1 -left-1 w-5 h-5 border-t-4 border-l-4 border-rose-500 rounded-tl"></span>
                 <span className="absolute -top-1 -right-1 w-5 h-5 border-t-4 border-r-4 border-rose-500 rounded-tr"></span>
                 <span className="absolute -bottom-1 -left-1 w-5 h-5 border-b-4 border-l-4 border-rose-500 rounded-bl"></span>
@@ -123,7 +123,7 @@ export default function QRScanner({ onScanSuccess, onClose }) {
       </div>
 
       {/* Simulador rápido para teste sem câmera física */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 space-y-2">
+      <div className="bg-slate-900/90 border border-slate-800 rounded-[2px] p-3 space-y-2">
         <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">
           Ou selecione uma máquina de teste rápido:
         </span>
@@ -131,7 +131,7 @@ export default function QRScanner({ onScanSuccess, onClose }) {
           <button
             type="button"
             onClick={() => onScanSuccess('qr_mv3_rob_04_token_hash_faeterj_2026')}
-            className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-left active:scale-95 transition-all"
+            className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-[2px] text-left active:scale-95 transition-all"
           >
             <span className="font-mono font-bold text-white block">MV3-ROB-04</span>
             <span className="text-[10px] text-slate-400">Robô KUKA • Chaparia</span>
@@ -139,7 +139,7 @@ export default function QRScanner({ onScanSuccess, onClose }) {
           <button
             type="button"
             onClick={() => onScanSuccess('qr_hc1_apt_02_token_hash_faeterj_2026')}
-            className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-left active:scale-95 transition-all"
+            className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-[2px] text-left active:scale-95 transition-all"
           >
             <span className="font-mono font-bold text-white block">HC1-APT-02</span>
             <span className="text-[10px] text-slate-400">Apertadeira • Montagem</span>

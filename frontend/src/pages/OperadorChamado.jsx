@@ -191,7 +191,7 @@ export default function OperadorChamado() {
           </div>
 
           {/* Cartão de Resumo da Parada */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-left space-y-2 text-sm shadow-xl">
+          <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 text-left space-y-2 text-sm shadow-xl">
             <div className="flex justify-between border-b border-slate-800 pb-2">
               <span className="text-slate-400">Ativo / Posto:</span>
               <span className="font-mono font-bold text-white">{sucessoChamado.tag_patrimonio || ativoData?.tag_patrimonio}</span>
@@ -213,7 +213,7 @@ export default function OperadorChamado() {
             </div>
           </div>
 
-          <div className="bg-indigo-950/40 border border-indigo-500/30 rounded-lg p-3 text-xs text-indigo-300 text-left">
+          <div className="bg-indigo-950/40 border border-indigo-500/30 rounded-[2px] p-3 text-xs text-indigo-300 text-left">
             <p className="font-semibold flex items-center gap-1.5 text-indigo-200">
               <Clock className="w-4 h-4 text-indigo-400" />
               Notificação em Tempo Real Disparada
@@ -232,7 +232,7 @@ export default function OperadorChamado() {
               setDescricaoExtra('');
               carregarAtivo(token);
             }}
-            className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl active:scale-98 transition-all"
+            className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-[2px] active:scale-98 transition-all"
           >
             Acompanhar Status da Máquina
           </button>
@@ -256,7 +256,7 @@ export default function OperadorChamado() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate('/')}
-              className="p-1.5 -ml-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+              className="p-1.5 -ml-1.5 text-slate-400 hover:text-white rounded-[2px] hover:bg-slate-800"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -307,7 +307,7 @@ export default function OperadorChamado() {
             <p className="text-sm text-slate-300">{erro}</p>
             <button
               onClick={() => carregarAtivo(token)}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg font-medium"
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs rounded-[2px] font-medium"
             >
               Tentar Novamente
             </button>
@@ -315,7 +315,7 @@ export default function OperadorChamado() {
         ) : (
           <div className="space-y-4 pt-2">
             {/* Cartão do Ativo Escaneado */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-3.5 shadow-lg relative overflow-hidden">
+            <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-3.5 shadow-lg relative overflow-hidden">
               <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center gap-2">
@@ -341,14 +341,14 @@ export default function OperadorChamado() {
                     {ativoData?.linha_nome} • {ativoData?.posto_trabalho}
                   </p>
                 </div>
-                <div className="p-2 bg-slate-800/80 rounded-lg text-slate-400">
+                <div className="p-2 bg-slate-800/80 rounded-[2px] text-slate-400">
                   <QrCode className="w-5 h-5 text-indigo-400" />
                 </div>
               </div>
 
               {/* Alerta de Máquina Já Em Atendimento (Evita duplicidade) */}
               {emAtendimento && osAtiva && (
-                <div className="mt-3 bg-amber-500/15 border border-amber-500/30 rounded-lg p-2.5 text-xs text-amber-300 space-y-1">
+                <div className="mt-3 bg-amber-500/15 border border-amber-500/30 rounded-[2px] p-2.5 text-xs text-amber-300 space-y-1">
                   <div className="flex items-center gap-1.5 font-bold">
                     <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
                     <span>Máquina já possui chamado em andamento:</span>
@@ -362,7 +362,7 @@ export default function OperadorChamado() {
             </div>
 
             {/* Identificação do Operador (Matrícula/RE) */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 space-y-2">
+            <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-3 space-y-2">
               <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <UserCheck className="w-3.5 h-3.5 text-indigo-400" />
@@ -376,7 +376,7 @@ export default function OperadorChamado() {
                   value={matricula}
                   onChange={(e) => setMatricula(e.target.value.toUpperCase())}
                   placeholder="Ex: RE-5001"
-                  className="w-full bg-slate-950 border border-slate-700 focus:border-indigo-500 rounded-lg px-3 py-2 text-sm font-mono font-bold text-white placeholder-slate-600 focus:outline-none"
+                  className="w-full bg-slate-950 border border-slate-700 focus:border-indigo-500 rounded-[2px] px-3 py-2 text-sm font-mono font-bold text-white placeholder-slate-600 focus:outline-none"
                 />
               </div>
             </div>
@@ -398,7 +398,7 @@ export default function OperadorChamado() {
                       key={s.id}
                       type="button"
                       onClick={() => setSintomaSelecionado(s)}
-                      className={`p-3 rounded-xl border text-left flex flex-col justify-between min-h-[90px] transition-all active:scale-95 ${
+                      className={`p-3 rounded-[2px] border text-left flex flex-col justify-between min-h-[90px] transition-all active:scale-95 ${
                         isSelected
                           ? 'bg-indigo-600/25 border-indigo-500 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500'
                           : 'bg-slate-900/90 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
@@ -431,7 +431,7 @@ export default function OperadorChamado() {
                   value={descricaoExtra}
                   onChange={(e) => setDescricaoExtra(e.target.value)}
                   placeholder="Ex: Pinça de solda número 2 vazando na conexão superior..."
-                  className="w-full mt-1.5 bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500"
+                  className="w-full mt-1.5 bg-slate-950 border border-slate-700 rounded-[2px] p-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500"
                 />
               )}
             </div>
@@ -445,7 +445,7 @@ export default function OperadorChamado() {
           type="button"
           disabled={loading || submetendo || !sintomaSelecionado || !matricula.trim()}
           onClick={handleAbrirChamado}
-          className={`w-full py-4 rounded-xl font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 shadow-2xl transition-all ${
+          className={`w-full py-4 rounded-[2px] font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 shadow-2xl transition-all ${
             !sintomaSelecionado || !matricula.trim() || loading || submetendo
               ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
               : 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white shadow-rose-600/30 active:scale-98'

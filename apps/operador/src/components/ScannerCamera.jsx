@@ -60,8 +60,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
 
       const config = {
         fps: 20,
-        qrbox: { width: 260, height: 260 },
-        aspectRatio: 1.0
+        qrbox: { width: 260, height: 260 }
       };
 
       // 2. Inicia diretamente com facingMode: 'environment' (lente traseira principal com flash)
@@ -268,10 +267,10 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
   }
 
   return (
-    <div className="flex-1 flex flex-col justify-between relative bg-[#2a2a2a] overflow-hidden select-none">
+    <div className="flex-1 flex flex-col justify-between relative bg-[#212121] overflow-hidden select-none">
       {/* Alerta de Conexão HTTP Insegura */}
       {inseguro && (
-        <div className="bg-amber-500/20 border-b border-amber-500/40 p-2.5 px-4 text-xs text-amber-300 flex items-center justify-between">
+        <div className="relative z-30 bg-amber-500/20 border-b border-amber-500/40 p-2.5 px-4 text-xs text-amber-300 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShieldAlert className="w-4 h-4 shrink-0 text-amber-400" />
             <span className="text-[11px] leading-tight">
@@ -283,106 +282,133 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
 
       {/* Aviso temporário se a lanterna física não responder */}
       {avisoLanterna && (
-        <div className="bg-zinc-900/95 border-b border-zinc-700 p-2 px-4 text-[11px] text-amber-300 text-center animate-fade-in">
+        <div className="relative z-30 bg-zinc-900/95 border-b border-zinc-700 p-2 px-4 text-[11px] text-amber-300 text-center animate-fade-in">
           {avisoLanterna}
         </div>
       )}
 
-      {/* ÁREA CENTRAL DO SCANNER */}
-      <div className="relative flex-1 flex flex-col items-center justify-center p-4">
-        {/* Container do Vídeo da Câmera */}
-        <div className="w-full max-w-sm aspect-square relative flex items-center justify-center overflow-hidden rounded-xl bg-black border border-zinc-800">
-          <div id={containerId} className="w-full h-full object-cover"></div>
+      {/* CONTAINER DO VÍDEO DA CÂMERA EM TELA CHEIA (SEM BORDAS OU FUNDO PRETO) */}
+      <div className="absolute inset-0 w-full h-full overflow-hidden bg-[#212121]">
+        <div id={containerId} className="w-full h-full object-cover"></div>
+      </div>
 
-          {/* RETÍCULO VERMELHO FIEL AO WIREFRAME */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
-            <div className="relative w-64 h-64 border-4 border-red-600 bg-red-900/15 rounded-lg flex flex-col items-center justify-center text-center p-4 shadow-[0_0_30px_rgba(220,38,38,0.35)]">
-              {/* Cantos vermelhos chanfrados em destaque */}
-              <span className="absolute -top-2 -left-2 w-8 h-8 border-t-8 border-l-8 border-red-600"></span>
-              <span className="absolute -top-2 -right-2 w-8 h-8 border-t-8 border-r-8 border-red-600"></span>
-              <span className="absolute -bottom-2 -left-2 w-8 h-8 border-b-8 border-l-8 border-red-600"></span>
-              <span className="absolute -bottom-2 -right-2 w-8 h-8 border-b-8 border-r-8 border-red-600"></span>
+      {/* RETÍCULO TRANSPARENTE COM CANTONEIRAS BRANCAS ARREDONDADAS E MÁSCARA CINZA EM TODA A TELA */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10 p-4 overflow-hidden">
+        {/* Texto superior orientando o operador */}
+        <span className="text-white text-xs sm:text-sm font-medium tracking-wide mb-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+          Aponte a câmera para o QR Code
+        </span>
 
-              {/* Texto central em branco exatamente como no wireframe */}
-              <span className="text-white font-black text-base sm:text-lg leading-tight uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] max-w-[190px]">
-                Escanear QR code da maquina
-              </span>
+        {/* Viewfinder 100% transparente com cantoneiras brancas e máscara externa cinza cobrindo toda a tela */}
+        <div className="relative w-56 h-56 sm:w-64 sm:h-64 rounded-2xl shadow-[0_0_0_9999px_rgba(32,32,36,0.68)]">
+          {/* Cantoneira Superior Esquerda */}
+          <span className="absolute -top-[1.5px] -left-[1.5px] w-9 h-9 border-t-[4px] border-l-[4px] border-white rounded-tl-2xl"></span>
+
+          {/* Cantoneira Superior Direita */}
+          <span className="absolute -top-[1.5px] -right-[1.5px] w-9 h-9 border-t-[4px] border-r-[4px] border-white rounded-tr-2xl"></span>
+
+          {/* Cantoneira Inferior Esquerda */}
+          <span className="absolute -bottom-[1.5px] -left-[1.5px] w-9 h-9 border-b-[4px] border-l-[4px] border-white rounded-bl-2xl"></span>
+
+          {/* Cantoneira Inferior Direita */}
+          <span className="absolute -bottom-[1.5px] -right-[1.5px] w-9 h-9 border-b-[4px] border-r-[4px] border-white rounded-br-2xl"></span>
+        </div>
+
+        {/* Texto inferior auxiliar */}
+        <span className="text-white text-xs font-mono font-medium mt-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] text-center">
+          Alinhe o código no centro do quadro
+        </span>
+      </div>
+
+      {/* Loader de Inicialização com Retângulos Animados (100% Branco Puro e Corp.Vanguard sobre Fundo Cinza #212121) */}
+      {iniciando && !erroCamera && (
+        <div className="absolute inset-0 bg-[#212121] z-20 flex flex-col items-center justify-center select-none p-4">
+          <div className="flex flex-col items-center gap-2">
+            <img
+              src="/brand/corp-vanguard-wordmark-transparent.png?v=20"
+              alt="Corp.Vanguard"
+              className="w-48 sm:w-56 max-w-[80vw] object-contain"
+            />
+            <span className="text-white font-mono text-[11px] font-bold uppercase tracking-[0.3em]">
+              Trigger
+            </span>
+            <div className="loaderRectangle mt-2">
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
             </div>
+            <span className="font-mono text-[10px] text-white font-bold tracking-wider uppercase mt-1">
+              Iniciando câmera e lanterna...
+            </span>
           </div>
-
-          {/* Loader de Inicialização */}
-          {iniciando && !erroCamera && (
-            <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center text-white text-xs gap-3">
-              <RefreshCw className="w-8 h-8 text-red-500 animate-spin" />
-              <span className="font-bold tracking-wide">Iniciando câmera e lanterna...</span>
-            </div>
-          )}
-
-          {/* Alerta de Câmera Bloqueada com Botão de Ação Direta */}
-          {erroCamera && (
-            <div className="absolute inset-0 bg-zinc-950/95 p-5 flex flex-col items-center justify-center text-center gap-3">
-              <AlertCircle className="w-10 h-10 text-amber-400" />
-              <p className="text-xs text-zinc-300 max-w-xs">{erroCamera}</p>
-
-              <button
-                type="button"
-                onClick={iniciarCameraComPermissao}
-                className="mt-2 px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow-lg flex items-center gap-2 active:scale-95"
-              >
-                <Camera className="w-4 h-4" />
-                <span>Permitir e Iniciar Câmera</span>
-              </button>
-            </div>
-          )}
         </div>
+      )}
 
-        {/* CONTROLES: LANTERNA E ALTERNATIVA */}
-        <div className="mt-4 flex items-center justify-center gap-3">
-          {/* Botão de Lanterna (Torch) com controle físico real */}
+      {/* Alerta de Câmera Bloqueada com Botão de Ação Direta sobre Fundo Cinza #212121 */}
+      {erroCamera && (
+        <div className="absolute inset-0 bg-[#212121] p-5 flex flex-col items-center justify-center text-center gap-3 z-30">
+          <AlertCircle className="w-10 h-10 text-amber-400" />
+          <p className="text-xs text-zinc-100 max-w-xs font-medium">{erroCamera}</p>
+
           <button
             type="button"
-            onClick={() => alternarLanternaFisica(!lanternaAtiva, true)}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all active:scale-95 shadow-lg ${
-              lanternaAtiva
-                ? 'bg-amber-500 text-zinc-950 shadow-amber-500/30 ring-2 ring-amber-400 font-black'
-                : 'bg-zinc-900 border border-zinc-700 text-zinc-300 hover:text-white'
-            }`}
+            onClick={iniciarCameraComPermissao}
+            className="mt-2 px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-[2px] shadow-lg flex items-center gap-2 active:scale-95"
           >
-            {lanternaAtiva ? (
-              <>
-                <Zap className="w-4 h-4 fill-current text-zinc-950 animate-pulse" />
-                <span>Lanterna: LIGADA</span>
-              </>
-            ) : (
-              <>
-                <ZapOff className="w-4 h-4 text-zinc-400" />
-                <span>Ligar Lanterna</span>
-              </>
-            )}
-          </button>
-
-          {/* Opção de Digitar TAG (Fallback Industrial) */}
-          <button
-            type="button"
-            onClick={() => setModalTagManual(true)}
-            className="px-3.5 py-2.5 rounded-xl font-semibold text-xs bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 flex items-center gap-1.5"
-            title="Digitar TAG manualmente caso a câmera não leia"
-          >
-            <Keyboard className="w-3.5 h-3.5" />
-            <span>Digitar TAG</span>
+            <Camera className="w-4 h-4" />
+            <span>Permitir e Iniciar Câmera</span>
           </button>
         </div>
+      )}
+
+      {/* CONTROLES: LANTERNA E ALTERNATIVA */}
+      <div className="mt-auto relative z-20 pb-8 pt-3 flex items-center justify-center gap-3">
+        {/* Botão de Lanterna (Torch) com controle físico real */}
+        <button
+          type="button"
+          onClick={() => alternarLanternaFisica(!lanternaAtiva, true)}
+          className={`px-4 py-2.5 rounded-[2px] font-bold text-xs flex items-center gap-2 transition-all active:scale-95 shadow-lg ${
+            lanternaAtiva
+              ? 'bg-amber-500 text-zinc-950 shadow-amber-500/30 ring-2 ring-amber-400 font-black'
+              : 'bg-zinc-900/90 backdrop-blur-md border border-zinc-700 text-white hover:bg-zinc-800 font-bold'
+          }`}
+        >
+          {lanternaAtiva ? (
+            <>
+              <Zap className="w-4 h-4 fill-current text-zinc-950 animate-pulse" />
+              <span>Lanterna: LIGADA</span>
+            </>
+          ) : (
+            <>
+              <ZapOff className="w-4 h-4 text-zinc-200" />
+              <span>Ligar Lanterna</span>
+            </>
+          )}
+        </button>
+
+        {/* Opção de Digitar TAG (Fallback Industrial) */}
+        <button
+          type="button"
+          onClick={() => setModalTagManual(true)}
+          className="px-3.5 py-2.5 rounded-[2px] font-bold text-xs bg-zinc-900/90 backdrop-blur-md border border-zinc-700 text-white hover:bg-zinc-800 flex items-center gap-1.5 shadow-md"
+          title="Digitar TAG manualmente caso a câmera não leia"
+        >
+          <Keyboard className="w-3.5 h-3.5" />
+          <span>Digitar TAG</span>
+        </button>
       </div>
 
       {/* MODAL PARA DIGITAÇÃO MANUAL DE TAG */}
       {modalTagManual && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-xs w-full p-4 space-y-3 shadow-2xl">
+          <div className="bg-[#212121] border border-zinc-700 rounded-[2px] max-w-xs w-full p-4 space-y-3 shadow-2xl">
             <h3 className="text-xs font-bold text-white flex items-center gap-2">
               <Keyboard className="w-4 h-4 text-red-500" />
               Digitar TAG da Máquina
             </h3>
-            <p className="text-[11px] text-zinc-400">
+            <p className="text-xs text-zinc-200 font-medium">
               Digite a TAG gravada na placa de patrimônio do equipamento:
             </p>
             <input
@@ -391,20 +417,20 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
               value={tagDigitada}
               onChange={(e) => setTagDigitada(e.target.value.toUpperCase())}
               placeholder="Ex: MV3-ROB-04"
-              className="w-full bg-black border border-zinc-700 rounded-xl p-3 text-sm font-mono text-white placeholder-zinc-500 text-center uppercase tracking-wider focus:outline-none focus:border-red-500"
+              className="w-full bg-[#18181b] border border-zinc-700 rounded-[2px] p-3 text-sm font-mono text-white placeholder-zinc-400 text-center uppercase tracking-wider focus:outline-none focus:border-red-500"
             />
             <div className="flex gap-2 pt-1">
               <button
                 type="button"
                 onClick={() => setModalTagManual(false)}
-                className="flex-1 py-2.5 bg-zinc-800 text-zinc-400 font-bold text-xs rounded-xl"
+                className="flex-1 py-2.5 bg-zinc-800 text-zinc-200 font-bold text-xs rounded-[2px]"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleConfirmarTagManual}
-                className="flex-1 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-[2px] flex items-center justify-center gap-1.5"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>Confirmar</span>

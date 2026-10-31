@@ -26,7 +26,7 @@ export default function Home() {
         </div>
 
         {/* Banner do Módulo do Operador (Etapa 04 - Destaque) */}
-        <div className="mt-6 bg-gradient-to-r from-rose-950/40 via-slate-900 to-slate-900 border border-rose-500/30 rounded-2xl p-5 relative overflow-hidden shadow-xl">
+        <div className="mt-6 bg-gradient-to-r from-rose-950/40 via-slate-900 to-slate-900 border border-rose-500/30 rounded-[2px] p-5 relative overflow-hidden shadow-xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 text-[11px] font-bold tracking-wide uppercase border border-rose-500/30">
@@ -43,7 +43,7 @@ export default function Home() {
 
             <button
               onClick={() => navigate('/operador')}
-              className="py-3.5 px-6 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-rose-600/30 active:scale-95 transition-all shrink-0"
+              className="py-3.5 px-6 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-[2px] text-sm flex items-center justify-center gap-2 shadow-lg shadow-rose-600/30 active:scale-95 transition-all shrink-0"
             >
               <QrCode className="w-5 h-5" />
               <span>Abrir Chamado ($T_0$)</span>
@@ -62,10 +62,10 @@ export default function Home() {
             {/* Card NOVO: Totem de Posto / Simulador de QR Code */}
             <div
               onClick={() => navigate('/totem-qr')}
-              className="bg-gradient-to-br from-zinc-900 to-black border-2 border-red-500/50 hover:border-red-400 p-4 rounded-xl cursor-pointer transition-all hover:shadow-red-900/30 hover:shadow-xl group col-span-1 sm:col-span-2"
+              className="bg-gradient-to-br from-zinc-900 to-black border-2 border-red-500/50 hover:border-red-400 p-4 rounded-[2px] cursor-pointer transition-all hover:shadow-red-900/30 hover:shadow-xl group col-span-1 sm:col-span-2"
             >
               <div className="flex items-start justify-between">
-                <div className="p-2.5 bg-red-600/20 border border-red-500/40 rounded-lg text-red-400">
+                <div className="p-2.5 bg-red-600/20 border border-red-500/40 rounded-[2px] text-red-400">
                   <QrCode className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 bg-red-600 text-white rounded uppercase tracking-wider">
@@ -81,76 +81,76 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Card 1: Operador (Concluído) */}
+            {/* Card 1: Vanguard Trigger */}
             <div
               onClick={() => navigate('/operador')}
-              className="bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 p-4 rounded-xl cursor-pointer transition-all hover:bg-slate-900 group"
+              className="bg-slate-900/80 border border-slate-800 hover:border-red-500/50 p-4 rounded-[2px] cursor-pointer transition-all hover:bg-slate-900 group"
             >
               <div className="flex items-start justify-between">
-                <div className="p-2.5 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400">
+                <div className="p-2.5 bg-rose-500/10 border border-rose-500/20 rounded-[2px] text-rose-400">
                   <QrCode className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded">
-                  Etapa 04 • Ativo
+                  Vanguard Trigger • Ativo
                 </span>
               </div>
-              <h4 className="font-bold text-sm text-white mt-3 group-hover:text-indigo-400 transition-colors">
-                Terminal Operador (Mobile PWA)
+              <h4 className="font-bold text-sm text-white mt-3 group-hover:text-red-400 transition-colors">
+                Vanguard Trigger (Terminal Operador)
               </h4>
               <p className="text-xs text-slate-400 mt-1">
-                Leitura de QR Code, auto-preenchimento e abertura de OS sem senha.
+                Leitura de QR Code, auto-preenchimento por Identifiant, foto, gravação de áudio e flag de criticidade.
               </p>
             </div>
 
-            {/* Card 2: Cockpit PCM & TL (Ativo) */}
+            {/* Card 2: Vanguard Central */}
             <div
-              onClick={() => navigate('/cockpit')}
-              className="bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 p-4 rounded-xl cursor-pointer transition-all hover:bg-slate-900 group"
+              onClick={() => navigate('/central')}
+              className="bg-slate-900/80 border border-slate-800 hover:border-red-500/50 p-4 rounded-[2px] cursor-pointer transition-all hover:bg-slate-900 group"
             >
               <div className="flex items-start justify-between">
-                <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-indigo-400">
+                <div className="p-2.5 bg-red-500/10 border border-red-500/20 rounded-[2px] text-red-400">
                   <LayoutDashboard className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded">
-                  Etapa 05 • Ativo
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded">
+                  Vanguard Central • Ativo
                 </span>
               </div>
-              <h4 className="font-bold text-sm text-white mt-3 group-hover:text-indigo-400 transition-colors">
-                Cockpit Manutenção & TL
+              <h4 className="font-bold text-sm text-white mt-3 group-hover:text-red-400 transition-colors">
+                Vanguard Central (Gestão, Triagem e Ativos)
               </h4>
               <p className="text-xs text-slate-400 mt-1">
-                Painel em tempo real, matriz GUT, alarme sonoro e atribuição $T_1$.
+                Matriz de priorização, monitoramento de SLA, gerador de etiquetas QR, prontuário histórico e métricas.
               </p>
             </div>
 
-            {/* Card 3: Mantenedor em Campo (Concluído) */}
+            {/* Card 3: Vanguard Field */}
             <div
               onClick={() => navigate('/mantenedor')}
-              className="bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 p-4 rounded-xl cursor-pointer transition-all hover:bg-slate-900 group"
+              className="bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 p-4 rounded-[2px] cursor-pointer transition-all hover:bg-slate-900 group"
             >
               <div className="flex items-start justify-between">
-                <div className="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-lg text-blue-400">
+                <div className="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-[2px] text-blue-400">
                   <Wrench className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded">
-                  Etapa 06 • Ativo
+                  Vanguard Field • Ativo
                 </span>
               </div>
               <h4 className="font-bold text-sm text-white mt-3 group-hover:text-indigo-400 transition-colors">
-                Terminal Mantenedor (Mobile)
+                Vanguard Field (Terminal Mantenedor)
               </h4>
               <p className="text-xs text-slate-400 mt-1">
-                Registro de chegada ($T_2$), pausas, árvore de falhas e encerramento ($T_3$).
+                Registro de chegada ($T_2$), pausas operacionais, árvore de falhas, peças e liberação ($T_3$).
               </p>
             </div>
 
             {/* Card 4: Almoxarifado & Estoque (Concluído) */}
             <div
               onClick={() => navigate('/almoxarifado')}
-              className="bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 p-4 rounded-xl cursor-pointer transition-all hover:bg-slate-900 group"
+              className="bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 p-4 rounded-[2px] cursor-pointer transition-all hover:bg-slate-900 group"
             >
               <div className="flex items-start justify-between">
-                <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-400">
+                <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-[2px] text-amber-400">
                   <Boxes className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded">
@@ -168,10 +168,10 @@ export default function Home() {
             {/* Card 5: Motor de Indicadores & Métricas Industriais (Concluído) */}
             <div
               onClick={() => navigate('/indicadores')}
-              className="bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 p-4 rounded-xl cursor-pointer transition-all hover:bg-slate-900 group sm:col-span-2"
+              className="bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 p-4 rounded-[2px] cursor-pointer transition-all hover:bg-slate-900 group sm:col-span-2"
             >
               <div className="flex items-start justify-between">
-                <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-indigo-400">
+                <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-[2px] text-indigo-400">
                   <BarChart3 className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded">

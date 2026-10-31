@@ -19,6 +19,8 @@ function App() {
         <Route path="/abrir-chamado" element={<OperadorChamado />} />
         <Route path="/abrir-chamado/:token" element={<OperadorChamado />} />
         <Route path="/cockpit" element={<CockpitPCM />} />
+        <Route path="/central" element={<CockpitPCM />} />
+        <Route path="/vanguard-central" element={<CockpitPCM />} />
         <Route path="/painel-manutencao" element={<CockpitPCM />} />
         <Route path="/mantenedor" element={<MantenedorPainel />} />
         <Route path="/tecnico" element={<MantenedorPainel />} />

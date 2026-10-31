@@ -138,21 +138,21 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
             <Camera className="w-4 h-4 text-red-500" />
             Fotografar Peça / Alarme
           </h3>
-          <p className="text-[10px] text-zinc-400">
+          <p className="text-xs text-zinc-200 font-medium">
             {fotoCongelada ? 'Confira o enquadramento da evidência' : 'Aponte para a falha e aperte o disparador'}
           </p>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="w-7 h-7 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white"
+          className="w-7 h-7 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-white hover:bg-zinc-800"
         >
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
 
       {/* Viewfinder Central */}
-      <div className="flex-1 my-3 flex items-center justify-center overflow-hidden rounded-2xl bg-zinc-950 border border-zinc-800 relative">
+      <div className="flex-1 my-3 flex items-center justify-center overflow-hidden rounded-[2px] bg-zinc-950 border border-zinc-800 relative">
         {fotoCongelada ? (
           <img
             src={fotoCongelada}
@@ -169,7 +169,7 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
               className="w-full h-full object-cover"
             />
             {/* Retículo Guia */}
-            <div className="absolute inset-8 border border-white/20 rounded-xl pointer-events-none flex items-center justify-center">
+            <div className="absolute inset-8 border border-white/20 rounded-[2px] pointer-events-none flex items-center justify-center">
               <span className="text-[9px] font-mono text-white/40 tracking-wider uppercase">
                 Área de Foco
               </span>
@@ -184,7 +184,7 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="mt-2 px-4 py-2 bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center gap-2"
+              className="mt-2 px-4 py-2 bg-zinc-800 text-white rounded-[2px] text-xs font-bold flex items-center gap-2"
             >
               <ImageIcon className="w-4 h-4" />
               <span>Selecionar da Galeria</span>
@@ -200,7 +200,7 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
             <button
               type="button"
               onClick={() => setFotoCongelada(null)}
-              className="flex-1 py-3 bg-zinc-900 border border-zinc-700 text-zinc-300 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 active:scale-95"
+              className="flex-1 py-3 bg-zinc-900 border border-zinc-700 text-white font-bold text-xs rounded-[2px] flex items-center justify-center gap-1.5 active:scale-95"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Tirar Outra</span>
@@ -208,7 +208,7 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
             <button
               type="button"
               onClick={confirmarFoto}
-              className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-1.5 active:scale-95"
+              className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-[2px] shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-1.5 active:scale-95"
             >
               <Check className="w-4 h-4 stroke-[3]" />
               <span>Usar Esta Foto</span>
@@ -219,7 +219,7 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white"
+              className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white hover:text-zinc-200"
               title="Escolher da Galeria"
             >
               <ImageIcon className="w-4 h-4" />

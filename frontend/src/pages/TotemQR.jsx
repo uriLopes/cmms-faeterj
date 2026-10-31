@@ -131,7 +131,7 @@ export default function TotemQR() {
         <button
           type="button"
           onClick={toggleFullscreen}
-          className="text-zinc-500 hover:text-white p-2.5 rounded-xl bg-zinc-950/80 hover:bg-zinc-900 border border-zinc-800 transition-all active:scale-95 cursor-pointer shadow-lg"
+          className="text-zinc-500 hover:text-white p-2.5 rounded-[2px] bg-zinc-950/80 hover:bg-zinc-900 border border-zinc-800 transition-all active:scale-95 cursor-pointer shadow-lg"
           title="Expandir para Tela Cheia (Tecla F)"
         >
           {isFullscreen ? (
@@ -156,7 +156,7 @@ export default function TotemQR() {
           </div>
 
           {/* QUADRO DO QR CODE COM BORDA VERMELHA EXATA DO CANVA */}
-          <div className="p-3 bg-red-600 rounded-lg shadow-[0_0_40px_rgba(220,38,38,0.35)]">
+          <div className="p-3 bg-red-600 rounded-[2px] shadow-[0_0_40px_rgba(220,38,38,0.35)]">
             <div className="bg-white p-3 rounded flex flex-col items-center">
               {/* CANVAS DO QR CODE */}
               <canvas
@@ -182,7 +182,7 @@ export default function TotemQR() {
                 key={maq.id}
                 type="button"
                 onClick={() => setMaquinaAtiva(maq)}
-                className={`w-full p-4 rounded-2xl text-left transition-all duration-150 active:scale-98 cursor-pointer ${
+                className={`w-full p-4 rounded-[2px] text-left transition-all duration-150 active:scale-98 cursor-pointer ${
                   isSelected
                     ? 'border-2 border-red-600 bg-[#1e0a0d] shadow-[0_0_25px_rgba(220,38,38,0.25)] ring-1 ring-red-600/40'
                     : 'border border-zinc-900 bg-[#111113] hover:bg-[#18181b] hover:border-zinc-800'
@@ -205,8 +205,8 @@ export default function TotemQR() {
 
       {/* NOTIFICAÇÃO FLUTUANTE EM TEMPO REAL QUANDO O OPERADOR DISPARAR T0 */}
       {ultimoDisparo && (
-        <div className="fixed bottom-6 z-50 bg-emerald-950/90 border-2 border-emerald-500 rounded-2xl p-4 shadow-2xl flex items-center gap-3.5 animate-bounce">
-          <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+        <div className="fixed bottom-6 z-50 bg-emerald-950/90 border-2 border-emerald-500 rounded-[2px] p-4 shadow-2xl flex items-center gap-3.5 animate-bounce">
+          <div className="w-9 h-9 rounded-[2px] bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <div className="font-mono text-xs">

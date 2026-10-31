@@ -231,7 +231,7 @@ export default function AlmoxarifadoPainel() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/')}
-              className="p-1.5 -ml-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+              className="p-1.5 -ml-1.5 text-slate-400 hover:text-white rounded-[2px] hover:bg-slate-800 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -260,7 +260,7 @@ export default function AlmoxarifadoPainel() {
 
         {/* Notificação Toast Flutuante */}
         {toastAlerta && (
-          <div className="mt-4 bg-gradient-to-r from-amber-950/80 to-slate-900 border border-amber-500/40 p-3 rounded-xl flex items-center justify-between text-xs text-amber-200 shadow-xl animate-fade-in-up">
+          <div className="mt-4 bg-gradient-to-r from-amber-950/80 to-slate-900 border border-amber-500/40 p-3 rounded-[2px] flex items-center justify-between text-xs text-amber-200 shadow-xl animate-fade-in-up">
             <div className="flex items-center gap-2">
               <Bell className="w-4 h-4 text-amber-400 animate-bounce" />
               <span className="font-semibold">{toastAlerta}</span>
@@ -273,7 +273,7 @@ export default function AlmoxarifadoPainel() {
 
         {/* Cards de Métricas / Indicadores do Almoxarifado */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-          <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-xl">
+          <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-[2px]">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
               <Boxes className="w-3.5 h-3.5 text-indigo-400" />
               Total de Itens
@@ -289,7 +289,7 @@ export default function AlmoxarifadoPainel() {
               setAbaAtiva('catalogo');
               setApenasCritico(true);
             }}
-            className={`border p-3.5 rounded-xl cursor-pointer transition-all ${
+            className={`border p-3.5 rounded-[2px] cursor-pointer transition-all ${
               pecasCriticas.length > 0
                 ? 'bg-rose-950/30 border-rose-500/40 hover:border-rose-400'
                 : 'bg-slate-900/80 border-slate-800'
@@ -310,7 +310,7 @@ export default function AlmoxarifadoPainel() {
 
           <div
             onClick={() => setAbaAtiva('requisicoes')}
-            className={`border p-3.5 rounded-xl cursor-pointer transition-all ${
+            className={`border p-3.5 rounded-[2px] cursor-pointer transition-all ${
               requisicoesPendentes.length > 0
                 ? 'bg-amber-950/30 border-amber-500/40 hover:border-amber-400'
                 : 'bg-slate-900/80 border-slate-800'
@@ -326,7 +326,7 @@ export default function AlmoxarifadoPainel() {
             <span className="text-[10px] text-slate-400">Aguardando entrega física</span>
           </div>
 
-          <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-xl">
+          <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-[2px]">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
               Baixas Realizadas
@@ -395,7 +395,7 @@ export default function AlmoxarifadoPainel() {
                 Carregando requisições do chão de fábrica...
               </div>
             ) : requisicoes.length === 0 ? (
-              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-500">
+              <div className="bg-slate-900/60 border border-slate-800 rounded-[2px] p-8 text-center text-xs text-slate-500">
                 Nenhuma peça foi requisitada em ordens de serviço até o momento.
               </div>
             ) : (
@@ -407,7 +407,7 @@ export default function AlmoxarifadoPainel() {
                   return (
                     <div
                       key={reqItem.id}
-                      className={`rounded-2xl border p-4 transition-all shadow-md ${
+                      className={`rounded-[2px] border p-4 transition-all shadow-md ${
                         isPendente
                           ? 'bg-slate-900 border-amber-500/40 hover:border-amber-400'
                           : 'bg-slate-900/50 border-slate-800/80 opacity-80'
@@ -491,7 +491,7 @@ export default function AlmoxarifadoPainel() {
                             <button
                               disabled={processando || estoqueInsuficiente}
                               onClick={() => handleConfirmarBaixa(reqItem.id)}
-                              className={`py-2.5 px-4 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg active:scale-95 transition-all ${
+                              className={`py-2.5 px-4 rounded-[2px] text-xs font-bold flex items-center gap-1.5 shadow-lg active:scale-95 transition-all ${
                                 estoqueInsuficiente
                                   ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
                                   : 'bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white shadow-amber-600/25'
@@ -501,7 +501,7 @@ export default function AlmoxarifadoPainel() {
                               <span>{estoqueInsuficiente ? 'Estoque Zerado' : 'Confirmar Entrega & Baixa'}</span>
                             </button>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-bold">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-bold">
                               <Check className="w-4 h-4" />
                               <span>Baixado do Estoque</span>
                             </span>
@@ -528,7 +528,7 @@ export default function AlmoxarifadoPainel() {
                   value={busca}
                   onChange={(e) => setBusca(e.target.value)}
                   placeholder="Buscar sobressalente por código SAP ou descrição..."
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-[2px] pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -536,7 +536,7 @@ export default function AlmoxarifadoPainel() {
                 <select
                   value={filtroCategoria}
                   onChange={(e) => setFiltroCategoria(e.target.value)}
-                  className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                  className="bg-slate-900 border border-slate-800 rounded-[2px] px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
                 >
                   <option value="">Todas as Categorias</option>
                   <option value="Pneumática">Pneumática</option>
@@ -548,7 +548,7 @@ export default function AlmoxarifadoPainel() {
                 <button
                   type="button"
                   onClick={() => setApenasCritico(!apenasCritico)}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-2 rounded-[2px] text-xs font-bold border transition-all flex items-center gap-1.5 ${
                     apenasCritico
                       ? 'bg-rose-500/20 text-rose-300 border-rose-500/50'
                       : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
@@ -562,7 +562,7 @@ export default function AlmoxarifadoPainel() {
 
             {/* Grid / Tabela de Sobressalentes */}
             {pecasFiltradas.length === 0 ? (
-              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-500">
+              <div className="bg-slate-900/60 border border-slate-800 rounded-[2px] p-8 text-center text-xs text-slate-500">
                 Nenhuma peça encontrada com os critérios informados.
               </div>
             ) : (
@@ -577,7 +577,7 @@ export default function AlmoxarifadoPainel() {
                   return (
                     <div
                       key={peca.id}
-                      className={`bg-slate-900 border rounded-2xl p-4 space-y-3 transition-all ${
+                      className={`bg-slate-900 border rounded-[2px] p-4 space-y-3 transition-all ${
                         isCritico
                           ? 'border-rose-500/40 hover:border-rose-400 shadow-rose-950/20'
                           : 'border-slate-800 hover:border-slate-700'
@@ -646,7 +646,7 @@ export default function AlmoxarifadoPainel() {
                             setPecaEntrada(peca);
                             setModalEntrada(true);
                           }}
-                          className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold rounded-lg flex items-center gap-1 text-[11px] active:scale-95 transition-all"
+                          className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold rounded-[2px] flex items-center gap-1 text-[11px] active:scale-95 transition-all"
                         >
                           <PackagePlus className="w-3.5 h-3.5 text-amber-400" />
                           <span>+ Entrada</span>
@@ -664,7 +664,7 @@ export default function AlmoxarifadoPainel() {
       {/* MODAL: ENTRADA DE ESTOQUE / REPOSIÇÃO */}
       {modalEntrada && pecaEntrada && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-4 shadow-2xl">
+          <div className="bg-slate-900 border border-slate-700 rounded-[2px] max-w-md w-full p-4 sm:p-5 space-y-4 shadow-2xl">
             <div className="flex justify-between items-start border-b border-slate-800 pb-3">
               <div>
                 <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider">
@@ -694,7 +694,7 @@ export default function AlmoxarifadoPainel() {
                   <button
                     type="button"
                     onClick={() => setQtdEntrada(Math.max(1, qtdEntrada - 1))}
-                    className="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-sm"
+                    className="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-[2px] text-sm"
                   >
                     -
                   </button>
@@ -703,12 +703,12 @@ export default function AlmoxarifadoPainel() {
                     min="1"
                     value={qtdEntrada}
                     onChange={(e) => setQtdEntrada(Math.max(1, Number(e.target.value)))}
-                    className="w-20 bg-slate-950 border border-slate-700 rounded-lg py-2 text-center text-white font-mono font-bold focus:outline-none focus:border-amber-500"
+                    className="w-20 bg-slate-950 border border-slate-700 rounded-[2px] py-2 text-center text-white font-mono font-bold focus:outline-none focus:border-amber-500"
                   />
                   <button
                     type="button"
                     onClick={() => setQtdEntrada(qtdEntrada + 1)}
-                    className="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-sm"
+                    className="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-[2px] text-sm"
                   >
                     +
                   </button>
@@ -730,7 +730,7 @@ export default function AlmoxarifadoPainel() {
                   value={obsEntrada}
                   onChange={(e) => setObsEntrada(e.target.value)}
                   placeholder="Ex: NF 104423 - Lote reposição Festo Stellantis"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-[2px] p-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-500"
                 />
               </div>
             </div>
@@ -739,7 +739,7 @@ export default function AlmoxarifadoPainel() {
               <button
                 type="button"
                 onClick={() => setModalEntrada(false)}
-                className="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs"
+                className="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-[2px] text-xs"
               >
                 Cancelar
               </button>
@@ -747,7 +747,7 @@ export default function AlmoxarifadoPainel() {
                 type="button"
                 disabled={processando}
                 onClick={handleConfirmarEntrada}
-                className="w-1/2 py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-xl text-xs shadow-lg shadow-amber-600/20 active:scale-95 transition-all"
+                className="w-1/2 py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-[2px] text-xs shadow-lg shadow-amber-600/20 active:scale-95 transition-all"
               >
                 {processando ? 'Gravando...' : 'Confirmar Entrada'}
               </button>
