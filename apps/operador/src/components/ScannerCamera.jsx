@@ -8,10 +8,11 @@ import {
   Camera,
   ShieldAlert,
   Keyboard,
-  Check
+  Check,
+  Edit2
 } from 'lucide-react';
 
-export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }) {
+export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, onAbrirModalOperador }) {
   const [iniciando, setIniciando] = useState(true);
   const [erroCamera, setErroCamera] = useState(null);
   const [inseguro, setInseguro] = useState(false);
@@ -291,6 +292,24 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula }
       <div className="absolute inset-0 w-full h-full overflow-hidden bg-[#212121]">
         <div id={containerId} className="w-full h-full object-cover"></div>
       </div>
+
+      {/* BOTÃO DO OPERADOR FLUTUANTE NO TOPO (SOBREPOSTO À MÁSCARA CINZA ESTENDIDA) */}
+      {onAbrirModalOperador && (
+        <div className="absolute top-0 left-0 right-0 z-30 pt-3 pb-1 px-4 flex justify-center pointer-events-auto">
+          <button
+            type="button"
+            onClick={onAbrirModalOperador}
+            className="cursor-pointer inline-flex items-center justify-center gap-2 py-1.5 px-4 rounded-[2px] bg-zinc-900/90 backdrop-blur-md hover:bg-zinc-800 active:scale-95 border border-zinc-700 transition-all text-xs shadow-lg"
+            title="Toque para validar ou alterar Identifiant da fábrica"
+          >
+            <span className="font-semibold text-white text-xs">
+              Operador: <strong className="text-white font-bold">{nomeOperador}</strong>{' '}
+              <span className="text-zinc-200 font-mono text-[11px]">({matricula})</span>
+            </span>
+            <Edit2 className="w-3.5 h-3.5 text-zinc-200 ml-0.5" />
+          </button>
+        </div>
+      )}
 
       {/* RETÍCULO TRANSPARENTE COM CANTONEIRAS BRANCAS ARREDONDADAS E MÁSCARA CINZA EM TODA A TELA */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10 p-4 overflow-hidden">

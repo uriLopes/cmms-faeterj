@@ -423,26 +423,6 @@ export default function App() {
           </div>
         </div>
       )}
-      {/* HEADER SUPERIOR (SOMENTE A LOGO, SEM BORDAS) */}
-      {/* HEADER SUPERIOR (IDENTIFICAÇÃO DO OPERADOR EM BLOCO ESTENDIDO COM CINZA TRANSLÚCIDO #212121) */}
-      {/* HEADER SUPERIOR: EXIBIDO APENAS NO SCANNER */}
-      {tela === 'scanner' && (
-        <header className="bg-transparent relative z-20 pt-3 pb-1 px-4 shrink-0 border-none flex justify-center">
-          <button
-            type="button"
-            onClick={abrirModalOperador}
-            className="cursor-pointer inline-flex items-center justify-center gap-2 py-1.5 px-4 rounded-[2px] bg-zinc-900/90 backdrop-blur-md hover:bg-zinc-800 active:scale-95 border border-zinc-700 transition-all text-xs shadow-lg"
-            title="Toque para validar ou alterar Identifiant da fábrica"
-          >
-            <span className="font-semibold text-white text-xs">
-              Operador: <strong className="text-white font-bold">{nomeOperador}</strong>{' '}
-              <span className="text-zinc-200 font-mono text-[11px]">({identifiant})</span>
-            </span>
-            <Edit2 className="w-3.5 h-3.5 text-zinc-200 ml-0.5" />
-          </button>
-        </header>
-      )}
-
       {/* MODAL ULTRA-MINIMALISTA DE IDENTIFIANT (3 ESTADOS: REPOUSO, SUCESSO VERDE #10B981, ERRO VERMELHO #EF4444) */}
       {modalEditarOperador && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
@@ -533,6 +513,7 @@ export default function App() {
           onScanSuccess={handleQRScanned}
           nomeOperador={nomeOperador}
           matricula={identifiant}
+          onAbrirModalOperador={abrirModalOperador}
         />
       )}
 
