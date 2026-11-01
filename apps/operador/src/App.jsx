@@ -32,6 +32,10 @@ import ScannerCamera from './components/ScannerCamera';
 import CameraFotoModal from './components/CameraFotoModal';
 import VanguardLogo from './components/VanguardLogo';
 
+// PNGs 1x1 rasterizados base64 para blindagem contra o filtro Auto Dark Mode do Blink/Android
+const PNG_BG_CONTAINER_262629 = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNQU9MEAADrAHY1t8gwAAAAAElFTkSuQmCC)';
+const PNG_BG_SELECTED_36363A = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMwM7MCAAFMAKdxj4gVAAAAAElFTkSuQmCC)';
+
 export default function App() {
   // 0. Splash Screen inicial com animação Uiverse.io (#EF4444)
   const [splashVisivel, setSplashVisivel] = useState(true);
@@ -783,10 +787,24 @@ export default function App() {
           </div>
 
           {/* CORPO DO HUD: SINTOMAS E IMPACTO COM ESPAÇAMENTOS GENEROSOS E HARMONIOSOS (ÁREA INTERNA ROLÁVEL COM NO-SCROLLBAR) */}
-          <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar p-4 sm:p-5 pt-6 sm:pt-7 pb-36 flex flex-col gap-7 sm:gap-8 max-w-md mx-auto w-full">
+          <div
+            className="flex-1 min-h-0 overflow-y-auto no-scrollbar p-4 sm:p-5 pt-6 sm:pt-7 pb-36 flex flex-col gap-7 sm:gap-8 max-w-md mx-auto w-full"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehaviorY: 'contain'
+            }}
+          >
             {/* 1. SEÇÃO POSSÍVEL PROBLEMA (PENUMBRA RADIO GROUP BY UIVERSE-ASTRONAUT) */}
             <fieldset
-              style={{ background: '#2C2C2E', backgroundColor: '#2C2C2E', border: '1px solid rgba(255, 255, 255, 0.16)', boxShadow: 'none' }}
+              style={{
+                backgroundColor: '#262629',
+                backgroundImage: PNG_BG_CONTAINER_262629,
+                backgroundRepeat: 'repeat',
+                border: '1px solid rgba(255, 255, 255, 0.16)',
+                boxShadow: 'none'
+              }}
               className="penumbra-radio-group"
             >
               <legend className="penumbra-radio-group__legend">Possível Problema</legend>
@@ -801,8 +819,9 @@ export default function App() {
                     role="button"
                     tabIndex={0}
                     style={{
-                      background: isChecked ? '#363638' : 'transparent',
-                      backgroundColor: isChecked ? '#363638' : 'transparent',
+                      backgroundColor: isChecked ? '#36363A' : 'transparent',
+                      backgroundImage: isChecked ? PNG_BG_SELECTED_36363A : 'none',
+                      backgroundRepeat: 'repeat',
                       border: isChecked ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid transparent'
                     }}
                     className={`penumbra-radio ${isChecked ? 'is-selected' : ''}`}
@@ -828,7 +847,7 @@ export default function App() {
                             width: '6px',
                             height: '6px',
                             borderRadius: '999px',
-                            backgroundColor: '#363638',
+                            backgroundColor: '#36363A',
                             forcedColorAdjust: 'none'
                           }}
                         />
@@ -845,7 +864,13 @@ export default function App() {
 
             {/* 2. SEÇÃO IMPACTO DO PROBLEMA NA LINHA (PENUMBRA RADIO GROUP) */}
             <fieldset
-              style={{ background: '#2C2C2E', backgroundColor: '#2C2C2E', border: '1px solid rgba(255, 255, 255, 0.16)', boxShadow: 'none' }}
+              style={{
+                backgroundColor: '#262629',
+                backgroundImage: PNG_BG_CONTAINER_262629,
+                backgroundRepeat: 'repeat',
+                border: '1px solid rgba(255, 255, 255, 0.16)',
+                boxShadow: 'none'
+              }}
               className="penumbra-radio-group"
             >
               <legend className="penumbra-radio-group__legend">Impacto do Problema na Linha</legend>
@@ -855,8 +880,9 @@ export default function App() {
                 role="button"
                 tabIndex={0}
                 style={{
-                  background: statusImpacto === 'maquina_parada' ? '#363638' : 'transparent',
-                  backgroundColor: statusImpacto === 'maquina_parada' ? '#363638' : 'transparent',
+                  backgroundColor: statusImpacto === 'maquina_parada' ? '#36363A' : 'transparent',
+                  backgroundImage: statusImpacto === 'maquina_parada' ? PNG_BG_SELECTED_36363A : 'none',
+                  backgroundRepeat: 'repeat',
                   border: statusImpacto === 'maquina_parada' ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid transparent'
                 }}
                 className={`penumbra-radio ${statusImpacto === 'maquina_parada' ? 'is-selected' : ''}`}
@@ -905,8 +931,9 @@ export default function App() {
                 role="button"
                 tabIndex={0}
                 style={{
-                  background: statusImpacto === 'operando_com_restricao' ? '#363638' : 'transparent',
-                  backgroundColor: statusImpacto === 'operando_com_restricao' ? '#363638' : 'transparent',
+                  backgroundColor: statusImpacto === 'operando_com_restricao' ? '#36363A' : 'transparent',
+                  backgroundImage: statusImpacto === 'operando_com_restricao' ? PNG_BG_SELECTED_36363A : 'none',
+                  backgroundRepeat: 'repeat',
                   border: statusImpacto === 'operando_com_restricao' ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid transparent'
                 }}
                 className={`penumbra-radio ${statusImpacto === 'operando_com_restricao' ? 'is-selected' : ''}`}
@@ -933,7 +960,7 @@ export default function App() {
                         width: '6px',
                         height: '6px',
                         borderRadius: '999px',
-                        backgroundColor: '#363638',
+                        backgroundColor: '#36363A',
                         forcedColorAdjust: 'none'
                       }}
                     />
@@ -955,8 +982,9 @@ export default function App() {
                 role="button"
                 tabIndex={0}
                 style={{
-                  background: statusImpacto === 'melhoria_estetica' ? '#363638' : 'transparent',
-                  backgroundColor: statusImpacto === 'melhoria_estetica' ? '#363638' : 'transparent',
+                  backgroundColor: statusImpacto === 'melhoria_estetica' ? '#36363A' : 'transparent',
+                  backgroundImage: statusImpacto === 'melhoria_estetica' ? PNG_BG_SELECTED_36363A : 'none',
+                  backgroundRepeat: 'repeat',
                   border: statusImpacto === 'melhoria_estetica' ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid transparent'
                 }}
                 className={`penumbra-radio ${statusImpacto === 'melhoria_estetica' ? 'is-selected' : ''}`}
@@ -983,7 +1011,7 @@ export default function App() {
                         width: '6px',
                         height: '6px',
                         borderRadius: '999px',
-                        backgroundColor: '#363638',
+                        backgroundColor: '#36363A',
                         forcedColorAdjust: 'none'
                       }}
                     />

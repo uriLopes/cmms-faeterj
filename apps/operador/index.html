@@ -75,46 +75,73 @@
       }
       .loaderRectangle div {
         width: 9px;
-        height: 16px;
+        height: 34px;
         background: #FFFFFF !important;
         border-radius: 2px;
         box-shadow: none !important;
-        opacity: 1 !important;
+        transform-origin: center;
+        -webkit-transform-origin: center;
+        will-change: transform, opacity;
       }
       .loaderRectangle div:nth-child(1) {
-        animation: rectangleOneAnim 0.9s ease-in-out infinite -0.4s !important;
+        -webkit-animation: loaderBarAnim1 0.9s ease-in-out infinite 0.1s !important;
+        animation: loaderBarAnim1 0.9s ease-in-out infinite 0.1s !important;
       }
       .loaderRectangle div:nth-child(2) {
-        animation: rectangleTwoAnim 0.9s ease-in-out infinite -0.3s !important;
+        -webkit-animation: loaderBarAnim2 0.9s ease-in-out infinite 0.2s !important;
+        animation: loaderBarAnim2 0.9s ease-in-out infinite 0.2s !important;
       }
       .loaderRectangle div:nth-child(3) {
-        animation: rectangleThreeAnim 0.9s ease-in-out infinite -0.2s !important;
+        -webkit-animation: loaderBarAnim3 0.9s ease-in-out infinite 0.3s !important;
+        animation: loaderBarAnim3 0.9s ease-in-out infinite 0.3s !important;
       }
       .loaderRectangle div:nth-child(4) {
-        animation: rectangleFourAnim 0.9s ease-in-out infinite -0.1s !important;
+        -webkit-animation: loaderBarAnim4 0.9s ease-in-out infinite 0.4s !important;
+        animation: loaderBarAnim4 0.9s ease-in-out infinite 0.4s !important;
       }
       .loaderRectangle div:nth-child(5) {
-        animation: rectangleFiveAnim 0.9s ease-in-out infinite 0s !important;
+        -webkit-animation: loaderBarAnim5 0.9s ease-in-out infinite 0.5s !important;
+        animation: loaderBarAnim5 0.9s ease-in-out infinite 0.5s !important;
       }
-      @keyframes rectangleOneAnim {
-        0%, 100% { height: 14px; opacity: 0.5; }
-        50% { height: 32px; opacity: 1; }
+      @-webkit-keyframes loaderBarAnim1 {
+        0%, 100% { -webkit-transform: scaleY(0.42); opacity: 0.4; }
+        50% { -webkit-transform: scaleY(0.85); opacity: 1; }
       }
-      @keyframes rectangleTwoAnim {
-        0%, 100% { height: 14px; opacity: 0.5; }
-        50% { height: 42px; opacity: 1; }
+      @keyframes loaderBarAnim1 {
+        0%, 100% { transform: scaleY(0.42); opacity: 0.4; }
+        50% { transform: scaleY(0.85); opacity: 1; }
       }
-      @keyframes rectangleThreeAnim {
-        0%, 100% { height: 14px; opacity: 0.5; }
-        50% { height: 52px; opacity: 1; }
+      @-webkit-keyframes loaderBarAnim2 {
+        0%, 100% { -webkit-transform: scaleY(0.42); opacity: 0.4; }
+        50% { -webkit-transform: scaleY(1.05); opacity: 1; }
       }
-      @keyframes rectangleFourAnim {
-        0%, 100% { height: 14px; opacity: 0.5; }
-        50% { height: 42px; opacity: 1; }
+      @keyframes loaderBarAnim2 {
+        0%, 100% { transform: scaleY(0.42); opacity: 0.4; }
+        50% { transform: scaleY(1.05); opacity: 1; }
       }
-      @keyframes rectangleFiveAnim {
-        0%, 100% { height: 14px; opacity: 0.5; }
-        50% { height: 32px; opacity: 1; }
+      @-webkit-keyframes loaderBarAnim3 {
+        0%, 100% { -webkit-transform: scaleY(0.42); opacity: 0.4; }
+        50% { -webkit-transform: scaleY(1.28); opacity: 1; }
+      }
+      @keyframes loaderBarAnim3 {
+        0%, 100% { transform: scaleY(0.42); opacity: 0.4; }
+        50% { transform: scaleY(1.28); opacity: 1; }
+      }
+      @-webkit-keyframes loaderBarAnim4 {
+        0%, 100% { -webkit-transform: scaleY(0.42); opacity: 0.4; }
+        50% { -webkit-transform: scaleY(1.05); opacity: 1; }
+      }
+      @keyframes loaderBarAnim4 {
+        0%, 100% { transform: scaleY(0.42); opacity: 0.4; }
+        50% { transform: scaleY(1.05); opacity: 1; }
+      }
+      @-webkit-keyframes loaderBarAnim5 {
+        0%, 100% { -webkit-transform: scaleY(0.42); opacity: 0.4; }
+        50% { -webkit-transform: scaleY(0.85); opacity: 1; }
+      }
+      @keyframes loaderBarAnim5 {
+        0%, 100% { transform: scaleY(0.42); opacity: 0.4; }
+        50% { transform: scaleY(0.85); opacity: 1; }
       }
     </style>
   </head>
@@ -138,7 +165,7 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js?v=55').then((reg) => {
+          navigator.serviceWorker.register('/sw.js?v=56').then((reg) => {
             reg.update();
           }).catch((err) => {
             console.log('SW registration failed:', err);
