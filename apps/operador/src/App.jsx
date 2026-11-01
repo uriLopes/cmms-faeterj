@@ -23,7 +23,10 @@ import {
   ChevronUp,
   ChevronDown,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Play,
+  Pause,
+  RotateCcw
 } from 'lucide-react';
 import ScannerCamera from './components/ScannerCamera';
 import VanguardLogo from './components/VanguardLogo';
@@ -83,6 +86,8 @@ export default function App() {
   const [audioBase64, setAudioBase64] = useState(null);
   const [gravandoAudio, setGravandoAudio] = useState(false);
   const [tempoGravacao, setTempoGravacao] = useState(0);
+  const [tocandoAudio, setTocandoAudio] = useState(false);
+  const audioPlayerRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerGravacaoRef = useRef(null);
@@ -209,6 +214,7 @@ export default function App() {
     setCarregandoAtivo(false);
     setFotoBase64(null);
     setAudioBase64(null);
+    setTocandoAudio(false);
     setStatusImpacto('maquina_parada');
   }
 
@@ -275,6 +281,7 @@ export default function App() {
       } catch (e) {}
     }
     setGravandoAudio(false);
+    setTocandoAudio(false);
   }
 
   // Acionamento direto da Câmera Nativa do Celular (Samsung, Motorola, iOS, Xiaomi)
@@ -936,81 +943,183 @@ export default function App() {
                 </div>
               )}
 
-              {/* CARD CONTEXTUAL FLUTUANTE: ÁUDIO */}
+              {/* CARD CONTEXTUAL FLUTUANTE: ÁUDIO ESTILO CHATGPT 4O VOICE COM ANIMAÇÃO */}
               {abaAtivaHomebar === 'audio' && (
-                <div className="bg-[#18181b] border border-zinc-700 rounded-2xl p-4 shadow-2xl animate-slide-up space-y-3">
-                  <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                <div className="chatgpt-voice-card p-5 shadow-[0_25px_60px_rgba(0,0,0,0.95)] animate-slide-up relative overflow-hidden select-none">
+                  {/* Brilho radial ambiente suave ao fundo das barras */}
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06)_0%,transparent_70%)] pointer-events-none"></div>
+
+                  {/* Header superior sutil estilo ChatGPT 4o */}
+                  <div className="relative z-10 flex items-center justify-between pb-2">
                     <div className="flex items-center gap-2">
-                      <Mic className="w-4 h-4 text-white" />
-                      <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
-                        Ruído Mecânico (Áudio)
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                      <span className="text-[11px] font-mono font-bold tracking-wider text-zinc-300 uppercase">
+                        Vanguard 4o • Ruído
                       </span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setAbaAtivaHomebar(null)}
-                      className="text-zinc-200 hover:text-white p-1 text-xs"
-                      title="Fechar"
-                    >
-                      ✕
-                    </button>
-                  </div>
 
-                  {gravandoAudio ? (
-                    <div className="flex flex-col items-center gap-3 py-2">
-                      <div className="flex items-center gap-2 text-red-500 font-mono font-black text-sm animate-pulse">
-                        <span className="w-3 h-3 rounded-full bg-red-600 animate-ping"></span>
-                        <span>Gravando ruído: {tempoGravacao}s / 10s</span>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      {gravandoAudio && (
+                        <span className="text-[11px] font-mono font-bold text-orange-400 bg-orange-950/60 px-2 py-0.5 rounded-full border border-orange-800/60 animate-pulse">
+                          00:{tempoGravacao < 10 ? `0${tempoGravacao}` : tempoGravacao} / 10s
+                        </span>
+                      )}
                       <button
                         type="button"
-                        onClick={pararGravacaoAudio}
-                        className="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-[2px] flex items-center gap-2 shadow-lg active:scale-95 transition-all"
+                        onClick={() => {
+                          if (gravandoAudio) pararGravacaoAudio();
+                          setAbaAtivaHomebar(null);
+                        }}
+                        className="text-zinc-300 hover:text-white p-1 rounded-full hover:bg-zinc-800/60 transition-colors"
+                        title="Fechar"
                       >
-                        <Square className="w-4 h-4 fill-current" />
-                        <span>Parar e Salvar</span>
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
-                  ) : audioBase64 ? (
-                    <div className="space-y-2.5">
-                      <div className="flex items-center gap-2">
-                        <audio src={audioBase64} controls className="h-8 flex-1" />
+                  </div>
+
+                  {/* Centro: O Visualizador de Ondas Sonoras (9 Barras em Cápsula Fiel ao ChatGPT 4o) */}
+                  <div className="relative z-10 py-5 flex flex-col items-center justify-center">
+                    <div className={`chatgpt-voice-wave ${gravandoAudio || tocandoAudio ? 'is-active' : ''}`}>
+                      <div className="chatgpt-voice-bar"></div>
+                      <div className="chatgpt-voice-bar"></div>
+                      <div className="chatgpt-voice-bar"></div>
+                      <div className="chatgpt-voice-bar"></div>
+                      <div className="chatgpt-voice-bar"></div>
+                      <div className="chatgpt-voice-bar"></div>
+                      <div className="chatgpt-voice-bar"></div>
+                      <div className="chatgpt-voice-bar"></div>
+                      <div className="chatgpt-voice-bar"></div>
+                    </div>
+
+                    {/* Texto dinâmico abaixo do visualizador */}
+                    <div className="mt-5 text-center">
+                      {gravandoAudio ? (
+                        <p className="text-sm font-medium text-white tracking-wide flex items-center justify-center gap-1.5">
+                          <span>Ouvindo ruído do motor</span>
+                          <span className="inline-flex text-zinc-200">
+                            <span className="animate-bounce" style={{ animationDelay: '0ms' }}>.</span>
+                            <span className="animate-bounce" style={{ animationDelay: '150ms' }}>.</span>
+                            <span className="animate-bounce" style={{ animationDelay: '300ms' }}>.</span>
+                          </span>
+                        </p>
+                      ) : audioBase64 ? (
+                        <p className="text-sm font-semibold text-white tracking-wide">
+                          {tocandoAudio ? 'Reproduzindo ruído sonoro...' : 'Ruído mecânico capturado ✓'}
+                        </p>
+                      ) : (
+                        <p className="text-sm font-medium text-zinc-200 tracking-wide">
+                          Toque no botão para gravar ruído
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Rodapé: Ações e Botão Circular Laranja com Stop Quadrado */}
+                  <div className="relative z-10 flex items-center justify-between pt-2 border-t border-zinc-800/60 mt-1">
+                    {/* Lado Esquerdo: Ações secundárias */}
+                    <div>
+                      {audioBase64 && !gravandoAudio ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (audioPlayerRef.current) {
+                                if (tocandoAudio) {
+                                  audioPlayerRef.current.pause();
+                                } else {
+                                  audioPlayerRef.current.play();
+                                }
+                              }
+                            }}
+                            className="px-3 py-1.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold flex items-center gap-1.5 border border-zinc-700 active:scale-95 transition-all"
+                            title={tocandoAudio ? 'Pausar áudio' : 'Ouvir ruído'}
+                          >
+                            {tocandoAudio ? (
+                              <>
+                                <Pause className="w-3.5 h-3.5 fill-current" />
+                                <span>Pausar</span>
+                              </>
+                            ) : (
+                              <>
+                                <Play className="w-3.5 h-3.5 fill-current" />
+                                <span>Ouvir</span>
+                              </>
+                            )}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={iniciarGravacaoAudio}
+                            className="p-1.5 text-zinc-300 hover:text-white rounded-full hover:bg-zinc-800 transition-colors"
+                            title="Gravar novamente"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAudioBase64(null);
+                              setTocandoAudio(false);
+                            }}
+                            className="p-1.5 text-red-400 hover:text-red-300 rounded-full hover:bg-red-950/40 transition-colors"
+                            title="Excluir gravação"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-[11px] font-mono text-zinc-300 font-medium">
+                          {gravandoAudio ? 'Gravação ativa (até 10s)' : 'Microfone sensível'}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Lado Direito: Botão Circular Laranja de Parar / Iniciar (Fiel à referência ChatGPT 4o) */}
+                    <div>
+                      {gravandoAudio ? (
                         <button
                           type="button"
-                          onClick={() => setAudioBase64(null)}
-                          className="p-2 bg-red-950/40 text-red-400 hover:text-red-300 rounded-[2px] border border-red-900/40 active:scale-95 transition-all"
-                          title="Excluir gravação"
+                          onClick={pararGravacaoAudio}
+                          className="btn-chatgpt-stop"
+                          title="Parar e Salvar Gravação"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <div className="btn-chatgpt-stop-inner"></div>
                         </button>
-                      </div>
-                      <div className="flex justify-between items-center pt-1">
-                        <span className="text-[11px] text-[#10B981] font-mono font-bold">
-                          Áudio anexado ao ticket ✓
-                        </span>
+                      ) : audioBase64 ? (
+                        <button
+                          type="button"
+                          onClick={() => setAbaAtivaHomebar(null)}
+                          className="px-3.5 py-1.5 bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs rounded-full flex items-center gap-1 shadow-md active:scale-95 transition-all"
+                          title="Salvar e fechar"
+                        >
+                          <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                          <span>Pronto</span>
+                        </button>
+                      ) : (
                         <button
                           type="button"
                           onClick={iniciarGravacaoAudio}
-                          className="text-xs text-zinc-200 hover:text-white underline font-mono font-medium"
+                          className="w-11 h-11 rounded-full border-2 border-orange-500 bg-orange-600/20 text-orange-400 hover:bg-orange-600 hover:text-white flex items-center justify-center transition-all active:scale-95 shadow-[0_0_16px_rgba(234,88,12,0.35)]"
+                          title="Iniciar gravação de ruído"
                         >
-                          Gravar de novo
+                          <Mic className="w-5 h-5" />
                         </button>
-                      </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="text-center py-2 space-y-2">
-                      <p className="text-xs text-zinc-100 font-medium">
-                        Grave até 10 segundos do ruído sonoro da máquina para a equipe técnica.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={iniciarGravacaoAudio}
-                        className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs rounded-[2px] flex items-center justify-center gap-2 border border-zinc-700 shadow-md active:scale-95 transition-all"
-                      >
-                        <Mic className="w-4 h-4 text-red-400" />
-                        <span>Iniciar Gravação (10s)</span>
-                      </button>
-                    </div>
+                  </div>
+
+                  {/* Elemento de áudio invisível para playback */}
+                  {audioBase64 && (
+                    <audio
+                      ref={audioPlayerRef}
+                      src={audioBase64}
+                      onPlay={() => setTocandoAudio(true)}
+                      onPause={() => setTocandoAudio(false)}
+                      onEnded={() => setTocandoAudio(false)}
+                      className="hidden"
+                    />
                   )}
                 </div>
               )}

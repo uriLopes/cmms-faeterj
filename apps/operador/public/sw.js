@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cmms-operador-v32';
+const CACHE_NAME = 'cmms-operador-v33';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

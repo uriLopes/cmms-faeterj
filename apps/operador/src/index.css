@@ -533,3 +533,137 @@
   }
 }
 
+/* Card e Visualizador de Voz Estilo ChatGPT 4o (Referência do Usuário) */
+.chatgpt-voice-card {
+  background: #09090b;
+  border: 1px solid rgba(63, 63, 70, 0.7);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 255, 255, 0.03);
+  border-radius: 24px;
+}
+
+.chatgpt-voice-wave {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 96px;
+  position: relative;
+}
+
+.chatgpt-voice-bar {
+  width: 9px;
+  border-radius: 9999px;
+  background: #FFFFFF;
+  transform-origin: center center;
+  transition: height 0.25s ease, opacity 0.25s ease;
+  will-change: height, opacity;
+}
+
+/* Quando gravando ou reproduzindo áudio */
+.chatgpt-voice-wave.is-active .chatgpt-voice-bar:nth-child(1) {
+  animation: voiceBarAnim1 1.1s ease-in-out infinite alternate;
+}
+.chatgpt-voice-wave.is-active .chatgpt-voice-bar:nth-child(2) {
+  animation: voiceBarAnim2 0.95s ease-in-out infinite alternate 0.15s;
+}
+.chatgpt-voice-wave.is-active .chatgpt-voice-bar:nth-child(3) {
+  animation: voiceBarAnim3 1.25s ease-in-out infinite alternate 0.25s;
+}
+.chatgpt-voice-wave.is-active .chatgpt-voice-bar:nth-child(4) {
+  animation: voiceBarAnim4 1.05s ease-in-out infinite alternate 0.1s;
+}
+.chatgpt-voice-wave.is-active .chatgpt-voice-bar:nth-child(5) {
+  animation: voiceBarAnimCenter 0.85s ease-in-out infinite alternate 0.05s;
+}
+.chatgpt-voice-wave.is-active .chatgpt-voice-bar:nth-child(6) {
+  animation: voiceBarAnim4 1.15s ease-in-out infinite alternate 0.2s;
+}
+.chatgpt-voice-wave.is-active .chatgpt-voice-bar:nth-child(7) {
+  animation: voiceBarAnim3 1.2s ease-in-out infinite alternate 0.1s;
+}
+.chatgpt-voice-wave.is-active .chatgpt-voice-bar:nth-child(8) {
+  animation: voiceBarAnim2 0.9s ease-in-out infinite alternate 0.3s;
+}
+.chatgpt-voice-wave.is-active .chatgpt-voice-bar:nth-child(9) {
+  animation: voiceBarAnim1 1.3s ease-in-out infinite alternate 0.15s;
+}
+
+@keyframes voiceBarAnim1 {
+  0% { height: 10px; opacity: 0.2; }
+  100% { height: 26px; opacity: 0.45; }
+}
+
+@keyframes voiceBarAnim2 {
+  0% { height: 16px; opacity: 0.35; }
+  100% { height: 42px; opacity: 0.65; }
+}
+
+@keyframes voiceBarAnim3 {
+  0% { height: 24px; opacity: 0.55; }
+  100% { height: 60px; opacity: 0.85; }
+}
+
+@keyframes voiceBarAnim4 {
+  0% { height: 36px; opacity: 0.75; }
+  100% { height: 74px; opacity: 0.95; }
+}
+
+@keyframes voiceBarAnimCenter {
+  0% {
+    height: 46px;
+    opacity: 1;
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.5), 0 0 32px rgba(255, 255, 255, 0.25);
+  }
+  100% {
+    height: 86px;
+    opacity: 1;
+    box-shadow: 0 0 28px rgba(255, 255, 255, 0.85), 0 0 50px rgba(255, 255, 255, 0.45);
+  }
+}
+
+/* Estado de repouso / estático quando pausado */
+.chatgpt-voice-wave:not(.is-active) .chatgpt-voice-bar:nth-child(1) { height: 12px; opacity: 0.2; }
+.chatgpt-voice-wave:not(.is-active) .chatgpt-voice-bar:nth-child(2) { height: 20px; opacity: 0.35; }
+.chatgpt-voice-wave:not(.is-active) .chatgpt-voice-bar:nth-child(3) { height: 32px; opacity: 0.55; }
+.chatgpt-voice-wave:not(.is-active) .chatgpt-voice-bar:nth-child(4) { height: 48px; opacity: 0.75; }
+.chatgpt-voice-wave:not(.is-active) .chatgpt-voice-bar:nth-child(5) { 
+  height: 64px; 
+  opacity: 1; 
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.4); 
+}
+.chatgpt-voice-wave:not(.is-active) .chatgpt-voice-bar:nth-child(6) { height: 48px; opacity: 0.75; }
+.chatgpt-voice-wave:not(.is-active) .chatgpt-voice-bar:nth-child(7) { height: 32px; opacity: 0.55; }
+.chatgpt-voice-wave:not(.is-active) .chatgpt-voice-bar:nth-child(8) { height: 20px; opacity: 0.35; }
+.chatgpt-voice-wave:not(.is-active) .chatgpt-voice-bar:nth-child(9) { height: 12px; opacity: 0.2; }
+
+/* Botão circular de Stop/Ação fiel à referência ChatGPT 4o */
+.btn-chatgpt-stop {
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  border: 2.5px solid #EA580C;
+  background: #09090b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 16px rgba(234, 88, 12, 0.35);
+}
+
+.btn-chatgpt-stop:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 24px rgba(234, 88, 12, 0.55);
+}
+
+.btn-chatgpt-stop:active {
+  transform: scale(0.92);
+}
+
+.btn-chatgpt-stop-inner {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background-color: #EA580C;
+}
+
