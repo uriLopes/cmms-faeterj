@@ -299,7 +299,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
           <button
             type="button"
             onClick={onAbrirModalOperador}
-            className="cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-[#1E1E26]/90 backdrop-blur-md hover:bg-[#282834] active:scale-95 border border-white/[0.14] transition-all text-xs shadow-xl"
+            className="cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-[#1C1C1E]/95 backdrop-blur-md hover:bg-[#2C2C2E] active:scale-95 border border-white/[0.16] transition-all text-xs shadow-xl"
             title="Toque para validar ou alterar Identifiant da fábrica"
           >
             <span className="font-semibold text-white text-xs">
@@ -391,7 +391,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
           className={`cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full text-xs transition-all active:scale-95 shadow-md ${
             lanternaAtiva
               ? 'bg-amber-500 text-zinc-950 font-black'
-              : 'bg-[#1E1E26]/90 backdrop-blur-md border border-white/[0.14] text-white hover:bg-[#282834] font-semibold'
+              : 'bg-[#1C1C1E]/95 backdrop-blur-md border border-white/[0.16] text-white hover:bg-[#2C2C2E] font-semibold'
           }`}
           title="Alternar lanterna / flash do leitor"
         >
@@ -412,7 +412,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
         <button
           type="button"
           onClick={() => setModalTagManual(true)}
-          className="cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-[#1E1E26]/90 backdrop-blur-md hover:bg-[#282834] active:scale-95 border border-white/[0.14] transition-all text-xs shadow-md font-semibold text-white"
+          className="cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-[#1C1C1E]/95 backdrop-blur-md hover:bg-[#2C2C2E] active:scale-95 border border-white/[0.16] transition-all text-xs shadow-md font-semibold text-white"
           title="Digitar TAG manualmente caso a câmera não leia"
         >
           <span className="font-semibold text-white text-xs">Digitar TAG</span>
@@ -423,7 +423,10 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
       {/* MODAL PARA DIGITAÇÃO MANUAL DE TAG */}
       {modalTagManual && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#1E1E26] border border-white/[0.14] rounded-2xl max-w-xs w-full p-5 space-y-3.5 shadow-2xl">
+          <div
+            style={{ background: 'linear-gradient(#1C1C1E, #1C1C1E)', border: '1px solid rgba(255, 255, 255, 0.16)' }}
+            className="rounded-2xl max-w-xs w-full p-5 space-y-3.5 shadow-2xl"
+          >
             <h3 className="text-xs font-bold text-white flex items-center gap-2">
               <Keyboard className="w-4 h-4 text-red-500" />
               Digitar TAG da Máquina
@@ -437,13 +440,13 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
               value={tagDigitada}
               onChange={(e) => setTagDigitada(e.target.value.toUpperCase())}
               placeholder="Ex: MV3-ROB-04"
-              className="w-full bg-[#14141C] border border-white/[0.12] rounded-xl p-3 text-sm font-mono text-white placeholder-[#8E8E93] text-center uppercase tracking-wider focus:outline-none focus:border-red-500"
+              className="w-full bg-[#141416] border border-white/[0.16] rounded-xl p-3 text-sm font-mono text-white placeholder-[#8E8E93] text-center uppercase tracking-wider focus:outline-none focus:border-red-500"
             />
             <div className="flex gap-2 pt-1">
               <button
                 type="button"
                 onClick={() => setModalTagManual(false)}
-                className="flex-1 py-2.5 bg-[#242430] hover:bg-[#2E2E3C] text-[#8E8E93] hover:text-white font-bold text-xs rounded-xl border border-white/[0.12] transition-all"
+                className="flex-1 py-2.5 bg-[#2C2C2E] hover:bg-[#3A3A3C] text-[#8E8E93] hover:text-white font-bold text-xs rounded-xl border border-white/[0.16] transition-all"
               >
                 Cancelar
               </button>

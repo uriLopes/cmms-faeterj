@@ -7,8 +7,8 @@
 
 @layer base {
   :root, html {
-    color-scheme: dark;
-    forced-color-adjust: none;
+    color-scheme: dark only !important;
+    forced-color-adjust: none !important;
     height: 100% !important;
     height: 100dvh !important;
     overflow: hidden !important;
@@ -20,7 +20,8 @@
     -webkit-tap-highlight-color: transparent;
     background-color: #000000 !important;
     color: #FFFFFF;
-    color-scheme: dark;
+    color-scheme: dark only !important;
+    forced-color-adjust: none !important;
     height: 100% !important;
     height: 100dvh !important;
     overflow: hidden !important;
@@ -541,10 +542,11 @@ html, body, #root, * {
 }
 
 .btn-uiverse-send.btn-disabled {
-  background: #22222E;
+  background-color: #2C2C2E !important;
+  background: linear-gradient(#2C2C2E, #2C2C2E) !important;
   color: #8E8E93;
   box-shadow: none;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
   opacity: 1;
 }
 
@@ -573,8 +575,9 @@ html, body, #root, * {
 
 /* Card e Visualizador de Voz Estilo ChatGPT 4o e Tema Escuro Workouts */
 .chatgpt-voice-card {
-  background: #202028;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: #1C1C1E !important;
+  background: linear-gradient(#1C1C1E, #1C1C1E) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
   border-radius: 24px;
 }
@@ -707,8 +710,9 @@ html, body, #root, * {
 
 /* Tooltip Speech Bubble Estilo Referência do Usuário */
 .tooltip-speech-bubble {
-  background: #202028;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: #1C1C1E !important;
+  background: linear-gradient(#1C1C1E, #1C1C1E) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
   border-radius: 20px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
   position: relative;
@@ -722,8 +726,9 @@ html, body, #root, * {
   width: 100%;
   margin: 0;
   padding: 20px;
-  background-color: #202028;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: #1C1C1E !important;
+  background: linear-gradient(#1C1C1E, #1C1C1E) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
   border-radius: 24px;
   font-family: inherit;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
@@ -756,12 +761,14 @@ html, body, #root, * {
 }
 
 .penumbra-radio:hover {
-  background-color: #262632;
+  background-color: #252528 !important;
+  background: linear-gradient(#252528, #252528) !important;
 }
 
 .penumbra-radio.is-selected {
-  background-color: #2D2D3A;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background-color: #2C2C2E !important;
+  background: linear-gradient(#2C2C2E, #2C2C2E) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
 }
 
 .penumbra-radio__input {
@@ -790,12 +797,12 @@ button, [role="button"], .penumbra-radio, .penumbra-radio__mark {
   height: 18px;
   margin-top: 2px;
   background-color: transparent !important;
-  border: 1.5px solid #68697D !important;
+  border: 1.5px solid #6E6E73 !important;
   border-radius: 999px;
   -webkit-appearance: none;
   appearance: none;
   forced-color-adjust: none !important;
-  color-scheme: only dark !important;
+  color-scheme: dark only !important;
   box-shadow: none !important;
   transition:
     border-color 180ms ease,
@@ -806,10 +813,10 @@ button, [role="button"], .penumbra-radio, .penumbra-radio__mark {
 /* Blindagem contra auto-dark mode mobile e herança indesejada */
 .penumbra-radio:not(.is-selected) .penumbra-radio__mark {
   background-color: transparent !important;
-  border: 1.5px solid #68697D !important;
+  border: 1.5px solid #6E6E73 !important;
   box-shadow: none !important;
   forced-color-adjust: none !important;
-  color-scheme: only dark !important;
+  color-scheme: dark only !important;
 }
 
 .penumbra-radio.is-selected .penumbra-radio__mark {

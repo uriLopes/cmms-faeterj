@@ -121,7 +121,7 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
         <button
           type="button"
           onClick={onClose}
-          className="w-10 h-10 rounded-full bg-[#1E1E26]/80 backdrop-blur-md border border-white/[0.14] flex items-center justify-center text-white hover:bg-[#282834] active:scale-95 transition-all shadow-md cursor-pointer"
+          className="w-10 h-10 rounded-full bg-[#1C1C1E]/90 backdrop-blur-md border border-white/[0.16] flex items-center justify-center text-white hover:bg-[#2C2C2E] active:scale-95 transition-all shadow-md cursor-pointer"
           title="Fechar Câmera"
         >
           <X className="w-5 h-5 stroke-[2.5]" />
@@ -130,7 +130,10 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
 
       {/* ALERTA DE ERRO DE CÂMERA CASO NÃO AUTORIZADA */}
       {erroCamera && !fotoCongelada && (
-        <div className="relative z-30 m-4 p-4 rounded-xl bg-[#1E1E26]/95 backdrop-blur-md border border-white/[0.14] text-center space-y-2">
+        <div
+          style={{ background: 'linear-gradient(#1C1C1E, #1C1C1E)', border: '1px solid rgba(255, 255, 255, 0.16)' }}
+          className="relative z-30 m-4 p-4 rounded-xl text-center space-y-2 shadow-xl"
+        >
           <AlertCircle className="w-8 h-8 text-amber-400 mx-auto" />
           <p className="text-xs text-[#8E8E93]">{erroCamera}</p>
         </div>
@@ -144,7 +147,7 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
             <button
               type="button"
               onClick={() => setFotoCongelada(null)}
-              className="flex-1 py-3.5 bg-[#242430] backdrop-blur-md border border-white/[0.12] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg cursor-pointer"
+              className="flex-1 py-3.5 bg-[#2C2C2E] backdrop-blur-md border border-white/[0.16] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
               <span>Tirar Outra</span>
