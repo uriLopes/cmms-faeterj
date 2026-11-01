@@ -753,105 +753,97 @@ export default function App() {
               })}
             </fieldset>
 
-            {/* 2. SEÇÃO IMPACTO DO PROBLEMA NA LINHA */}
-            <div className="space-y-3 pt-1">
-              <h2 className="text-sm font-semibold text-white tracking-wide">
-                Impacto do Problema na Linha
-              </h2>
+            {/* 2. SEÇÃO IMPACTO DO PROBLEMA NA LINHA (PENUMBRA RADIO GROUP) */}
+            <fieldset className="penumbra-radio-group">
+              <legend className="penumbra-radio-group__legend">Impacto do Problema na Linha</legend>
 
-              {/* BANNERS BOOKMARK DE IMPACTO (UIVERSE.IO + CORES DO SEGUNDO CÉREBRO) */}
-              <div className="flex items-center justify-around py-3.5 px-3 bg-[#161616] border border-zinc-800 rounded-[2px] shadow-inner">
-                {/* 1. Banner Vermelho - ALTO (#EF4444) */}
-                <label
-                  className="ui-bookmark"
-                  style={{ '--icon-primary-color': '#EF4444' }}
-                  title="Alto (Máquina Parada)"
-                >
-                  <input
-                    type="radio"
-                    name="impacto-banner"
-                    checked={statusImpacto === 'maquina_parada'}
-                    onChange={() => setStatusImpacto('maquina_parada')}
-                  />
-                  <div className="bookmark">
-                    <svg viewBox="0 0 32 32">
-                      <g>
-                        <path d="M27 4v27a1 1 0 0 1-1.625.781L16 24.281l-9.375 7.5A1 1 0 0 1 5 31V4a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4z"></path>
-                      </g>
-                    </svg>
-                  </div>
-                  <span
-                    className={`text-[10px] sm:text-[11px] font-mono mt-2 transition-colors whitespace-nowrap ${
-                      statusImpacto === 'maquina_parada'
-                        ? 'font-black text-[#EF4444]'
-                        : 'text-zinc-200 font-bold'
-                    }`}
-                  >
-                    ALTO
+              {/* 1. ALTO - MÁQUINA PARADA (#EF4444) */}
+              <label
+                className={`penumbra-radio ${statusImpacto === 'maquina_parada' ? 'is-selected' : ''}`}
+                data-impact="alto"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setStatusImpacto('maquina_parada');
+                }}
+              >
+                <input
+                  className="penumbra-radio__input"
+                  type="radio"
+                  name="impacto-penumbra"
+                  value="maquina_parada"
+                  checked={statusImpacto === 'maquina_parada'}
+                  readOnly
+                />
+                <span className="penumbra-radio__mark" aria-hidden="true"></span>
+                <span className="penumbra-radio__text">
+                  <span className="penumbra-radio__title flex items-center gap-2">
+                    <span className="text-[#EF4444] font-bold">ALTO</span>
+                    <span className="text-white font-semibold">- Máquina Parada</span>
                   </span>
-                </label>
+                  <span className="penumbra-radio__hint">
+                    Interrupção total da produção no posto de trabalho
+                  </span>
+                </span>
+              </label>
 
-                {/* 2. Banner Âmbar - MÉDIO (#F59E0B) */}
-                <label
-                  className="ui-bookmark"
-                  style={{ '--icon-primary-color': '#F59E0B' }}
-                  title="Médio (Operando com Restrição)"
-                >
-                  <input
-                    type="radio"
-                    name="impacto-banner"
-                    checked={statusImpacto === 'operando_com_restricao'}
-                    onChange={() => setStatusImpacto('operando_com_restricao')}
-                  />
-                  <div className="bookmark">
-                    <svg viewBox="0 0 32 32">
-                      <g>
-                        <path d="M27 4v27a1 1 0 0 1-1.625.781L16 24.281l-9.375 7.5A1 1 0 0 1 5 31V4a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4z"></path>
-                      </g>
-                    </svg>
-                  </div>
-                  <span
-                    className={`text-[10px] sm:text-[11px] font-mono mt-2 transition-colors whitespace-nowrap ${
-                      statusImpacto === 'operando_com_restricao'
-                        ? 'font-black text-[#F59E0B]'
-                        : 'text-zinc-200 font-bold'
-                    }`}
-                  >
-                    MÉDIO
+              {/* 2. MÉDIO - OPERANDO COM RESTRIÇÃO (#F59E0B) */}
+              <label
+                className={`penumbra-radio ${statusImpacto === 'operando_com_restricao' ? 'is-selected' : ''}`}
+                data-impact="medio"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setStatusImpacto('operando_com_restricao');
+                }}
+              >
+                <input
+                  className="penumbra-radio__input"
+                  type="radio"
+                  name="impacto-penumbra"
+                  value="operando_com_restricao"
+                  checked={statusImpacto === 'operando_com_restricao'}
+                  readOnly
+                />
+                <span className="penumbra-radio__mark" aria-hidden="true"></span>
+                <span className="penumbra-radio__text">
+                  <span className="penumbra-radio__title flex items-center gap-2">
+                    <span className="text-[#F59E0B] font-bold">MÉDIO</span>
+                    <span className="text-white font-semibold">- Operando com Restrição</span>
                   </span>
-                </label>
+                  <span className="penumbra-radio__hint">
+                    Velocidade reduzida, retrabalho ou desvio temporário
+                  </span>
+                </span>
+              </label>
 
-                {/* 3. Banner Verde - BAIXO (#10B981) */}
-                <label
-                  className="ui-bookmark"
-                  style={{ '--icon-primary-color': '#10B981' }}
-                  title="Baixo (Melhoria)"
-                >
-                  <input
-                    type="radio"
-                    name="impacto-banner"
-                    checked={statusImpacto === 'melhoria_estetica'}
-                    onChange={() => setStatusImpacto('melhoria_estetica')}
-                  />
-                  <div className="bookmark">
-                    <svg viewBox="0 0 32 32">
-                      <g>
-                        <path d="M27 4v27a1 1 0 0 1-1.625.781L16 24.281l-9.375 7.5A1 1 0 0 1 5 31V4a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4z"></path>
-                      </g>
-                    </svg>
-                  </div>
-                  <span
-                    className={`text-[10px] sm:text-[11px] font-mono mt-2 transition-colors whitespace-nowrap ${
-                      statusImpacto === 'melhoria_estetica'
-                        ? 'font-black text-[#10B981]'
-                        : 'text-zinc-200 font-bold'
-                    }`}
-                  >
-                    BAIXO
+              {/* 3. BAIXO - SEM IMPACTO / MELHORIA (#10B981) */}
+              <label
+                className={`penumbra-radio ${statusImpacto === 'melhoria_estetica' ? 'is-selected' : ''}`}
+                data-impact="baixo"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setStatusImpacto('melhoria_estetica');
+                }}
+              >
+                <input
+                  className="penumbra-radio__input"
+                  type="radio"
+                  name="impacto-penumbra"
+                  value="melhoria_estetica"
+                  checked={statusImpacto === 'melhoria_estetica'}
+                  readOnly
+                />
+                <span className="penumbra-radio__mark" aria-hidden="true"></span>
+                <span className="penumbra-radio__text">
+                  <span className="penumbra-radio__title flex items-center gap-2">
+                    <span className="text-[#10B981] font-bold">BAIXO</span>
+                    <span className="text-white font-semibold">- Sem Interrupção de Linha</span>
                   </span>
-                </label>
-              </div>
-            </div>
+                  <span className="penumbra-radio__hint">
+                    Melhoria estética ou anomalia que não impede o ciclo
+                  </span>
+                </span>
+              </label>
+            </fieldset>
           </div>
 
           {/* Fundo de clique externo quando o cartão contextual estiver aberto */}
