@@ -6,11 +6,16 @@
 }
 
 @layer base {
+  :root, html {
+    color-scheme: dark;
+    forced-color-adjust: none;
+  }
   body {
     font-family: var(--font-sans);
     -webkit-tap-highlight-color: transparent;
     background-color: #000000;
     color: #FFFFFF;
+    color-scheme: dark;
   }
 }
 
@@ -736,6 +741,10 @@
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .penumbra-radio__mark {
@@ -747,10 +756,20 @@
   background-color: #24242E;
   border: 1.5px solid #484858;
   border-radius: 999px;
+  -webkit-appearance: none;
+  appearance: none;
+  forced-color-adjust: none;
   transition:
     border-color 180ms ease,
     background-color 180ms ease,
     box-shadow 180ms ease;
+}
+
+/* Blindagem contra auto-dark mode mobile e herança indesejada */
+.penumbra-radio:not(.is-selected) .penumbra-radio__mark {
+  background-color: #24242E !important;
+  border: 1.5px solid #484858 !important;
+  box-shadow: none !important;
 }
 
 .penumbra-radio__mark::after {
@@ -768,9 +787,9 @@
 
 .penumbra-radio__input:checked + .penumbra-radio__mark,
 .penumbra-radio.is-selected .penumbra-radio__mark {
-  background-color: #FFFFFF;
-  border-color: #FFFFFF;
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+  background-color: #FFFFFF !important;
+  border-color: #FFFFFF !important;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.2) !important;
 }
 
 .penumbra-radio__input:checked + .penumbra-radio__mark::after,
@@ -779,8 +798,8 @@
 }
 
 .penumbra-radio__input:focus-visible + .penumbra-radio__mark {
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
-  border-color: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15) !important;
+  border-color: #FFFFFF !important;
 }
 
 .penumbra-radio__text {
