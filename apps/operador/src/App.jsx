@@ -986,18 +986,12 @@ export default function App() {
                       <div className="chatgpt-voice-bar"></div>
                     </div>
 
-                    {/* Texto dinâmico apenas após gravação ou em repouso */}
-                    {!gravandoAudio && (
+                    {/* Texto dinâmico apenas quando reproduzindo áudio */}
+                    {tocandoAudio && (
                       <div className="mt-4 text-center">
-                        {audioBase64 ? (
-                          <p className="text-sm font-semibold text-white tracking-wide">
-                            {tocandoAudio ? 'Reproduzindo ruído sonoro...' : 'Ruído mecânico capturado ✓'}
-                          </p>
-                        ) : (
-                          <p className="text-sm font-medium text-zinc-300 tracking-wide">
-                            Toque no botão para gravar ruído
-                          </p>
-                        )}
+                        <p className="text-sm font-semibold text-white tracking-wide">
+                          Reproduzindo áudio...
+                        </p>
                       </div>
                     )}
                   </div>
@@ -1076,11 +1070,11 @@ export default function App() {
                         <button
                           type="button"
                           onClick={() => setAbaAtivaHomebar(null)}
-                          className="px-3.5 py-1.5 bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs rounded-full flex items-center gap-1 shadow-md active:scale-95 transition-all"
-                          title="Salvar e fechar"
+                          className="px-4 py-1.5 bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs rounded-full flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer"
+                          title="Confirmar"
                         >
                           <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                          <span>Pronto</span>
+                          <span>Confirmar</span>
                         </button>
                       ) : (
                         <button
@@ -1109,11 +1103,14 @@ export default function App() {
                 </div>
               )}
 
-              {/* CARD CONTEXTUAL FLUTUANTE: REGISTRO ESCRITO (ESTILO TOOLTIP SPEECH BUBBLE) */}
+              {/* CARD CONTEXTUAL FLUTUANTE: REGISTRO ESCRITO (ESTILO BOX DO ÁUDIO) */}
               {abaAtivaHomebar === 'registro' && (
-                <div className="tooltip-speech-bubble p-4 sm:p-5 shadow-2xl animate-slide-up space-y-3 mb-1 select-none">
-                  {/* Header superior estilo Tooltip */}
-                  <div className="flex items-center justify-between pb-1">
+                <div className="chatgpt-voice-card p-5 shadow-[0_25px_60px_rgba(0,0,0,0.95)] animate-slide-up relative overflow-hidden select-none space-y-3 mb-1">
+                  {/* Brilho radial ambiente sutil */}
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.04)_0%,transparent_70%)] pointer-events-none"></div>
+
+                  {/* Header superior */}
+                  <div className="relative z-10 flex items-center justify-between pb-1">
                     <span className="text-sm font-bold text-white tracking-tight">
                       Registro Escrito
                     </span>
@@ -1127,8 +1124,8 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Corpo do Tooltip com Textarea */}
-                  <div className="space-y-2.5">
+                  {/* Corpo do Registro com Textarea */}
+                  <div className="relative z-10 space-y-2.5">
                     <textarea
                       rows={3}
                       autoFocus
@@ -1137,23 +1134,17 @@ export default function App() {
                       placeholder="Descreva detalhes específicos da falha, sintomas secundários ou orientações para a manutenção..."
                       className="w-full bg-[#121214] border border-zinc-700/80 rounded-xl p-3 text-xs sm:text-sm text-white placeholder-zinc-400 focus:outline-none focus:border-white resize-none transition-all"
                     />
-                    <div className="flex items-center justify-between pt-0.5">
-                      <span className="text-[11px] font-mono text-zinc-300 font-medium">
-                        {observacaoTexto.trim() ? `${observacaoTexto.trim().length} caracteres` : 'Opcional'}
-                      </span>
+                    <div className="flex items-center justify-end pt-0.5">
                       <button
                         type="button"
                         onClick={() => setAbaAtivaHomebar(null)}
-                        className="px-4 py-1.5 bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs rounded-full flex items-center gap-1.5 shadow active:scale-95 transition-all cursor-pointer"
+                        className="px-4 py-1.5 bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs rounded-full flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer"
                       >
                         <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                         <span>Confirmar</span>
                       </button>
                     </div>
                   </div>
-
-                  {/* Ponteiro / Triângulo da Fala (Tooltip Tail apontando para o botão da Homebar) */}
-                  <div className="absolute -bottom-2 left-[58%] -translate-x-1/2 w-4 h-4 bg-[#18181b] border-r border-b border-zinc-700/80 rotate-45 z-20"></div>
                 </div>
               )}
 
