@@ -101,15 +101,15 @@ export default function App() {
   const [abaAtivaHomebar, setAbaAtivaHomebar] = useState(null); // null | 'camera' | 'audio' | 'registro'
   const [avisoValidacaoHomebar, setAvisoValidacaoHomebar] = useState(null);
 
-  // Lista padrão de sintomas de fábrica
+  // Lista padrão de sintomas de fábrica (Formato Penumbra Radio)
   const sintomasPadrao = [
-    { id: 2, descricao: 'Vazamento Pneumático / Queda de Pressão de Ar', categoria: 'pneumatica' },
-    { id: 1, descricao: 'Falha de Alimentação / Peça Travada no Posto', categoria: 'mecanica' },
-    { id: 3, descricao: 'Sensor Óptico Apagado / Falha Elétrica', categoria: 'eletrica' },
-    { id: 4, descricao: 'Superaquecimento ou Fumaça no Motor/Mancal', categoria: 'mecanica' },
-    { id: 5, descricao: 'Ruído Estranho / Vibração Anormal na Linha', categoria: 'mecanica' },
-    { id: 6, descricao: 'Braço Robótico / Pinça não trava no ciclo', categoria: 'automacao' },
-    { id: 7, descricao: 'Outro Defeito / Anomalia Mecânica', categoria: 'geral' }
+    { id: 2, titulo: 'Vazamento Pneumático', hint: 'Queda de pressão de ar ou mangueira rompida', descricao: 'Vazamento Pneumático / Queda de Pressão de Ar', categoria: 'pneumatica' },
+    { id: 1, titulo: 'Falha de Alimentação', hint: 'Peça travada no posto ou magazine vazio', descricao: 'Falha de Alimentação / Peça Travada no Posto', categoria: 'mecanica' },
+    { id: 3, titulo: 'Falha Elétrica / Sensor', hint: 'Sensor óptico apagado ou interrupção de sinal', descricao: 'Sensor Óptico Apagado / Falha Elétrica', categoria: 'eletrica' },
+    { id: 4, titulo: 'Superaquecimento / Fumaça', hint: 'Temperatura excessiva no motor ou mancal', descricao: 'Superaquecimento ou Fumaça no Motor/Mancal', categoria: 'mecanica' },
+    { id: 5, titulo: 'Ruído Estranho / Vibração', hint: 'Vibração anormal ou estalos mecânicos na linha', descricao: 'Ruído Estranho / Vibração Anormal na Linha', categoria: 'mecanica' },
+    { id: 6, titulo: 'Braço Robótico / Pinça', hint: 'Não trava no ciclo ou perda de posicionamento', descricao: 'Braço Robótico / Pinça não trava no ciclo', categoria: 'automacao' },
+    { id: 7, titulo: 'Outro Defeito / Anomalia', hint: 'Desvio operacional complementar não listado', descricao: 'Outro Defeito / Anomalia Mecânica', categoria: 'geral' }
   ];
 
   // Limpeza de streams e timers ao desmontar
@@ -401,12 +401,12 @@ export default function App() {
     setTela('gabarito');
   }
 
-  // Marcar/Desmarcar Confere no Gabarito
+  // Selecionar/Desmarcar Sintoma no formato Penumbra Radio
   function toggleSintoma(sintoma) {
     if (sintomasSelecionados.some((s) => s.id === sintoma.id)) {
-      setSintomasSelecionados(sintomasSelecionados.filter((s) => s.id !== sintoma.id));
+      setSintomasSelecionados([]);
     } else {
-      setSintomasSelecionados([...sintomasSelecionados, sintoma]);
+      setSintomasSelecionados([sintoma]);
     }
   }
 
@@ -718,42 +718,40 @@ export default function App() {
 
           {/* CORPO DO HUD: SINTOMAS E IMPACTO (LIMPO, SEM ROLAGEM EXCESSIVA) */}
           <div className="p-4 space-y-5 flex-1 pb-32">
-            {/* 1. SEÇÃO POSSÍVEL PROBLEMA */}
-            <div className="space-y-2.5">
-              <h2 className="text-sm font-semibold text-white tracking-wide">
-                Possível Problema
-              </h2>
-              <div className="space-y-2">
-                {sintomasDisponiveis.map((item) => {
-                  const isChecked = sintomasSelecionados.some((s) => s.id === item.id);
-                  return (
-                    <div
-                      key={item.id}
-                      onClick={() => toggleSintoma(item)}
-                      className={`p-3 bg-[#161616] border transition-all cursor-pointer rounded-[2px] flex items-center gap-3 active:scale-[0.99] ${
-                        isChecked
-                          ? 'border-white/50 ring-1 ring-white/30'
-                          : 'border-zinc-800 hover:border-zinc-700'
-                      }`}
-                    >
-                      {/* Caixa de Confere Quadrada (Cinza #525252 no repouso) */}
-                      <div
-                        className={`w-6 h-6 rounded-[2px] flex items-center justify-center shrink-0 transition-all ${
-                          isChecked
-                            ? 'bg-white text-black font-bold'
-                            : 'bg-[#525252] border border-zinc-600'
-                        }`}
-                      >
-                        {isChecked && <Check className="w-4 h-4 stroke-[3]" />}
-                      </div>
-                      <span className="text-xs sm:text-sm font-medium text-white leading-snug">
-                        {item.descricao}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            {/* 1. SEÇÃO POSSÍVEL PROBLEMA (PENUMBRA RADIO GROUP BY UIVERSE-ASTRONAUT) */}
+            <fieldset className="penumbra-radio-group">
+              <legend className="penumbra-radio-group__legend">Possível Problema</legend>
+              {sintomasDisponiveis.map((item) => {
+                const isChecked = sintomasSelecionados.some((s) => s.id === item.id);
+                const titulo = item.titulo || (item.descricao.includes('/') ? item.descricao.split('/')[0].trim() : item.descricao);
+                const hint = item.hint || (item.descricao.includes('/') ? item.descricao.split('/').slice(1).join('/').trim() : item.categoria || 'Anomalia operacional');
+
+                return (
+                  <label
+                    key={item.id}
+                    className={`penumbra-radio ${isChecked ? 'is-selected' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toggleSintoma(item);
+                    }}
+                  >
+                    <input
+                      className="penumbra-radio__input"
+                      type="radio"
+                      name="penumbra-problema"
+                      value={item.id}
+                      checked={isChecked}
+                      readOnly
+                    />
+                    <span className="penumbra-radio__mark" aria-hidden="true"></span>
+                    <span className="penumbra-radio__text">
+                      <span className="penumbra-radio__title">{titulo}</span>
+                      <span className="penumbra-radio__hint">{hint}</span>
+                    </span>
+                  </label>
+                );
+              })}
+            </fieldset>
 
             {/* 2. SEÇÃO IMPACTO DO PROBLEMA NA LINHA */}
             <div className="space-y-3 pt-1">

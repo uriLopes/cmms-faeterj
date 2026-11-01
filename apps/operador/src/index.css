@@ -676,4 +676,125 @@
   position: relative;
 }
 
+/* From Uiverse.io by uiverse-astronaut - Penumbra Radio Group */
+.penumbra-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  margin: 0;
+  padding: 16px;
+  background-color: #101013;
+  border: 1px solid #23232a;
+  border-radius: 10px;
+  font-family: inherit;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.penumbra-radio-group__legend {
+  margin: 0 0 12px;
+  padding: 0 4px;
+  color: #9ba0ab;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.penumbra-radio {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 180ms ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.penumbra-radio:hover {
+  background-color: #17171c;
+}
+
+.penumbra-radio.is-selected {
+  background-color: rgba(232, 229, 220, 0.06);
+}
+
+.penumbra-radio__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.penumbra-radio__mark {
+  position: relative;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  background-color: #17171c;
+  border: 1px solid #23232a;
+  border-radius: 999px;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.penumbra-radio__mark::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background-color: #08080a;
+  border-radius: 999px;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 160ms ease;
+}
+
+.penumbra-radio__input:checked + .penumbra-radio__mark,
+.penumbra-radio.is-selected .penumbra-radio__mark {
+  background-color: #e8e5dc;
+  border-color: #e8e5dc;
+}
+
+.penumbra-radio__input:checked + .penumbra-radio__mark::after,
+.penumbra-radio.is-selected .penumbra-radio__mark::after {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.penumbra-radio__input:focus-visible + .penumbra-radio__mark {
+  box-shadow: 0 0 0 6px rgba(232, 229, 220, 0.18);
+  border-color: #e8e5dc;
+}
+
+.penumbra-radio__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.penumbra-radio__title {
+  color: #f4f4f5;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
+}
+
+.penumbra-radio__hint {
+  color: #9ba0ab;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+
 
