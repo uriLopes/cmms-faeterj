@@ -38,6 +38,11 @@ export default function App() {
   const [splashOpacidade, setSplashOpacidade] = useState(true);
 
   useEffect(() => {
+    // Limpa qualquer rascunho residual para que o app sempre inicie na câmera do QR code
+    try {
+      localStorage.removeItem('cmms_trigger_active_draft');
+    } catch (e) {}
+
     // Transição limpa e sólida para evitar qualquer oscilação de cor entre branco e cinza
     const timerRemover = setTimeout(() => {
       setSplashVisivel(false);
@@ -49,16 +54,7 @@ export default function App() {
   }, []);
 
   // Telas: 'scanner' | 'duplicado_aviso' | 'gabarito' | 'sucesso'
-  const [tela, setTela] = useState(() => {
-    try {
-      const saved = localStorage.getItem('cmms_trigger_active_draft');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.ativoData && parsed.tela === 'gabarito') return 'gabarito';
-      }
-    } catch (e) {}
-    return 'scanner';
-  });
+  const [tela, setTela] = useState('scanner');
   const processandoQRRef = useRef(false);
 
   // 1. Identificação do Operador: Validada estritamente pelo Identifiant (Sem digitação livre de nome)
@@ -76,79 +72,25 @@ export default function App() {
   const [sucessoOperador, setSucessoOperador] = useState(null);
 
   // 2. Dados do Ativo escaneado e Trava de Duplicidade
-  const [ativoData, setAtivoData] = useState(() => {
-    try {
-      const saved = localStorage.getItem('cmms_trigger_active_draft');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.ativoData && parsed.tela === 'gabarito') return parsed.ativoData;
-      }
-    } catch (e) {}
-    return null;
-  });
+  const [ativoData, setAtivoData] = useState(null);
   const [carregandoAtivo, setCarregandoAtivo] = useState(false);
   const [chamadoAtivoAlerta, setChamadoAtivoAlerta] = useState(null);
   const [ignorarTravaDuplicada, setIgnorarTravaDuplicada] = useState(false);
 
   // 3. Flag de Criticidade / Status Operacional da Máquina (3 Estados Obrigatórios)
   // 'maquina_parada' (Crítico/Emergência) | 'operando_com_restricao' (Alerta) | 'melhoria_estetica' (Baixa)
-  const [statusImpacto, setStatusImpacto] = useState(() => {
-    try {
-      const saved = localStorage.getItem('cmms_trigger_active_draft');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.statusImpacto) return parsed.statusImpacto;
-      }
-    } catch (e) {}
-    return 'maquina_parada';
-  });
+  const [statusImpacto, setStatusImpacto] = useState('maquina_parada');
 
   // 4. Gabarito de Sintomas e Observação
   const [sintomasDisponiveis, setSintomasDisponiveis] = useState([]);
-  const [sintomasSelecionados, setSintomasSelecionados] = useState(() => {
-    try {
-      const saved = localStorage.getItem('cmms_trigger_active_draft');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.sintomasSelecionados) return parsed.sintomasSelecionados;
-      }
-    } catch (e) {}
-    return [];
-  });
-  const [observacaoTexto, setObservacaoTexto] = useState(() => {
-    try {
-      const saved = localStorage.getItem('cmms_trigger_active_draft');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.observacaoTexto) return parsed.observacaoTexto;
-      }
-    } catch (e) {}
-    return '';
-  });
+  const [sintomasSelecionados, setSintomasSelecionados] = useState([]);
+  const [observacaoTexto, setObservacaoTexto] = useState('');
 
   // 5. Anexo de Mídia Rápido (Câmera Integrada In-App + Áudio de ruído)
   const [modalCameraAberto, setModalCameraAberto] = useState(false);
-  const [fotoBase64, setFotoBase64] = useState(() => {
-    try {
-      const saved = localStorage.getItem('cmms_trigger_active_draft');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.fotoBase64) return parsed.fotoBase64;
-      }
-    } catch (e) {}
-    return null;
-  });
+  const [fotoBase64, setFotoBase64] = useState(null);
   const cameraInputRef = useRef(null);
-  const [audioBase64, setAudioBase64] = useState(() => {
-    try {
-      const saved = localStorage.getItem('cmms_trigger_active_draft');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.audioBase64) return parsed.audioBase64;
-      }
-    } catch (e) {}
-    return null;
-  });
+  const [audioBase64, setAudioBase64] = useState(null);
   const [gravandoAudio, setGravandoAudio] = useState(false);
   const [tempoGravacao, setTempoGravacao] = useState(0);
   const [tocandoAudio, setTocandoAudio] = useState(false);
@@ -187,23 +129,6 @@ export default function App() {
     };
   }, []);
 
-  // Salva rascunho de tela no localStorage para tolerância total a recarregamentos acidentais no mobile
-  useEffect(() => {
-    if (tela === 'gabarito' && ativoData) {
-      const draft = {
-        tela: 'gabarito',
-        ativoData,
-        sintomasSelecionados,
-        statusImpacto,
-        observacaoTexto,
-        fotoBase64,
-        audioBase64
-      };
-      localStorage.setItem('cmms_trigger_active_draft', JSON.stringify(draft));
-    } else if (tela === 'sucesso') {
-      localStorage.removeItem('cmms_trigger_active_draft');
-    }
-  }, [tela, ativoData, sintomasSelecionados, statusImpacto, observacaoTexto, fotoBase64, audioBase64]);
 
   function abrirModalOperador() {
     setCodigoInput('');
