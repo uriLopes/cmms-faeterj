@@ -664,7 +664,7 @@ export default function App() {
             <button
               type="button"
               onClick={voltarAoScanner}
-              className="w-10 h-10 rounded-full bg-[#252530] border border-white/10 flex items-center justify-center text-white hover:bg-[#323240] transition-all active:scale-95 shadow-md"
+              className="w-10 h-10 rounded-full bg-[#2B2B36] border border-white/15 flex items-center justify-center text-white hover:bg-[#383848] transition-all active:scale-95 shadow-md"
               title="Voltar ao scanner"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -680,7 +680,7 @@ export default function App() {
             <button
               type="button"
               onClick={voltarAoScanner}
-              className="w-10 h-10 rounded-full bg-[#252530] border border-white/10 flex items-center justify-center text-white hover:bg-[#323240] transition-all active:scale-95 shadow-md"
+              className="w-10 h-10 rounded-full bg-[#2B2B36] border border-white/15 flex items-center justify-center text-white hover:bg-[#383848] transition-all active:scale-95 shadow-md"
               title="Cancelar e escanear outra"
             >
               <X className="w-5 h-5" />
@@ -709,8 +709,8 @@ export default function App() {
                       className="penumbra-radio__mark"
                       aria-hidden="true"
                       style={{
-                        backgroundColor: isChecked ? '#FFFFFF' : 'transparent',
-                        borderColor: isChecked ? '#FFFFFF' : '#484858'
+                        backgroundColor: isChecked ? '#FFFFFF' : '#22232E',
+                        borderColor: isChecked ? '#FFFFFF' : '#58596D'
                       }}
                     >
                       {isChecked && (
@@ -753,8 +753,8 @@ export default function App() {
                   className="penumbra-radio__mark"
                   aria-hidden="true"
                   style={{
-                    backgroundColor: statusImpacto === 'maquina_parada' ? '#EF4444' : 'transparent',
-                    borderColor: statusImpacto === 'maquina_parada' ? '#EF4444' : '#484858'
+                    backgroundColor: statusImpacto === 'maquina_parada' ? '#EF4444' : '#22232E',
+                    borderColor: statusImpacto === 'maquina_parada' ? '#EF4444' : '#58596D'
                   }}
                 >
                   {statusImpacto === 'maquina_parada' && (
@@ -795,8 +795,8 @@ export default function App() {
                   className="penumbra-radio__mark"
                   aria-hidden="true"
                   style={{
-                    backgroundColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : 'transparent',
-                    borderColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#484858'
+                    backgroundColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#22232E',
+                    borderColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#58596D'
                   }}
                 >
                   {statusImpacto === 'operando_com_restricao' && (
@@ -837,8 +837,8 @@ export default function App() {
                   className="penumbra-radio__mark"
                   aria-hidden="true"
                   style={{
-                    backgroundColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : 'transparent',
-                    borderColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#484858'
+                    backgroundColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#22232E',
+                    borderColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#58596D'
                   }}
                 >
                   {statusImpacto === 'melhoria_estetica' && (
@@ -1156,7 +1156,7 @@ export default function App() {
               )}
 
               {/* A CÁPSULA DA HOMEBAR: 4 ITENS FIÉIS AO DESIGN SYSTEM (@jsav.design & WORKOUTS VIBE) */}
-              <nav className="h-[68px] bg-[#16161D]/95 border border-white/10 rounded-full px-3 py-2 flex items-center justify-between shadow-lg backdrop-blur-xl">
+              <nav className="h-[68px] bg-[#181822]/95 border border-white/12 rounded-full px-3 py-2 flex items-center justify-between shadow-2xl backdrop-blur-xl">
                 {/* 1. CÂMERA */}
                 <button
                   type="button"
@@ -1164,7 +1164,7 @@ export default function App() {
                   className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
                     abaAtivaHomebar === 'camera'
                       ? 'bg-white text-zinc-950 shadow-md scale-105 border-transparent'
-                      : 'bg-[#252530] text-white hover:bg-[#343444] border border-white/10 shadow-sm active:scale-95'
+                      : 'bg-[#2B2B38] text-white hover:bg-[#38384A] border border-white/15 shadow-sm active:scale-95'
                   }`}
                   title="Câmera da falha"
                 >
@@ -1183,7 +1183,7 @@ export default function App() {
                       ? 'bg-[#EF4444] text-white animate-pulse shadow-md border-transparent'
                       : abaAtivaHomebar === 'audio'
                       ? 'bg-white text-zinc-950 shadow-md scale-105 border-transparent'
-                      : 'bg-[#252530] text-white hover:bg-[#343444] border border-white/10 shadow-sm active:scale-95'
+                      : 'bg-[#2B2B38] text-white hover:bg-[#38384A] border border-white/15 shadow-sm active:scale-95'
                   }`}
                   title="Gravar áudio do ruído"
                 >
@@ -1204,7 +1204,7 @@ export default function App() {
                   className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
                     abaAtivaHomebar === 'registro'
                       ? 'bg-white text-zinc-950 shadow-md scale-105 border-transparent'
-                      : 'bg-[#252530] text-white hover:bg-[#343444] border border-white/10 shadow-sm active:scale-95'
+                      : 'bg-[#2B2B38] text-white hover:bg-[#38384A] border border-white/15 shadow-sm active:scale-95'
                   }`}
                   title="Registro escrito complementar"
                 >
