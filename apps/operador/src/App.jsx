@@ -27,7 +27,6 @@ import {
 } from 'lucide-react';
 import ScannerCamera from './components/ScannerCamera';
 import VanguardLogo from './components/VanguardLogo';
-import CameraFotoModal from './components/CameraFotoModal';
 
 export default function App() {
   // 0. Splash Screen inicial com animação Uiverse.io (#EF4444)
@@ -78,9 +77,9 @@ export default function App() {
   const [sintomasSelecionados, setSintomasSelecionados] = useState([]);
   const [observacaoTexto, setObservacaoTexto] = useState('');
 
-  // 5. Anexo de Mídia Rápido (Foto in-app + Áudio de ruído)
+  // 5. Anexo de Mídia Rápido (Câmera Nativa do Celular + Áudio de ruído)
   const [fotoBase64, setFotoBase64] = useState(null);
-  const [modalFotoAberta, setModalFotoAberta] = useState(false);
+  const cameraInputRef = useRef(null);
   const [audioBase64, setAudioBase64] = useState(null);
   const [gravandoAudio, setGravandoAudio] = useState(false);
   const [tempoGravacao, setTempoGravacao] = useState(0);
@@ -278,6 +277,53 @@ export default function App() {
     setGravandoAudio(false);
   }
 
+  // Acionamento direto da Câmera Nativa do Celular (Samsung, Motorola, iOS, Xiaomi)
+  function acionarCameraNativa() {
+    if (cameraInputRef.current) {
+      cameraInputRef.current.value = '';
+      cameraInputRef.current.click();
+    }
+  }
+
+  function handleFotoNativaCapturada(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 1280;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+        setFotoBase64(dataUrl);
+        setAbaAtivaHomebar('camera');
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
   // AÇÃO: QR Code Lido com Sucesso (Trava contra múltiplos disparos + Detecção de Duplicidade)
   async function handleQRScanned(qrContent) {
     if (processandoQRRef.current) return;
@@ -410,7 +456,7 @@ export default function App() {
 
     if (aba === 'camera') {
       if (!fotoBase64) {
-        setModalFotoAberta(true);
+        acionarCameraNativa();
       } else {
         setAbaAtivaHomebar((prev) => (prev === 'camera' ? null : 'camera'));
       }
@@ -855,7 +901,7 @@ export default function App() {
                         <div className="flex gap-2">
                           <button
                             type="button"
-                            onClick={() => setModalFotoAberta(true)}
+                            onClick={acionarCameraNativa}
                             className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-xs rounded-[2px] font-semibold border border-zinc-700 active:scale-95 transition-all"
                           >
                             Tirar outra
@@ -878,7 +924,7 @@ export default function App() {
                       </p>
                       <button
                         type="button"
-                        onClick={() => setModalFotoAberta(true)}
+                        onClick={acionarCameraNativa}
                         className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs rounded-[2px] flex items-center justify-center gap-2 border border-zinc-700 shadow-md active:scale-95 transition-all"
                       >
                         <Camera className="w-4 h-4 text-emerald-400" />
@@ -1163,11 +1209,14 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DE CÂMERA INTEGRADA (ZERO RECARREGAMENTO DE ABA NO CELULAR) */}
-      <CameraFotoModal
-        isOpen={modalFotoAberta}
-        onClose={() => setModalFotoAberta(false)}
-        onFotoConfirmada={(foto) => setFotoBase64(foto)}
+      {/* DISPARADOR NATIVO DA CÂMERA DO CELULAR (SAMSUNG / IPHONE / MOTOROLA / XIAOMI) */}
+      <input
+        type="file"
+        ref={cameraInputRef}
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleFotoNativaCapturada}
       />
     </div>
   );
