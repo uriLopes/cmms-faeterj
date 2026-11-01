@@ -698,28 +698,41 @@ export default function App() {
                 const hint = item.hint || (item.descricao.includes('/') ? item.descricao.split('/').slice(1).join('/').trim() : item.categoria || 'Anomalia operacional');
 
                 return (
-                  <label
+                  <div
                     key={item.id}
+                    role="button"
+                    tabIndex={0}
                     className={`penumbra-radio ${isChecked ? 'is-selected' : ''}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      toggleSintoma(item);
-                    }}
+                    onClick={() => toggleSintoma(item)}
                   >
-                    <input
-                      className="penumbra-radio__input"
-                      type="radio"
-                      name="penumbra-problema"
-                      value={item.id}
-                      checked={isChecked}
-                      readOnly
-                    />
-                    <span className="penumbra-radio__mark" aria-hidden="true"></span>
+                    <span
+                      className="penumbra-radio__mark"
+                      aria-hidden="true"
+                      style={{
+                        backgroundColor: isChecked ? '#FFFFFF' : 'transparent',
+                        borderColor: isChecked ? '#FFFFFF' : '#484858'
+                      }}
+                    >
+                      {isChecked && (
+                        <span
+                          style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '999px',
+                            backgroundColor: '#0E0E12'
+                          }}
+                        />
+                      )}
+                    </span>
                     <span className="penumbra-radio__text">
                       <span className="penumbra-radio__title">{titulo}</span>
                       <span className="penumbra-radio__hint">{hint}</span>
                     </span>
-                  </label>
+                  </div>
                 );
               })}
             </fieldset>
@@ -729,23 +742,36 @@ export default function App() {
               <legend className="penumbra-radio-group__legend">Impacto do Problema na Linha</legend>
 
               {/* 1. ALTO - MÁQUINA PARADA (#EF4444) */}
-              <label
+              <div
+                role="button"
+                tabIndex={0}
                 className={`penumbra-radio ${statusImpacto === 'maquina_parada' ? 'is-selected' : ''}`}
                 data-impact="alto"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setStatusImpacto('maquina_parada');
-                }}
+                onClick={() => setStatusImpacto('maquina_parada')}
               >
-                <input
-                  className="penumbra-radio__input"
-                  type="radio"
-                  name="impacto-penumbra"
-                  value="maquina_parada"
-                  checked={statusImpacto === 'maquina_parada'}
-                  readOnly
-                />
-                <span className="penumbra-radio__mark" aria-hidden="true"></span>
+                <span
+                  className="penumbra-radio__mark"
+                  aria-hidden="true"
+                  style={{
+                    backgroundColor: statusImpacto === 'maquina_parada' ? '#EF4444' : 'transparent',
+                    borderColor: statusImpacto === 'maquina_parada' ? '#EF4444' : '#484858'
+                  }}
+                >
+                  {statusImpacto === 'maquina_parada' && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '999px',
+                        backgroundColor: '#FFFFFF'
+                      }}
+                    />
+                  )}
+                </span>
                 <span className="penumbra-radio__text">
                   <span className="penumbra-radio__title flex items-center gap-2">
                     <span className="text-[#EF4444] font-bold">ALTO</span>
@@ -755,26 +781,39 @@ export default function App() {
                     Interrupção total da produção no posto de trabalho
                   </span>
                 </span>
-              </label>
+              </div>
 
               {/* 2. MÉDIO - OPERANDO COM RESTRIÇÃO (#F59E0B) */}
-              <label
+              <div
+                role="button"
+                tabIndex={0}
                 className={`penumbra-radio ${statusImpacto === 'operando_com_restricao' ? 'is-selected' : ''}`}
                 data-impact="medio"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setStatusImpacto('operando_com_restricao');
-                }}
+                onClick={() => setStatusImpacto('operando_com_restricao')}
               >
-                <input
-                  className="penumbra-radio__input"
-                  type="radio"
-                  name="impacto-penumbra"
-                  value="operando_com_restricao"
-                  checked={statusImpacto === 'operando_com_restricao'}
-                  readOnly
-                />
-                <span className="penumbra-radio__mark" aria-hidden="true"></span>
+                <span
+                  className="penumbra-radio__mark"
+                  aria-hidden="true"
+                  style={{
+                    backgroundColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : 'transparent',
+                    borderColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#484858'
+                  }}
+                >
+                  {statusImpacto === 'operando_com_restricao' && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '999px',
+                        backgroundColor: '#0E0E12'
+                      }}
+                    />
+                  )}
+                </span>
                 <span className="penumbra-radio__text">
                   <span className="penumbra-radio__title flex items-center gap-2">
                     <span className="text-[#F59E0B] font-bold">MÉDIO</span>
@@ -784,26 +823,39 @@ export default function App() {
                     Velocidade reduzida, retrabalho ou desvio temporário
                   </span>
                 </span>
-              </label>
+              </div>
 
               {/* 3. BAIXO - SEM IMPACTO / MELHORIA (#10B981) */}
-              <label
+              <div
+                role="button"
+                tabIndex={0}
                 className={`penumbra-radio ${statusImpacto === 'melhoria_estetica' ? 'is-selected' : ''}`}
                 data-impact="baixo"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setStatusImpacto('melhoria_estetica');
-                }}
+                onClick={() => setStatusImpacto('melhoria_estetica')}
               >
-                <input
-                  className="penumbra-radio__input"
-                  type="radio"
-                  name="impacto-penumbra"
-                  value="melhoria_estetica"
-                  checked={statusImpacto === 'melhoria_estetica'}
-                  readOnly
-                />
-                <span className="penumbra-radio__mark" aria-hidden="true"></span>
+                <span
+                  className="penumbra-radio__mark"
+                  aria-hidden="true"
+                  style={{
+                    backgroundColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : 'transparent',
+                    borderColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#484858'
+                  }}
+                >
+                  {statusImpacto === 'melhoria_estetica' && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '999px',
+                        backgroundColor: '#0E0E12'
+                      }}
+                    />
+                  )}
+                </span>
                 <span className="penumbra-radio__text">
                   <span className="penumbra-radio__title flex items-center gap-2">
                     <span className="text-[#10B981] font-bold">BAIXO</span>
@@ -813,7 +865,7 @@ export default function App() {
                     Melhoria estética ou anomalia que não impede o ciclo
                   </span>
                 </span>
-              </label>
+              </div>
             </fieldset>
           </div>
 

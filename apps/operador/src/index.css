@@ -753,12 +753,13 @@
   width: 18px;
   height: 18px;
   margin-top: 2px;
-  background-color: #24242E;
-  border: 1.5px solid #484858;
+  background-color: transparent !important;
+  border: 1.5px solid #484858 !important;
   border-radius: 999px;
   -webkit-appearance: none;
   appearance: none;
   forced-color-adjust: none;
+  box-shadow: none !important;
   transition:
     border-color 180ms ease,
     background-color 180ms ease,
@@ -767,25 +768,11 @@
 
 /* Blindagem contra auto-dark mode mobile e herança indesejada */
 .penumbra-radio:not(.is-selected) .penumbra-radio__mark {
-  background-color: #24242E !important;
+  background-color: transparent !important;
   border: 1.5px solid #484858 !important;
   box-shadow: none !important;
 }
 
-.penumbra-radio__mark::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  background-color: #0E0E12;
-  border-radius: 999px;
-  transform: translate(-50%, -50%) scale(0);
-  transition: transform 160ms ease;
-}
-
-.penumbra-radio__input:checked + .penumbra-radio__mark,
 .penumbra-radio.is-selected .penumbra-radio__mark {
   background-color: #FFFFFF !important;
   border-color: #FFFFFF !important;
@@ -830,22 +817,19 @@
 }
 
 /* Impactos com acentuação cromática Corp.Vanguard suave e elegante */
-.penumbra-radio[data-impact="alto"].is-selected .penumbra-radio__mark,
-.penumbra-radio[data-impact="alto"] .penumbra-radio__input:checked + .penumbra-radio__mark {
+.penumbra-radio[data-impact="alto"].is-selected .penumbra-radio__mark {
   background-color: #EF4444 !important;
   border-color: #EF4444 !important;
   box-shadow: 0 0 6px rgba(239, 68, 68, 0.3) !important;
 }
 
-.penumbra-radio[data-impact="medio"].is-selected .penumbra-radio__mark,
-.penumbra-radio[data-impact="medio"] .penumbra-radio__input:checked + .penumbra-radio__mark {
+.penumbra-radio[data-impact="medio"].is-selected .penumbra-radio__mark {
   background-color: #F59E0B !important;
   border-color: #F59E0B !important;
   box-shadow: 0 0 6px rgba(245, 158, 11, 0.3) !important;
 }
 
-.penumbra-radio[data-impact="baixo"].is-selected .penumbra-radio__mark,
-.penumbra-radio[data-impact="baixo"] .penumbra-radio__input:checked + .penumbra-radio__mark {
+.penumbra-radio[data-impact="baixo"].is-selected .penumbra-radio__mark {
   background-color: #10B981 !important;
   border-color: #10B981 !important;
   box-shadow: 0 0 6px rgba(16, 185, 129, 0.3) !important;
