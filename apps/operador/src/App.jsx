@@ -592,7 +592,7 @@ export default function App() {
       {/* MODAL ULTRA-MINIMALISTA DE IDENTIFIANT (3 ESTADOS: REPOUSO, SUCESSO VERDE #10B981, ERRO VERMELHO #EF4444) */}
       {modalEditarOperador && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-[#1C1C22] border border-white/10 rounded-2xl max-w-[320px] w-full overflow-hidden shadow-2xl flex flex-col">
+          <div className="bg-[#16161A] border border-white/[0.08] rounded-2xl max-w-[320px] w-full overflow-hidden shadow-2xl flex flex-col">
             {/* Bloco Superior: Fechar + Linha de Ação */}
             <div className="p-4 space-y-3">
               {/* Fechar no canto superior direito */}
@@ -604,7 +604,7 @@ export default function App() {
                     setErroOperador(null);
                     setSucessoOperador(null);
                   }}
-                  className="w-7 h-7 rounded-full bg-[#252530] text-zinc-300 hover:text-white flex items-center justify-center font-bold text-sm leading-none transition-transform active:scale-90"
+                  className="w-7 h-7 rounded-full bg-[#1E1E26] text-[#8E8E93] hover:text-white flex items-center justify-center font-bold text-sm leading-none transition-transform active:scale-90"
                   title="Fechar"
                 >
                   ✕
@@ -641,7 +641,7 @@ export default function App() {
                   type="button"
                   disabled={validandoOperador || !codigoInput.trim()}
                   onClick={() => validarEConfirmarOperador(codigoInput)}
-                  className="bg-[#282834] hover:bg-[#343444] text-white font-semibold text-xs sm:text-sm rounded-xl px-3.5 h-[42px] border border-white/10 transition-all flex items-center justify-center min-w-[75px] shrink-0 active:scale-95 disabled:opacity-40"
+                  className="bg-[#22222C] hover:bg-[#2A2A36] text-white font-semibold text-xs sm:text-sm rounded-xl px-3.5 h-[42px] border border-white/[0.08] transition-all flex items-center justify-center min-w-[75px] shrink-0 active:scale-95 disabled:opacity-40"
                 >
                   {validandoOperador ? (
                     <RefreshCw className="w-4 h-4 animate-spin text-white" />
@@ -699,30 +699,30 @@ export default function App() {
               <h2 className="text-lg font-black text-white leading-tight">
                 Chamado já em andamento para esta máquina!
               </h2>
-              <p className="text-xs text-zinc-200 font-medium">
+              <p className="text-xs text-[#8E8E93] font-medium">
                 A equipe técnica já foi notificada. Evite tickets repetidos na troca de turno.
               </p>
             </div>
 
             {/* Dossiê do Chamado Ativo */}
-            <div className="bg-[#1C1C22] border border-amber-500/40 rounded-2xl p-4 text-xs font-mono space-y-2 shadow-xl">
-              <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
-                <span className="text-zinc-200 font-semibold">Ordem de Serviço:</span>
+            <div className="bg-[#16161A] border border-amber-500/30 rounded-2xl p-4 text-xs font-mono space-y-2 shadow-xl">
+              <div className="flex justify-between items-center border-b border-white/[0.08] pb-2">
+                <span className="text-[#8E8E93] font-semibold">Ordem de Serviço:</span>
                 <span className="text-amber-400 font-black text-sm">{chamadoAtivoAlerta?.numero_os}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-zinc-200 font-semibold">Tempo Aberto:</span>
+                <span className="text-[#8E8E93] font-semibold">Tempo Aberto:</span>
                 <span className="text-white font-bold">
                   Aberto há {chamadoAtivoAlerta?.minutos_aberto || 1} min
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-zinc-200 font-semibold">Operador Solicitante:</span>
-                <span className="text-zinc-200">{chamadoAtivoAlerta?.operador_nome}</span>
+                <span className="text-[#8E8E93] font-semibold">Operador Solicitante:</span>
+                <span className="text-white">{chamadoAtivoAlerta?.operador_nome}</span>
               </div>
-              <div className="pt-1 border-t border-zinc-800/80">
-                <span className="text-zinc-200 block text-[10px] uppercase font-bold">Problema Reportado:</span>
-                <p className="text-zinc-200 font-sans text-xs mt-0.5">
+              <div className="pt-1 border-t border-white/[0.08]">
+                <span className="text-[#8E8E93] block text-[10px] uppercase font-bold">Problema Reportado:</span>
+                <p className="text-white font-sans text-xs mt-0.5">
                   "{chamadoAtivoAlerta?.descricao_exibicao}"
                 </p>
               </div>
@@ -743,7 +743,7 @@ export default function App() {
             <button
               type="button"
               onClick={prosseguirComReforco}
-              className="w-full py-3 bg-[#252530] border border-white/10 hover:bg-[#323240] text-zinc-200 hover:text-white font-bold text-xs rounded-xl transition-all"
+              className="w-full py-3 bg-[#1E1E26] border border-white/[0.08] hover:bg-[#282832] text-[#8E8E93] hover:text-white font-bold text-xs rounded-xl transition-all"
             >
               Agravou o problema? Abrir Reforço de OS
             </button>
@@ -755,17 +755,17 @@ export default function App() {
       {tela === 'gabarito' && (
         <div className="flex-1 min-h-0 flex flex-col h-full overflow-hidden bg-[#000000] relative">
           {/* TOPO: BANNER DA MÁQUINA (EX: MV3-ROB-04) COM PERFEITA SIMETRIA BILATERAL */}
-          <div className="bg-[#000000]/95 backdrop-blur-md py-4 px-4 sm:px-5 border-b border-white/10 flex items-center justify-between shrink-0 z-20 shadow-md">
+          <div className="bg-[#000000]/95 backdrop-blur-md py-4 px-4 sm:px-5 border-b border-white/[0.08] flex items-center justify-between shrink-0 z-20 shadow-md">
             <button
               type="button"
               onClick={voltarAoScanner}
-              className="w-10 h-10 rounded-full bg-[#2B2B36] border border-white/15 flex items-center justify-center text-white hover:bg-[#383848] transition-all active:scale-95 shadow-md"
+              className="w-10 h-10 rounded-full bg-[#181820] border border-white/[0.08] flex items-center justify-center text-white hover:bg-[#22222A] transition-all active:scale-95 shadow-md"
               title="Voltar ao scanner"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="text-center flex flex-col items-center">
-              <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-zinc-300">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#8E8E93]">
                 Equipamento Selecionado
               </span>
               <h1 className="font-mono font-black text-xl sm:text-2xl text-white tracking-widest uppercase mt-0.5">
@@ -798,8 +798,8 @@ export default function App() {
                       className="penumbra-radio__mark"
                       aria-hidden="true"
                       style={{
-                        backgroundColor: isChecked ? '#FFFFFF' : '#22232E',
-                        borderColor: isChecked ? '#FFFFFF' : '#58596D'
+                        backgroundColor: isChecked ? '#FFFFFF' : '#16161A',
+                        borderColor: isChecked ? '#FFFFFF' : '#484858'
                       }}
                     >
                       {isChecked && (
@@ -812,7 +812,7 @@ export default function App() {
                             width: '6px',
                             height: '6px',
                             borderRadius: '999px',
-                            backgroundColor: '#0E0E12'
+                            backgroundColor: '#16161A'
                           }}
                         />
                       )}
@@ -842,8 +842,8 @@ export default function App() {
                   className="penumbra-radio__mark"
                   aria-hidden="true"
                   style={{
-                    backgroundColor: statusImpacto === 'maquina_parada' ? '#EF4444' : '#22232E',
-                    borderColor: statusImpacto === 'maquina_parada' ? '#EF4444' : '#58596D'
+                    backgroundColor: statusImpacto === 'maquina_parada' ? '#EF4444' : '#16161A',
+                    borderColor: statusImpacto === 'maquina_parada' ? '#EF4444' : '#484858'
                   }}
                 >
                   {statusImpacto === 'maquina_parada' && (
@@ -884,8 +884,8 @@ export default function App() {
                   className="penumbra-radio__mark"
                   aria-hidden="true"
                   style={{
-                    backgroundColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#22232E',
-                    borderColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#58596D'
+                    backgroundColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#16161A',
+                    borderColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#484858'
                   }}
                 >
                   {statusImpacto === 'operando_com_restricao' && (
@@ -898,7 +898,7 @@ export default function App() {
                         width: '6px',
                         height: '6px',
                         borderRadius: '999px',
-                        backgroundColor: '#0E0E12'
+                        backgroundColor: '#16161A'
                       }}
                     />
                   )}
@@ -926,8 +926,8 @@ export default function App() {
                   className="penumbra-radio__mark"
                   aria-hidden="true"
                   style={{
-                    backgroundColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#22232E',
-                    borderColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#58596D'
+                    backgroundColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#16161A',
+                    borderColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#484858'
                   }}
                 >
                   {statusImpacto === 'melhoria_estetica' && (
@@ -940,7 +940,7 @@ export default function App() {
                         width: '6px',
                         height: '6px',
                         borderRadius: '999px',
-                        backgroundColor: '#0E0E12'
+                        backgroundColor: '#16161A'
                       }}
                     />
                   )}
@@ -979,8 +979,8 @@ export default function App() {
 
               {/* CARD CONTEXTUAL FLUTUANTE: CÂMERA */}
               {abaAtivaHomebar === 'camera' && (
-                <div className="bg-[#1C1C22] border border-white/10 rounded-2xl p-4 shadow-2xl animate-slide-up space-y-3">
-                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                <div className="bg-[#16161A] border border-white/[0.08] rounded-2xl p-4 shadow-2xl animate-slide-up space-y-3">
+                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-2">
                     <div className="flex items-center gap-2">
                       <Camera className="w-4 h-4 text-white" />
                       <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
@@ -990,7 +990,7 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => setAbaAtivaHomebar(null)}
-                      className="text-zinc-300 hover:text-white p-1 text-xs"
+                      className="text-[#8E8E93] hover:text-white p-1 text-xs"
                       title="Fechar"
                     >
                       ✕
@@ -1002,7 +1002,7 @@ export default function App() {
                       <img
                         src={fotoBase64}
                         alt="Foto Anexada"
-                        className="w-16 h-16 object-cover rounded-xl border border-white/10"
+                        className="w-16 h-16 object-cover rounded-xl border border-white/[0.08]"
                       />
                       <div className="flex-1 space-y-2">
                         <span className="text-xs text-[#10B981] font-mono font-bold block">
@@ -1012,7 +1012,7 @@ export default function App() {
                           <button
                             type="button"
                             onClick={() => setModalCameraAberto(true)}
-                            className="px-3 py-1.5 bg-[#282834] hover:bg-[#343444] text-white text-xs rounded-xl font-semibold border border-white/10 active:scale-95 transition-all"
+                            className="px-3 py-1.5 bg-[#22222C] hover:bg-[#2A2A36] text-white text-xs rounded-xl font-semibold border border-white/[0.08] active:scale-95 transition-all"
                           >
                             Tirar outra
                           </button>
@@ -1029,13 +1029,13 @@ export default function App() {
                     </div>
                   ) : (
                     <div className="text-center py-2 space-y-2">
-                      <p className="text-xs text-zinc-100 font-medium">
+                      <p className="text-xs text-[#8E8E93] font-medium">
                         Nenhuma foto anexada. Registre uma evidência visual da falha.
                       </p>
                       <button
                         type="button"
                         onClick={() => setModalCameraAberto(true)}
-                        className="w-full py-2.5 bg-[#282834] hover:bg-[#343444] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 border border-white/10 shadow-md active:scale-95 transition-all"
+                        className="w-full py-2.5 bg-[#22222C] hover:bg-[#2A2A36] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 border border-white/[0.08] shadow-md active:scale-95 transition-all"
                       >
                         <Camera className="w-4 h-4 text-emerald-400" />
                         <span>Abrir Câmera</span>
@@ -1228,7 +1228,7 @@ export default function App() {
                       value={observacaoTexto}
                       onChange={(e) => setObservacaoTexto(e.target.value)}
                       placeholder="Descreva detalhes específicos da falha, sintomas secundários ou orientações para a manutenção..."
-                      className="w-full bg-[#141418] border border-white/10 rounded-xl p-3 text-xs sm:text-sm text-white placeholder-zinc-400 focus:outline-none focus:border-white resize-none transition-all"
+                      className="w-full bg-[#111114] border border-white/[0.08] rounded-xl p-3 text-xs sm:text-sm text-white placeholder-[#8E8E93] focus:outline-none focus:border-white resize-none transition-all"
                     />
                     <div className="flex items-center justify-end pt-0.5">
                       <button
@@ -1245,7 +1245,7 @@ export default function App() {
               )}
 
               {/* A CÁPSULA DA HOMEBAR: 4 ITENS FIÉIS AO DESIGN SYSTEM (@jsav.design & WORKOUTS VIBE) */}
-              <nav className="h-[68px] bg-[#181822]/95 border border-white/12 rounded-full px-3 py-2 flex items-center justify-between shadow-2xl backdrop-blur-xl">
+              <nav className="h-[68px] bg-[#14141A]/95 border border-white/[0.08] rounded-full px-3 py-2 flex items-center justify-between shadow-2xl backdrop-blur-xl">
                 {/* 1. CÂMERA */}
                 <button
                   type="button"
@@ -1253,7 +1253,7 @@ export default function App() {
                   className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
                     abaAtivaHomebar === 'camera'
                       ? 'bg-white text-zinc-950 shadow-md scale-105 border-transparent'
-                      : 'bg-[#2B2B38] text-white hover:bg-[#38384A] border border-white/15 shadow-sm active:scale-95'
+                      : 'bg-[#1E1E26] text-white hover:bg-[#282832] border border-white/[0.08] shadow-sm active:scale-95'
                   }`}
                   title="Câmera da falha"
                 >
@@ -1272,7 +1272,7 @@ export default function App() {
                       ? 'bg-[#EF4444] text-white animate-pulse shadow-md border-transparent'
                       : abaAtivaHomebar === 'audio'
                       ? 'bg-white text-zinc-950 shadow-md scale-105 border-transparent'
-                      : 'bg-[#2B2B38] text-white hover:bg-[#38384A] border border-white/15 shadow-sm active:scale-95'
+                      : 'bg-[#1E1E26] text-white hover:bg-[#282832] border border-white/[0.08] shadow-sm active:scale-95'
                   }`}
                   title="Gravar áudio do ruído"
                 >
@@ -1293,7 +1293,7 @@ export default function App() {
                   className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
                     abaAtivaHomebar === 'registro'
                       ? 'bg-white text-zinc-950 shadow-md scale-105 border-transparent'
-                      : 'bg-[#2B2B38] text-white hover:bg-[#38384A] border border-white/15 shadow-sm active:scale-95'
+                      : 'bg-[#1E1E26] text-white hover:bg-[#282832] border border-white/[0.08] shadow-sm active:scale-95'
                   }`}
                   title="Registro escrito complementar"
                 >
@@ -1356,38 +1356,38 @@ export default function App() {
               <h2 className="text-xl font-black text-white mt-1">
                 Chamado Enviado à Manutenção!
               </h2>
-              <p className="text-xs text-zinc-200 mt-1 font-medium">
+              <p className="text-xs text-[#8E8E93] mt-1 font-medium">
                 O Team Leader e a equipe técnica já receberam o alerta no Cockpit.
               </p>
             </div>
 
             {/* Dossiê da OS */}
-            <div className="bg-[#1C1C22] border border-white/10 rounded-2xl p-4 text-left space-y-2 max-w-xs mx-auto shadow-xl text-xs font-mono">
-              <div className="flex justify-between border-b border-white/10 pb-2">
-                <span className="text-zinc-200 font-semibold">Número da OS:</span>
+            <div className="bg-[#16161A] border border-white/[0.08] rounded-2xl p-4 text-left space-y-2 max-w-xs mx-auto shadow-xl text-xs font-mono">
+              <div className="flex justify-between border-b border-white/[0.08] pb-2">
+                <span className="text-[#8E8E93] font-semibold">Número da OS:</span>
                 <span className="text-white font-bold text-sm">{chamadoCriado?.numero_os}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-200 font-semibold">Impacto:</span>
+                <span className="text-[#8E8E93] font-semibold">Impacto:</span>
                 <span className="text-red-400 font-bold uppercase">
                   {statusImpacto.replace(/_/g, ' ')}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-200 font-semibold">Máquina:</span>
+                <span className="text-[#8E8E93] font-semibold">Máquina:</span>
                 <span className="text-white">{ativoData?.tag_patrimonio}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-200 font-semibold">Posto:</span>
+                <span className="text-[#8E8E93] font-semibold">Posto:</span>
                 <span className="text-white font-bold">{ativoData?.posto_trabalho}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-200 font-semibold">Operador:</span>
+                <span className="text-[#8E8E93] font-semibold">Operador:</span>
                 <span className="text-white font-bold">{nomeOperador} ({identifiant})</span>
               </div>
               {fotoBase64 && (
-                <div className="flex justify-between items-center pt-1 border-t border-white/10">
-                  <span className="text-zinc-200 font-semibold">Anexo:</span>
+                <div className="flex justify-between items-center pt-1 border-t border-white/[0.08]">
+                  <span className="text-[#8E8E93] font-semibold">Anexo:</span>
                   <span className="text-emerald-400 font-bold">1 Foto Anexada</span>
                 </div>
               )}

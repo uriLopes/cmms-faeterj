@@ -541,10 +541,10 @@ html, body, #root, * {
 }
 
 .btn-uiverse-send.btn-disabled {
-  background: #272838;
-  color: #A1A1AA;
+  background: #1C1C24;
+  color: #8E8E93;
   box-shadow: none;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   opacity: 1;
 }
 
@@ -573,9 +573,9 @@ html, body, #root, * {
 
 /* Card e Visualizador de Voz Estilo ChatGPT 4o e Tema Escuro Workouts */
 .chatgpt-voice-card {
-  background: #1C1C22;
+  background: #16161A;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
   border-radius: 24px;
 }
 
@@ -707,10 +707,10 @@ html, body, #root, * {
 
 /* Tooltip Speech Bubble Estilo Referência do Usuário */
 .tooltip-speech-bubble {
-  background: #1C1C22;
+  background: #16161A;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
   position: relative;
 }
 
@@ -722,11 +722,11 @@ html, body, #root, * {
   width: 100%;
   margin: 0;
   padding: 20px;
-  background-color: #1E1F28;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 22px;
+  background-color: #16161A;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
   font-family: inherit;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
 }
 
 .penumbra-radio-group__legend {
@@ -756,12 +756,12 @@ html, body, #root, * {
 }
 
 .penumbra-radio:hover {
-  background-color: #272836;
+  background-color: #1A1A22;
 }
 
 .penumbra-radio.is-selected {
-  background-color: #2C2D3E;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background-color: #22222C;
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .penumbra-radio__input {
@@ -784,7 +784,7 @@ html, body, #root, * {
   width: 18px;
   height: 18px;
   margin-top: 2px;
-  background-color: transparent !important;
+  background-color: #16161A !important;
   border: 1.5px solid #484858 !important;
   border-radius: 999px;
   -webkit-appearance: none;
@@ -799,7 +799,7 @@ html, body, #root, * {
 
 /* Blindagem contra auto-dark mode mobile e herança indesejada */
 .penumbra-radio:not(.is-selected) .penumbra-radio__mark {
-  background-color: transparent !important;
+  background-color: #16161A !important;
   border: 1.5px solid #484858 !important;
   box-shadow: none !important;
 }
@@ -835,7 +835,7 @@ html, body, #root, * {
 }
 
 .penumbra-radio__hint {
-  color: #D4D4D8;
+  color: #8E8E93;
   font-size: 12px;
   line-height: 1.4;
   font-weight: 500;
@@ -844,7 +844,7 @@ html, body, #root, * {
 
 .penumbra-radio:hover .penumbra-radio__hint,
 .penumbra-radio.is-selected .penumbra-radio__hint {
-  color: #FFFFFF;
+  color: #A0A0AB;
 }
 
 /* Impactos com acentuação cromática Corp.Vanguard suave e elegante */

@@ -121,7 +121,7 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
         <button
           type="button"
           onClick={onClose}
-          className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-black/60 active:scale-95 transition-all shadow-md cursor-pointer"
+          className="w-10 h-10 rounded-full bg-[#16161A]/80 backdrop-blur-md border border-white/[0.08] flex items-center justify-center text-white hover:bg-[#202028] active:scale-95 transition-all shadow-md cursor-pointer"
           title="Fechar Câmera"
         >
           <X className="w-5 h-5 stroke-[2.5]" />
@@ -130,9 +130,9 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
 
       {/* ALERTA DE ERRO DE CÂMERA CASO NÃO AUTORIZADA */}
       {erroCamera && !fotoCongelada && (
-        <div className="relative z-30 m-4 p-4 rounded-xl bg-zinc-900/90 backdrop-blur-md border border-zinc-700 text-center space-y-2">
+        <div className="relative z-30 m-4 p-4 rounded-xl bg-[#16161A]/95 backdrop-blur-md border border-white/[0.08] text-center space-y-2">
           <AlertCircle className="w-8 h-8 text-amber-400 mx-auto" />
-          <p className="text-xs text-zinc-200">{erroCamera}</p>
+          <p className="text-xs text-[#8E8E93]">{erroCamera}</p>
         </div>
       )}
 
@@ -144,7 +144,7 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
             <button
               type="button"
               onClick={() => setFotoCongelada(null)}
-              className="flex-1 py-3.5 bg-zinc-900/90 backdrop-blur-md border border-zinc-700 text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg cursor-pointer"
+              className="flex-1 py-3.5 bg-[#1E1E26] backdrop-blur-md border border-white/[0.08] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
               <span>Tirar Outra</span>

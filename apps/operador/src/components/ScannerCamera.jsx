@@ -299,14 +299,14 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
           <button
             type="button"
             onClick={onAbrirModalOperador}
-            className="cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-[#22222A]/90 backdrop-blur-md hover:bg-[#2D2D38] active:scale-95 border border-white/15 transition-all text-xs shadow-xl"
+            className="cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-[#16161A]/90 backdrop-blur-md hover:bg-[#202028] active:scale-95 border border-white/[0.08] transition-all text-xs shadow-xl"
             title="Toque para validar ou alterar Identifiant da fábrica"
           >
             <span className="font-semibold text-white text-xs">
               Operador: <strong className="text-white font-bold">{nomeOperador}</strong>{' '}
-              <span className="text-zinc-200 font-mono text-[11px]">({matricula})</span>
+              <span className="text-[#8E8E93] font-mono text-[11px]">({matricula})</span>
             </span>
-            <Edit2 className="w-3.5 h-3.5 text-zinc-200 ml-0.5" />
+            <Edit2 className="w-3.5 h-3.5 text-[#8E8E93] ml-0.5" />
           </button>
         </div>
       )}
@@ -391,7 +391,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
           className={`cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full text-xs transition-all active:scale-95 shadow-md ${
             lanternaAtiva
               ? 'bg-amber-500 text-zinc-950 font-black'
-              : 'bg-[#22222A]/90 backdrop-blur-md border border-white/15 text-white hover:bg-[#2D2D38] font-semibold'
+              : 'bg-[#16161A]/90 backdrop-blur-md border border-white/[0.08] text-white hover:bg-[#202028] font-semibold'
           }`}
           title="Alternar lanterna / flash do leitor"
         >
@@ -403,7 +403,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
           ) : (
             <>
               <span className="font-semibold text-white text-xs">Ligar Lanterna</span>
-              <ZapOff className="w-3.5 h-3.5 text-zinc-200 ml-0.5" />
+              <ZapOff className="w-3.5 h-3.5 text-[#8E8E93] ml-0.5" />
             </>
           )}
         </button>
@@ -412,23 +412,23 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
         <button
           type="button"
           onClick={() => setModalTagManual(true)}
-          className="cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-[#22222A]/90 backdrop-blur-md hover:bg-[#2D2D38] active:scale-95 border border-white/15 transition-all text-xs shadow-md font-semibold text-white"
+          className="cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-[#16161A]/90 backdrop-blur-md hover:bg-[#202028] active:scale-95 border border-white/[0.08] transition-all text-xs shadow-md font-semibold text-white"
           title="Digitar TAG manualmente caso a câmera não leia"
         >
           <span className="font-semibold text-white text-xs">Digitar TAG</span>
-          <Keyboard className="w-3.5 h-3.5 text-zinc-200 ml-0.5" />
+          <Keyboard className="w-3.5 h-3.5 text-[#8E8E93] ml-0.5" />
         </button>
       </div>
 
       {/* MODAL PARA DIGITAÇÃO MANUAL DE TAG */}
       {modalTagManual && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#1C1C22] border border-white/10 rounded-2xl max-w-xs w-full p-5 space-y-3.5 shadow-2xl">
+          <div className="bg-[#16161A] border border-white/[0.08] rounded-2xl max-w-xs w-full p-5 space-y-3.5 shadow-2xl">
             <h3 className="text-xs font-bold text-white flex items-center gap-2">
               <Keyboard className="w-4 h-4 text-red-500" />
               Digitar TAG da Máquina
             </h3>
-            <p className="text-xs text-zinc-200 font-medium">
+            <p className="text-xs text-[#8E8E93] font-medium">
               Digite a TAG gravada na placa de patrimônio do equipamento:
             </p>
             <input
@@ -437,13 +437,13 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
               value={tagDigitada}
               onChange={(e) => setTagDigitada(e.target.value.toUpperCase())}
               placeholder="Ex: MV3-ROB-04"
-              className="w-full bg-[#141418] border border-white/15 rounded-xl p-3 text-sm font-mono text-white placeholder-zinc-400 text-center uppercase tracking-wider focus:outline-none focus:border-red-500"
+              className="w-full bg-[#111114] border border-white/[0.08] rounded-xl p-3 text-sm font-mono text-white placeholder-[#8E8E93] text-center uppercase tracking-wider focus:outline-none focus:border-red-500"
             />
             <div className="flex gap-2 pt-1">
               <button
                 type="button"
                 onClick={() => setModalTagManual(false)}
-                className="flex-1 py-2.5 bg-[#252530] hover:bg-[#323240] text-zinc-200 font-bold text-xs rounded-xl border border-white/10 transition-all"
+                className="flex-1 py-2.5 bg-[#1E1E26] hover:bg-[#282832] text-[#8E8E93] hover:text-white font-bold text-xs rounded-xl border border-white/[0.08] transition-all"
               >
                 Cancelar
               </button>
