@@ -9,17 +9,30 @@
   :root, html {
     color-scheme: dark;
     forced-color-adjust: none;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    height: 100% !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
   }
   body {
     font-family: var(--font-sans);
     -webkit-tap-highlight-color: transparent;
-    background-color: #000000;
+    background-color: #000000 !important;
     color: #FFFFFF;
     color-scheme: dark;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    height: 100% !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  #root {
+    height: 100% !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
   }
 }
 

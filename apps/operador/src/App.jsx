@@ -559,7 +559,7 @@ export default function App() {
   }
 
   return (
-    <div className={`${tela === 'scanner' ? 'h-screen' : 'min-h-screen'} bg-[#000000] text-slate-100 flex flex-col justify-between max-w-md mx-auto relative select-none overflow-hidden no-scrollbar`}>
+    <div className="h-screen h-[100dvh] max-h-[100dvh] bg-[#000000] text-slate-100 flex flex-col max-w-md mx-auto relative select-none overflow-hidden no-scrollbar">
       {/* SPLASH SCREEN INICIAL COM LOGO CORP. VANGUARD E LOADER #EF4444 */}
       {splashVisivel && (
         <div
@@ -753,9 +753,9 @@ export default function App() {
 
       {/* TELA 2: HUD DO OPERADOR COM BOTTOM SHEET RETRÁTIL (DASHBOARD DE DISPARO) */}
       {tela === 'gabarito' && (
-        <div className="flex-1 flex flex-col justify-between bg-[#000000] overflow-y-auto no-scrollbar relative">
+        <div className="flex-1 min-h-0 flex flex-col h-full overflow-hidden bg-[#000000] relative">
           {/* TOPO: BANNER DA MÁQUINA (EX: MV3-ROB-04) COM PERFEITA SIMETRIA BILATERAL */}
-          <div className="bg-[#000000]/90 backdrop-blur-md py-4 px-4 sm:px-5 border-b border-white/10 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-md">
+          <div className="bg-[#000000]/95 backdrop-blur-md py-4 px-4 sm:px-5 border-b border-white/10 flex items-center justify-between shrink-0 z-20 shadow-md">
             <button
               type="button"
               onClick={voltarAoScanner}
@@ -776,8 +776,8 @@ export default function App() {
             <div className="w-10 h-10 shrink-0 pointer-events-none" aria-hidden="true" />
           </div>
 
-          {/* CORPO DO HUD: SINTOMAS E IMPACTO COM ESPAÇAMENTOS GENEROSOS E HARMONIOSOS */}
-          <div className="p-4 sm:p-5 pt-6 sm:pt-7 pb-36 flex-1 flex flex-col gap-7 sm:gap-8 max-w-md mx-auto w-full">
+          {/* CORPO DO HUD: SINTOMAS E IMPACTO COM ESPAÇAMENTOS GENEROSOS E HARMONIOSOS (ÁREA INTERNA ROLÁVEL COM NO-SCROLLBAR) */}
+          <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar p-4 sm:p-5 pt-6 sm:pt-7 pb-36 flex flex-col gap-7 sm:gap-8 max-w-md mx-auto w-full">
             {/* 1. SEÇÃO POSSÍVEL PROBLEMA (PENUMBRA RADIO GROUP BY UIVERSE-ASTRONAUT) */}
             <fieldset className="penumbra-radio-group">
               <legend className="penumbra-radio-group__legend">Possível Problema</legend>
