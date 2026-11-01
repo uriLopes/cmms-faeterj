@@ -64,7 +64,7 @@ export default function VanguardLogo({
       <div className="flex flex-col">
         {renderWordmark}
         <span
-          className={`font-mono uppercase font-semibold tracking-[0.25em] text-slate-400 mt-1 ${scale.sub}`}
+          className={`font-mono uppercase font-semibold tracking-[0.25em] text-zinc-200 mt-1 ${scale.sub}`}
         >
           Industrial Maintenance Systems
         </span>

@@ -73,7 +73,7 @@ export default function QRScanner({ onScanSuccess, onClose }) {
           </div>
           <div>
             <h3 className="font-bold text-sm text-white">Leitor de QR Code</h3>
-            <p className="text-[11px] text-slate-400">Aponte para a etiqueta fixada na máquina</p>
+            <p className="text-[11px] text-zinc-200">Aponte para a etiqueta fixada na máquina</p>
           </div>
         </div>
         <button
@@ -117,14 +117,14 @@ export default function QRScanner({ onScanSuccess, onClose }) {
           )}
         </div>
 
-        <p className="text-xs text-slate-400 text-center mt-3 max-w-xs">
+        <p className="text-xs text-zinc-200 font-medium text-center mt-3 max-w-xs">
           Posicione o QR Code dentro do quadro vermelho para leitura automática.
         </p>
       </div>
 
       {/* Simulador rápido para teste sem câmera física */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-[2px] p-3 space-y-2">
-        <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">
+        <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-200 block">
           Ou selecione uma máquina de teste rápido:
         </span>
         <div className="grid grid-cols-2 gap-2 text-xs">
@@ -134,7 +134,7 @@ export default function QRScanner({ onScanSuccess, onClose }) {
             className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-[2px] text-left active:scale-95 transition-all"
           >
             <span className="font-mono font-bold text-white block">MV3-ROB-04</span>
-            <span className="text-[10px] text-slate-400">Robô KUKA • Chaparia</span>
+            <span className="text-[10px] text-zinc-200">Robô KUKA • Chaparia</span>
           </button>
           <button
             type="button"
@@ -142,7 +142,7 @@ export default function QRScanner({ onScanSuccess, onClose }) {
             className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-[2px] text-left active:scale-95 transition-all"
           >
             <span className="font-mono font-bold text-white block">HC1-APT-02</span>
-            <span className="text-[10px] text-slate-400">Apertadeira • Montagem</span>
+            <span className="text-[10px] text-zinc-200">Apertadeira • Montagem</span>
           </button>
         </div>
       </div>

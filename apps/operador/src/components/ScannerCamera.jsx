@@ -313,13 +313,13 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
 
       {/* RETÍCULO TRANSPARENTE COM CANTONEIRAS BRANCAS ARREDONDADAS E MÁSCARA CINZA EM TODA A TELA */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10 p-4 overflow-hidden">
-        {/* Texto superior orientando o operador */}
-        <span className="text-white text-xs sm:text-sm font-medium tracking-wide mb-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+        {/* Texto superior orientando o operador (z-20 garante renderização estrita na frente da máscara 9999px) */}
+        <span className="relative z-20 text-white font-black text-xs sm:text-sm tracking-wider uppercase mb-3.5 drop-shadow-[0_2px_8px_rgba(0,0,0,1)] text-center">
           Aponte a câmera para o QR Code
         </span>
 
-        {/* Viewfinder 100% transparente com cantoneiras brancas e máscara externa cinza cobrindo toda a tela */}
-        <div className="relative w-56 h-56 sm:w-64 sm:h-64 rounded-2xl shadow-[0_0_0_9999px_rgba(32,32,36,0.68)]">
+        {/* Viewfinder 100% transparente com cantoneiras brancas e máscara externa cinza cobrindo toda a tela (z-10) */}
+        <div className="relative z-10 w-56 h-56 sm:w-64 sm:h-64 rounded-2xl shadow-[0_0_0_9999px_rgba(32,32,36,0.68)]">
           {/* Cantoneira Superior Esquerda */}
           <span className="absolute -top-[1.5px] -left-[1.5px] w-9 h-9 border-t-[4px] border-l-[4px] border-white rounded-tl-2xl"></span>
 
@@ -333,8 +333,8 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
           <span className="absolute -bottom-[1.5px] -right-[1.5px] w-9 h-9 border-b-[4px] border-r-[4px] border-white rounded-br-2xl"></span>
         </div>
 
-        {/* Texto inferior auxiliar */}
-        <span className="text-white text-xs font-mono font-medium mt-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] text-center">
+        {/* Texto inferior auxiliar (z-20 garante renderização estrita na frente da máscara 9999px) */}
+        <span className="relative z-20 text-white font-mono font-bold text-xs sm:text-sm mt-3.5 drop-shadow-[0_2px_8px_rgba(0,0,0,1)] text-center">
           Alinhe o código no centro do quadro
         </span>
       </div>
@@ -437,7 +437,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
               value={tagDigitada}
               onChange={(e) => setTagDigitada(e.target.value.toUpperCase())}
               placeholder="Ex: MV3-ROB-04"
-              className="w-full bg-[#18181b] border border-zinc-700 rounded-[2px] p-3 text-sm font-mono text-white placeholder-zinc-400 text-center uppercase tracking-wider focus:outline-none focus:border-red-500"
+              className="w-full bg-[#18181b] border border-zinc-700 rounded-[2px] p-3 text-sm font-mono text-white placeholder-zinc-300 text-center uppercase tracking-wider focus:outline-none focus:border-red-500"
             />
             <div className="flex gap-2 pt-1">
               <button

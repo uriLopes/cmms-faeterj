@@ -691,7 +691,7 @@ export default function App() {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="text-center">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 block">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-200 block">
                 Equipamento Selecionado
               </span>
               <h1 className="font-mono font-black text-lg sm:text-xl text-white tracking-widest uppercase">
@@ -880,7 +880,7 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => setAbaAtivaHomebar(null)}
-                      className="text-zinc-400 hover:text-white p-1 text-xs"
+                      className="text-zinc-200 hover:text-white p-1 text-xs"
                       title="Fechar"
                     >
                       ✕
@@ -919,7 +919,7 @@ export default function App() {
                     </div>
                   ) : (
                     <div className="text-center py-2 space-y-2">
-                      <p className="text-xs text-zinc-300">
+                      <p className="text-xs text-zinc-100 font-medium">
                         Nenhuma foto anexada. Registre uma evidência visual da falha.
                       </p>
                       <button
@@ -948,7 +948,7 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => setAbaAtivaHomebar(null)}
-                      className="text-zinc-400 hover:text-white p-1 text-xs"
+                      className="text-zinc-200 hover:text-white p-1 text-xs"
                       title="Fechar"
                     >
                       ✕
@@ -990,7 +990,7 @@ export default function App() {
                         <button
                           type="button"
                           onClick={iniciarGravacaoAudio}
-                          className="text-xs text-zinc-300 hover:text-white underline font-mono"
+                          className="text-xs text-zinc-200 hover:text-white underline font-mono font-medium"
                         >
                           Gravar de novo
                         </button>
@@ -998,7 +998,7 @@ export default function App() {
                     </div>
                   ) : (
                     <div className="text-center py-2 space-y-2">
-                      <p className="text-xs text-zinc-300">
+                      <p className="text-xs text-zinc-100 font-medium">
                         Grave até 10 segundos do ruído sonoro da máquina para a equipe técnica.
                       </p>
                       <button
@@ -1027,7 +1027,7 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => setAbaAtivaHomebar(null)}
-                      className="text-zinc-400 hover:text-white p-1 text-xs"
+                      className="text-zinc-200 hover:text-white p-1 text-xs"
                       title="Fechar"
                     >
                       ✕
@@ -1041,10 +1041,10 @@ export default function App() {
                       value={observacaoTexto}
                       onChange={(e) => setObservacaoTexto(e.target.value)}
                       placeholder="Descreva detalhes específicos da falha, sintomas secundários ou orientações para a manutenção..."
-                      className="w-full bg-[#121214] border border-zinc-700 rounded-[2px] p-2.5 text-xs sm:text-sm text-white placeholder-zinc-400 focus:outline-none focus:border-white resize-none"
+                      className="w-full bg-[#121214] border border-zinc-700 rounded-[2px] p-2.5 text-xs sm:text-sm text-white placeholder-zinc-300 focus:outline-none focus:border-white resize-none"
                     />
                     <div className="flex items-center justify-between pt-1">
-                      <span className="text-[11px] font-mono text-zinc-400">
+                      <span className="text-[11px] font-mono text-zinc-200 font-medium">
                         {observacaoTexto.trim() ? `${observacaoTexto.trim().length} caracteres` : 'Opcional'}
                       </span>
                       <button
@@ -1129,7 +1129,7 @@ export default function App() {
                       ? 'bg-zinc-800 text-white'
                       : (sintomasSelecionados.length > 0 || observacaoTexto.trim() || fotoBase64)
                       ? 'bg-[#EF4444] text-white shadow-lg shadow-red-950/60 hover:bg-[#dc2626] active:scale-95'
-                      : 'text-zinc-500 hover:text-zinc-300 active:scale-95'
+                      : 'text-zinc-300 hover:text-white active:scale-95'
                   }`}
                   title="Enviar Ticket para Manutenção"
                 >
