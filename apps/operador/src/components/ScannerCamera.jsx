@@ -388,34 +388,35 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
         <button
           type="button"
           onClick={() => alternarLanternaFisica(!lanternaAtiva, true)}
-          className={`px-4 py-2.5 rounded-[2px] font-bold text-xs flex items-center gap-2 transition-all active:scale-95 shadow-lg ${
+          className={`cursor-pointer inline-flex items-center justify-center gap-2 py-1.5 px-4 rounded-[2px] text-xs transition-all active:scale-95 shadow-lg ${
             lanternaAtiva
               ? 'bg-amber-500 text-zinc-950 shadow-amber-500/30 ring-2 ring-amber-400 font-black'
-              : 'bg-zinc-900/90 backdrop-blur-md border border-zinc-700 text-white hover:bg-zinc-800 font-bold'
+              : 'bg-zinc-900/90 backdrop-blur-md border border-zinc-700 text-white hover:bg-zinc-800 font-semibold'
           }`}
+          title="Alternar lanterna / flash do leitor"
         >
           {lanternaAtiva ? (
             <>
-              <Zap className="w-4 h-4 fill-current text-zinc-950 animate-pulse" />
-              <span>Lanterna: LIGADA</span>
+              <span className="font-bold text-zinc-950 text-xs">Lanterna: LIGADA</span>
+              <Zap className="w-3.5 h-3.5 fill-current text-zinc-950 animate-pulse ml-0.5" />
             </>
           ) : (
             <>
-              <ZapOff className="w-4 h-4 text-zinc-200" />
-              <span>Ligar Lanterna</span>
+              <span className="font-semibold text-white text-xs">Ligar Lanterna</span>
+              <ZapOff className="w-3.5 h-3.5 text-zinc-200 ml-0.5" />
             </>
           )}
         </button>
 
-        {/* Opção de Digitar TAG (Fallback Industrial) */}
+        {/* Opção de Digitar TAG (Estética Idêntica ao Botão do Operador) */}
         <button
           type="button"
           onClick={() => setModalTagManual(true)}
-          className="px-3.5 py-2.5 rounded-[2px] font-bold text-xs bg-zinc-900/90 backdrop-blur-md border border-zinc-700 text-white hover:bg-zinc-800 flex items-center gap-1.5 shadow-md"
+          className="cursor-pointer inline-flex items-center justify-center gap-2 py-1.5 px-4 rounded-[2px] bg-zinc-900/90 backdrop-blur-md hover:bg-zinc-800 active:scale-95 border border-zinc-700 transition-all text-xs shadow-lg"
           title="Digitar TAG manualmente caso a câmera não leia"
         >
-          <Keyboard className="w-3.5 h-3.5" />
-          <span>Digitar TAG</span>
+          <span className="font-semibold text-white text-xs">Digitar TAG</span>
+          <Keyboard className="w-3.5 h-3.5 text-zinc-200 ml-0.5" />
         </button>
       </div>
 
