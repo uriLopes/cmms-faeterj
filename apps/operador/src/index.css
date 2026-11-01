@@ -541,10 +541,10 @@ html, body, #root, * {
 }
 
 .btn-uiverse-send.btn-disabled {
-  background: #1C1C24;
+  background: #22222E;
   color: #8E8E93;
   box-shadow: none;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   opacity: 1;
 }
 
@@ -573,9 +573,9 @@ html, body, #root, * {
 
 /* Card e Visualizador de Voz Estilo ChatGPT 4o e Tema Escuro Workouts */
 .chatgpt-voice-card {
-  background: #16161A;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  background: #202028;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
   border-radius: 24px;
 }
 
@@ -707,10 +707,10 @@ html, body, #root, * {
 
 /* Tooltip Speech Bubble Estilo Referência do Usuário */
 .tooltip-speech-bubble {
-  background: #16161A;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #202028;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
   position: relative;
 }
 
@@ -722,11 +722,11 @@ html, body, #root, * {
   width: 100%;
   margin: 0;
   padding: 20px;
-  background-color: #16161A;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: #202028;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 24px;
   font-family: inherit;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
 }
 
 .penumbra-radio-group__legend {
@@ -756,12 +756,12 @@ html, body, #root, * {
 }
 
 .penumbra-radio:hover {
-  background-color: #1A1A22;
+  background-color: #262632;
 }
 
 .penumbra-radio.is-selected {
-  background-color: #22222C;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: #2D2D3A;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .penumbra-radio__input {
@@ -790,7 +790,7 @@ button, [role="button"], .penumbra-radio, .penumbra-radio__mark {
   height: 18px;
   margin-top: 2px;
   background-color: transparent !important;
-  border: 1.5px solid #58596D !important;
+  border: 1.5px solid #68697D !important;
   border-radius: 999px;
   -webkit-appearance: none;
   appearance: none;
@@ -806,7 +806,7 @@ button, [role="button"], .penumbra-radio, .penumbra-radio__mark {
 /* Blindagem contra auto-dark mode mobile e herança indesejada */
 .penumbra-radio:not(.is-selected) .penumbra-radio__mark {
   background-color: transparent !important;
-  border: 1.5px solid #58596D !important;
+  border: 1.5px solid #68697D !important;
   box-shadow: none !important;
   forced-color-adjust: none !important;
   color-scheme: only dark !important;

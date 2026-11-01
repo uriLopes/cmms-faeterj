@@ -592,7 +592,7 @@ export default function App() {
       {/* MODAL ULTRA-MINIMALISTA DE IDENTIFIANT (3 ESTADOS: REPOUSO, SUCESSO VERDE #10B981, ERRO VERMELHO #EF4444) */}
       {modalEditarOperador && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-[#16161A] border border-white/[0.08] rounded-2xl max-w-[320px] w-full overflow-hidden shadow-2xl flex flex-col">
+          <div className="bg-[#1E1E26] border border-white/[0.14] rounded-2xl max-w-[320px] w-full overflow-hidden shadow-2xl flex flex-col">
             {/* Bloco Superior: Fechar + Linha de Ação */}
             <div className="p-4 space-y-3">
               {/* Fechar no canto superior direito */}
@@ -604,7 +604,7 @@ export default function App() {
                     setErroOperador(null);
                     setSucessoOperador(null);
                   }}
-                  className="w-7 h-7 rounded-full bg-[#1E1E26] text-[#8E8E93] hover:text-white flex items-center justify-center font-bold text-sm leading-none transition-transform active:scale-90"
+                  className="w-7 h-7 rounded-full bg-[#262634] text-[#8E8E93] hover:text-white flex items-center justify-center font-bold text-sm leading-none transition-transform active:scale-90"
                   title="Fechar"
                 >
                   ✕
@@ -641,7 +641,7 @@ export default function App() {
                   type="button"
                   disabled={validandoOperador || !codigoInput.trim()}
                   onClick={() => validarEConfirmarOperador(codigoInput)}
-                  className="bg-[#22222C] hover:bg-[#2A2A36] text-white font-semibold text-xs sm:text-sm rounded-xl px-3.5 h-[42px] border border-white/[0.08] transition-all flex items-center justify-center min-w-[75px] shrink-0 active:scale-95 disabled:opacity-40"
+                  className="bg-[#282836] hover:bg-[#323244] text-white font-semibold text-xs sm:text-sm rounded-xl px-3.5 h-[42px] border border-white/[0.14] transition-all flex items-center justify-center min-w-[75px] shrink-0 active:scale-95 disabled:opacity-40"
                 >
                   {validandoOperador ? (
                     <RefreshCw className="w-4 h-4 animate-spin text-white" />
@@ -705,8 +705,8 @@ export default function App() {
             </div>
 
             {/* Dossiê do Chamado Ativo */}
-            <div className="bg-[#16161A] border border-amber-500/30 rounded-2xl p-4 text-xs font-mono space-y-2 shadow-xl">
-              <div className="flex justify-between items-center border-b border-white/[0.08] pb-2">
+            <div className="bg-[#1E1E26] border border-amber-500/40 rounded-2xl p-4 text-xs font-mono space-y-2 shadow-xl">
+              <div className="flex justify-between items-center border-b border-white/[0.12] pb-2">
                 <span className="text-[#8E8E93] font-semibold">Ordem de Serviço:</span>
                 <span className="text-amber-400 font-black text-sm">{chamadoAtivoAlerta?.numero_os}</span>
               </div>
@@ -720,7 +720,7 @@ export default function App() {
                 <span className="text-[#8E8E93] font-semibold">Operador Solicitante:</span>
                 <span className="text-white">{chamadoAtivoAlerta?.operador_nome}</span>
               </div>
-              <div className="pt-1 border-t border-white/[0.08]">
+              <div className="pt-1 border-t border-white/[0.12]">
                 <span className="text-[#8E8E93] block text-[10px] uppercase font-bold">Problema Reportado:</span>
                 <p className="text-white font-sans text-xs mt-0.5">
                   "{chamadoAtivoAlerta?.descricao_exibicao}"
@@ -743,7 +743,7 @@ export default function App() {
             <button
               type="button"
               onClick={prosseguirComReforco}
-              className="w-full py-3 bg-[#1E1E26] border border-white/[0.08] hover:bg-[#282832] text-[#8E8E93] hover:text-white font-bold text-xs rounded-xl transition-all"
+              className="w-full py-3 bg-[#242430] border border-white/[0.12] hover:bg-[#2E2E3C] text-[#8E8E93] hover:text-white font-bold text-xs rounded-xl transition-all"
             >
               Agravou o problema? Abrir Reforço de OS
             </button>
@@ -755,11 +755,11 @@ export default function App() {
       {tela === 'gabarito' && (
         <div className="flex-1 min-h-0 flex flex-col h-full overflow-hidden bg-[#000000] relative">
           {/* TOPO: BANNER DA MÁQUINA (EX: MV3-ROB-04) COM PERFEITA SIMETRIA BILATERAL */}
-          <div className="bg-[#000000]/95 backdrop-blur-md py-4 px-4 sm:px-5 border-b border-white/[0.08] flex items-center justify-between shrink-0 z-20 shadow-md">
+          <div className="bg-[#000000]/95 backdrop-blur-md py-4 px-4 sm:px-5 border-b border-white/[0.12] flex items-center justify-between shrink-0 z-20 shadow-md">
             <button
               type="button"
               onClick={voltarAoScanner}
-              className="w-10 h-10 rounded-full bg-[#181820] border border-white/[0.08] flex items-center justify-center text-white hover:bg-[#22222A] transition-all active:scale-95 shadow-md"
+              className="w-10 h-10 rounded-full bg-[#202028] border border-white/[0.14] flex items-center justify-center text-white hover:bg-[#2A2A36] transition-all active:scale-95 shadow-md"
               title="Voltar ao scanner"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -799,7 +799,7 @@ export default function App() {
                       aria-hidden="true"
                       style={{
                         backgroundColor: isChecked ? '#FFFFFF' : 'transparent',
-                        borderColor: isChecked ? '#FFFFFF' : '#58596D',
+                        borderColor: isChecked ? '#FFFFFF' : '#68697D',
                         forcedColorAdjust: 'none',
                         colorScheme: 'only dark'
                       }}
@@ -814,7 +814,7 @@ export default function App() {
                             width: '6px',
                             height: '6px',
                             borderRadius: '999px',
-                            backgroundColor: '#16161A',
+                            backgroundColor: '#202028',
                             forcedColorAdjust: 'none'
                           }}
                         />
@@ -846,7 +846,7 @@ export default function App() {
                   aria-hidden="true"
                   style={{
                     backgroundColor: statusImpacto === 'maquina_parada' ? '#EF4444' : 'transparent',
-                    borderColor: statusImpacto === 'maquina_parada' ? '#EF4444' : '#58596D',
+                    borderColor: statusImpacto === 'maquina_parada' ? '#EF4444' : '#68697D',
                     forcedColorAdjust: 'none',
                     colorScheme: 'only dark'
                   }}
@@ -891,7 +891,7 @@ export default function App() {
                   aria-hidden="true"
                   style={{
                     backgroundColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : 'transparent',
-                    borderColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#58596D',
+                    borderColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#68697D',
                     forcedColorAdjust: 'none',
                     colorScheme: 'only dark'
                   }}
@@ -906,7 +906,7 @@ export default function App() {
                         width: '6px',
                         height: '6px',
                         borderRadius: '999px',
-                        backgroundColor: '#16161A',
+                        backgroundColor: '#202028',
                         forcedColorAdjust: 'none'
                       }}
                     />
@@ -936,7 +936,7 @@ export default function App() {
                   aria-hidden="true"
                   style={{
                     backgroundColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : 'transparent',
-                    borderColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#58596D',
+                    borderColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#68697D',
                     forcedColorAdjust: 'none',
                     colorScheme: 'only dark'
                   }}
@@ -951,7 +951,7 @@ export default function App() {
                         width: '6px',
                         height: '6px',
                         borderRadius: '999px',
-                        backgroundColor: '#16161A',
+                        backgroundColor: '#202028',
                         forcedColorAdjust: 'none'
                       }}
                     />
@@ -991,8 +991,8 @@ export default function App() {
 
               {/* CARD CONTEXTUAL FLUTUANTE: CÂMERA */}
               {abaAtivaHomebar === 'camera' && (
-                <div className="bg-[#16161A] border border-white/[0.08] rounded-2xl p-4 shadow-2xl animate-slide-up space-y-3">
-                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-2">
+                <div className="bg-[#1E1E26] border border-white/[0.14] rounded-2xl p-4 shadow-2xl animate-slide-up space-y-3">
+                  <div className="flex items-center justify-between border-b border-white/[0.12] pb-2">
                     <div className="flex items-center gap-2">
                       <Camera className="w-4 h-4 text-white" />
                       <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
@@ -1014,7 +1014,7 @@ export default function App() {
                       <img
                         src={fotoBase64}
                         alt="Foto Anexada"
-                        className="w-16 h-16 object-cover rounded-xl border border-white/[0.08]"
+                        className="w-16 h-16 object-cover rounded-xl border border-white/[0.14]"
                       />
                       <div className="flex-1 space-y-2">
                         <span className="text-xs text-[#10B981] font-mono font-bold block">
@@ -1024,7 +1024,7 @@ export default function App() {
                           <button
                             type="button"
                             onClick={() => setModalCameraAberto(true)}
-                            className="px-3 py-1.5 bg-[#22222C] hover:bg-[#2A2A36] text-white text-xs rounded-xl font-semibold border border-white/[0.08] active:scale-95 transition-all"
+                            className="px-3 py-1.5 bg-[#282836] hover:bg-[#323244] text-white text-xs rounded-xl font-semibold border border-white/[0.12] active:scale-95 transition-all"
                           >
                             Tirar outra
                           </button>
@@ -1047,7 +1047,7 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => setModalCameraAberto(true)}
-                        className="w-full py-2.5 bg-[#22222C] hover:bg-[#2A2A36] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 border border-white/[0.08] shadow-md active:scale-95 transition-all"
+                        className="w-full py-2.5 bg-[#282836] hover:bg-[#323244] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 border border-white/[0.14] shadow-md active:scale-95 transition-all"
                       >
                         <Camera className="w-4 h-4 text-emerald-400" />
                         <span>Abrir Câmera</span>
@@ -1240,7 +1240,7 @@ export default function App() {
                       value={observacaoTexto}
                       onChange={(e) => setObservacaoTexto(e.target.value)}
                       placeholder="Descreva detalhes específicos da falha, sintomas secundários ou orientações para a manutenção..."
-                      className="w-full bg-[#111114] border border-white/[0.08] rounded-xl p-3 text-xs sm:text-sm text-white placeholder-[#8E8E93] focus:outline-none focus:border-white resize-none transition-all"
+                      className="w-full bg-[#14141C] border border-white/[0.12] rounded-xl p-3 text-xs sm:text-sm text-white placeholder-[#8E8E93] focus:outline-none focus:border-white resize-none transition-all"
                     />
                     <div className="flex items-center justify-end pt-0.5">
                       <button
@@ -1257,7 +1257,7 @@ export default function App() {
               )}
 
               {/* A CÁPSULA DA HOMEBAR: 4 ITENS FIÉIS AO DESIGN SYSTEM (@jsav.design & WORKOUTS VIBE) */}
-              <nav className="h-[68px] bg-[#14141A]/95 border border-white/[0.08] rounded-full px-3 py-2 flex items-center justify-between shadow-2xl backdrop-blur-xl">
+              <nav className="h-[68px] bg-[#181822]/95 border border-white/[0.14] rounded-full px-3 py-2 flex items-center justify-between shadow-2xl backdrop-blur-xl">
                 {/* 1. CÂMERA */}
                 <button
                   type="button"
@@ -1265,7 +1265,7 @@ export default function App() {
                   className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
                     abaAtivaHomebar === 'camera'
                       ? 'bg-white text-zinc-950 shadow-md scale-105 border-transparent'
-                      : 'bg-[#1E1E26] text-white hover:bg-[#282832] border border-white/[0.08] shadow-sm active:scale-95'
+                      : 'bg-[#242430] text-white hover:bg-[#2E2E3C] border border-white/[0.12] shadow-sm active:scale-95'
                   }`}
                   title="Câmera da falha"
                 >
@@ -1284,7 +1284,7 @@ export default function App() {
                       ? 'bg-[#EF4444] text-white animate-pulse shadow-md border-transparent'
                       : abaAtivaHomebar === 'audio'
                       ? 'bg-white text-zinc-950 shadow-md scale-105 border-transparent'
-                      : 'bg-[#1E1E26] text-white hover:bg-[#282832] border border-white/[0.08] shadow-sm active:scale-95'
+                      : 'bg-[#242430] text-white hover:bg-[#2E2E3C] border border-white/[0.12] shadow-sm active:scale-95'
                   }`}
                   title="Gravar áudio do ruído"
                 >
@@ -1305,7 +1305,7 @@ export default function App() {
                   className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
                     abaAtivaHomebar === 'registro'
                       ? 'bg-white text-zinc-950 shadow-md scale-105 border-transparent'
-                      : 'bg-[#1E1E26] text-white hover:bg-[#282832] border border-white/[0.08] shadow-sm active:scale-95'
+                      : 'bg-[#242430] text-white hover:bg-[#2E2E3C] border border-white/[0.12] shadow-sm active:scale-95'
                   }`}
                   title="Registro escrito complementar"
                 >
@@ -1374,8 +1374,8 @@ export default function App() {
             </div>
 
             {/* Dossiê da OS */}
-            <div className="bg-[#16161A] border border-white/[0.08] rounded-2xl p-4 text-left space-y-2 max-w-xs mx-auto shadow-xl text-xs font-mono">
-              <div className="flex justify-between border-b border-white/[0.08] pb-2">
+            <div className="bg-[#1E1E26] border border-white/[0.14] rounded-2xl p-4 text-left space-y-2 max-w-xs mx-auto shadow-xl text-xs font-mono">
+              <div className="flex justify-between border-b border-white/[0.12] pb-2">
                 <span className="text-[#8E8E93] font-semibold">Número da OS:</span>
                 <span className="text-white font-bold text-sm">{chamadoCriado?.numero_os}</span>
               </div>
@@ -1398,7 +1398,7 @@ export default function App() {
                 <span className="text-white font-bold">{nomeOperador} ({identifiant})</span>
               </div>
               {fotoBase64 && (
-                <div className="flex justify-between items-center pt-1 border-t border-white/[0.08]">
+                <div className="flex justify-between items-center pt-1 border-t border-white/[0.12]">
                   <span className="text-[#8E8E93] font-semibold">Anexo:</span>
                   <span className="text-emerald-400 font-bold">1 Foto Anexada</span>
                 </div>
