@@ -313,12 +313,10 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
 
       {/* RETÍCULO TRANSPARENTE COM CANTONEIRAS BRANCAS ARREDONDADAS E MÁSCARA EM TODA A TELA */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10 p-4 overflow-hidden">
-        {/* Texto superior orientando o operador (com pílula protetora de alto contraste) */}
-        <div className="relative z-20 mb-3.5 bg-[#1C1C22]/90 backdrop-blur-md border border-white/15 px-4 py-1.5 rounded-full shadow-2xl flex items-center justify-center">
-          <span className="text-white font-black text-xs sm:text-sm tracking-wider uppercase text-center">
-            Aponte a câmera para o QR Code
-          </span>
-        </div>
+        {/* Texto superior orientando o operador (z-20 garante renderização estrita na frente da máscara) */}
+        <span className="relative z-20 text-white font-black text-xs sm:text-sm tracking-wider uppercase mb-3.5 drop-shadow-[0_2px_8px_rgba(0,0,0,1)] text-center">
+          Aponte a câmera para o QR Code
+        </span>
 
         {/* Viewfinder 100% transparente com cantoneiras brancas e máscara externa OLED cobrindo toda a tela (z-10) */}
         <div className="relative z-10 w-56 h-56 sm:w-64 sm:h-64 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.72)]">
@@ -336,11 +334,9 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
         </div>
 
         {/* Texto inferior auxiliar */}
-        <div className="relative z-20 mt-3.5 bg-[#1C1C22]/90 backdrop-blur-md border border-white/15 px-3.5 py-1 rounded-full shadow-2xl flex items-center justify-center">
-          <span className="text-zinc-200 font-mono font-bold text-xs sm:text-sm text-center">
-            Alinhe o código no centro do quadro
-          </span>
-        </div>
+        <span className="relative z-20 text-white font-mono font-bold text-xs sm:text-sm mt-3.5 drop-shadow-[0_2px_8px_rgba(0,0,0,1)] text-center">
+          Alinhe o código no centro do quadro
+        </span>
       </div>
 
       {/* Loader de Inicialização com Retângulos Animados */}
@@ -392,9 +388,9 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
         <button
           type="button"
           onClick={() => alternarLanternaFisica(!lanternaAtiva, true)}
-          className={`cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full text-xs transition-all active:scale-95 shadow-xl ${
+          className={`cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full text-xs transition-all active:scale-95 shadow-md ${
             lanternaAtiva
-              ? 'bg-amber-500 text-zinc-950 shadow-[0_0_24px_rgba(245,158,11,0.55)] font-black'
+              ? 'bg-amber-500 text-zinc-950 font-black'
               : 'bg-[#22222A]/90 backdrop-blur-md border border-white/15 text-white hover:bg-[#2D2D38] font-semibold'
           }`}
           title="Alternar lanterna / flash do leitor"
@@ -416,7 +412,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
         <button
           type="button"
           onClick={() => setModalTagManual(true)}
-          className="cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-[#22222A]/90 backdrop-blur-md hover:bg-[#2D2D38] active:scale-95 border border-white/15 transition-all text-xs shadow-xl font-semibold text-white"
+          className="cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-[#22222A]/90 backdrop-blur-md hover:bg-[#2D2D38] active:scale-95 border border-white/15 transition-all text-xs shadow-md font-semibold text-white"
           title="Digitar TAG manualmente caso a câmera não leia"
         >
           <span className="font-semibold text-white text-xs">Digitar TAG</span>

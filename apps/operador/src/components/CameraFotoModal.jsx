@@ -269,7 +269,7 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
             <button
               type="button"
               onClick={confirmarFoto}
-              className="flex-1 py-3.5 bg-[#10B981] hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-full flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl shadow-emerald-950/60"
+              className="flex-1 py-3.5 bg-[#10B981] hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-full flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md"
             >
               <Check className="w-4 h-4 stroke-[3]" />
               <span>Usar Esta Foto</span>
@@ -295,7 +295,7 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-12 h-12 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-black/70 active:scale-90 transition-all shadow-lg"
+                className="w-12 h-12 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-black/70 active:scale-90 transition-all shadow-md"
                 title="Escolher Foto da Galeria"
               >
                 <ImageIcon className="w-5 h-5" />
@@ -305,7 +305,7 @@ export default function CameraFotoModal({ isOpen, onClose, onFotoConfirmada }) {
               <button
                 type="button"
                 onClick={dispararFoto}
-                className="w-20 h-20 rounded-full bg-white shadow-[0_0_25px_rgba(255,255,255,0.4)] active:scale-90 hover:scale-102 transition-all cursor-pointer flex items-center justify-center p-1"
+                className="w-20 h-20 rounded-full bg-white shadow-md active:scale-90 hover:scale-102 transition-all cursor-pointer flex items-center justify-center p-1"
                 title="Tirar Foto"
               >
                 <div className="w-full h-full rounded-full border-2 border-zinc-300 bg-white"></div>

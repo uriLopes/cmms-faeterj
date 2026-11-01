@@ -29,6 +29,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import ScannerCamera from './components/ScannerCamera';
+import CameraFotoModal from './components/CameraFotoModal';
 import VanguardLogo from './components/VanguardLogo';
 
 export default function App() {
@@ -48,7 +49,16 @@ export default function App() {
   }, []);
 
   // Telas: 'scanner' | 'duplicado_aviso' | 'gabarito' | 'sucesso'
-  const [tela, setTela] = useState('scanner');
+  const [tela, setTela] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cmms_trigger_active_draft');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.ativoData && parsed.tela === 'gabarito') return 'gabarito';
+      }
+    } catch (e) {}
+    return 'scanner';
+  });
   const processandoQRRef = useRef(false);
 
   // 1. Identificação do Operador: Validada estritamente pelo Identifiant (Sem digitação livre de nome)
@@ -66,24 +76,79 @@ export default function App() {
   const [sucessoOperador, setSucessoOperador] = useState(null);
 
   // 2. Dados do Ativo escaneado e Trava de Duplicidade
-  const [ativoData, setAtivoData] = useState(null);
+  const [ativoData, setAtivoData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cmms_trigger_active_draft');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.ativoData && parsed.tela === 'gabarito') return parsed.ativoData;
+      }
+    } catch (e) {}
+    return null;
+  });
   const [carregandoAtivo, setCarregandoAtivo] = useState(false);
   const [chamadoAtivoAlerta, setChamadoAtivoAlerta] = useState(null);
   const [ignorarTravaDuplicada, setIgnorarTravaDuplicada] = useState(false);
 
   // 3. Flag de Criticidade / Status Operacional da Máquina (3 Estados Obrigatórios)
   // 'maquina_parada' (Crítico/Emergência) | 'operando_com_restricao' (Alerta) | 'melhoria_estetica' (Baixa)
-  const [statusImpacto, setStatusImpacto] = useState('maquina_parada');
+  const [statusImpacto, setStatusImpacto] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cmms_trigger_active_draft');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.statusImpacto) return parsed.statusImpacto;
+      }
+    } catch (e) {}
+    return 'maquina_parada';
+  });
 
   // 4. Gabarito de Sintomas e Observação
   const [sintomasDisponiveis, setSintomasDisponiveis] = useState([]);
-  const [sintomasSelecionados, setSintomasSelecionados] = useState([]);
-  const [observacaoTexto, setObservacaoTexto] = useState('');
+  const [sintomasSelecionados, setSintomasSelecionados] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cmms_trigger_active_draft');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.sintomasSelecionados) return parsed.sintomasSelecionados;
+      }
+    } catch (e) {}
+    return [];
+  });
+  const [observacaoTexto, setObservacaoTexto] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cmms_trigger_active_draft');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.observacaoTexto) return parsed.observacaoTexto;
+      }
+    } catch (e) {}
+    return '';
+  });
 
-  // 5. Anexo de Mídia Rápido (Câmera Nativa do Celular + Áudio de ruído)
-  const [fotoBase64, setFotoBase64] = useState(null);
+  // 5. Anexo de Mídia Rápido (Câmera Integrada In-App + Áudio de ruído)
+  const [modalCameraAberto, setModalCameraAberto] = useState(false);
+  const [fotoBase64, setFotoBase64] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cmms_trigger_active_draft');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.fotoBase64) return parsed.fotoBase64;
+      }
+    } catch (e) {}
+    return null;
+  });
   const cameraInputRef = useRef(null);
-  const [audioBase64, setAudioBase64] = useState(null);
+  const [audioBase64, setAudioBase64] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cmms_trigger_active_draft');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.audioBase64) return parsed.audioBase64;
+      }
+    } catch (e) {}
+    return null;
+  });
   const [gravandoAudio, setGravandoAudio] = useState(false);
   const [tempoGravacao, setTempoGravacao] = useState(0);
   const [tocandoAudio, setTocandoAudio] = useState(false);
@@ -122,7 +187,7 @@ export default function App() {
     };
   }, []);
 
-  // Salva rascunho de tela no sessionStorage para tolerância a falhas do navegador mobile
+  // Salva rascunho de tela no localStorage para tolerância total a recarregamentos acidentais no mobile
   useEffect(() => {
     if (tela === 'gabarito' && ativoData) {
       const draft = {
@@ -134,30 +199,11 @@ export default function App() {
         fotoBase64,
         audioBase64
       };
-      sessionStorage.setItem('cmms_trigger_active_draft', JSON.stringify(draft));
-    } else if (tela === 'scanner' || tela === 'sucesso') {
-      sessionStorage.removeItem('cmms_trigger_active_draft');
+      localStorage.setItem('cmms_trigger_active_draft', JSON.stringify(draft));
+    } else if (tela === 'sucesso') {
+      localStorage.removeItem('cmms_trigger_active_draft');
     }
   }, [tela, ativoData, sintomasSelecionados, statusImpacto, observacaoTexto, fotoBase64, audioBase64]);
-
-  // Recupera rascunho se a aba tiver sido restaurada pelo navegador
-  useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem('cmms_trigger_active_draft');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.ativoData && parsed.tela === 'gabarito') {
-          setAtivoData(parsed.ativoData);
-          setSintomasSelecionados(parsed.sintomasSelecionados || []);
-          setStatusImpacto(parsed.statusImpacto || 'maquina_parada');
-          setObservacaoTexto(parsed.observacaoTexto || '');
-          setFotoBase64(parsed.fotoBase64 || null);
-          setAudioBase64(parsed.audioBase64 || null);
-          setTela('gabarito');
-        }
-      }
-    } catch (e) {}
-  }, []);
 
   function abrirModalOperador() {
     setCodigoInput('');
@@ -202,7 +248,7 @@ export default function App() {
 
   function voltarAoScanner() {
     processandoQRRef.current = false;
-    sessionStorage.removeItem('cmms_trigger_active_draft');
+    localStorage.removeItem('cmms_trigger_active_draft');
     setAbaAtivaHomebar(null);
     setAvisoValidacaoHomebar(null);
     setDashboardAberto(false);
@@ -463,7 +509,7 @@ export default function App() {
 
     if (aba === 'camera') {
       if (!fotoBase64) {
-        acionarCameraNativa();
+        setModalCameraAberto(true);
       } else {
         setAbaAtivaHomebar((prev) => (prev === 'camera' ? null : 'camera'));
       }
@@ -899,7 +945,7 @@ export default function App() {
                         <div className="flex gap-2">
                           <button
                             type="button"
-                            onClick={acionarCameraNativa}
+                            onClick={() => setModalCameraAberto(true)}
                             className="px-3 py-1.5 bg-[#282834] hover:bg-[#343444] text-white text-xs rounded-xl font-semibold border border-white/10 active:scale-95 transition-all"
                           >
                             Tirar outra
@@ -922,7 +968,7 @@ export default function App() {
                       </p>
                       <button
                         type="button"
-                        onClick={acionarCameraNativa}
+                        onClick={() => setModalCameraAberto(true)}
                         className="w-full py-2.5 bg-[#282834] hover:bg-[#343444] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 border border-white/10 shadow-md active:scale-95 transition-all"
                       >
                         <Camera className="w-4 h-4 text-emerald-400" />
@@ -935,10 +981,7 @@ export default function App() {
 
               {/* CARD CONTEXTUAL FLUTUANTE: ÁUDIO ESTILO CHATGPT 4O VOICE COM ANIMAÇÃO */}
               {abaAtivaHomebar === 'audio' && (
-                <div className="chatgpt-voice-card p-5 shadow-[0_25px_60px_rgba(0,0,0,0.95)] animate-slide-up relative overflow-hidden select-none">
-                  {/* Brilho radial ambiente suave ao fundo das barras */}
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06)_0%,transparent_70%)] pointer-events-none"></div>
-
+                <div className="chatgpt-voice-card p-5 shadow-lg animate-slide-up relative overflow-hidden select-none">
                   {/* Header superior minimalista */}
                   <div className="relative z-10 flex items-center justify-between pb-1">
                     {gravandoAudio ? (
@@ -1095,10 +1138,7 @@ export default function App() {
 
               {/* CARD CONTEXTUAL FLUTUANTE: REGISTRO ESCRITO (ESTILO BOX DO ÁUDIO) */}
               {abaAtivaHomebar === 'registro' && (
-                <div className="chatgpt-voice-card p-5 shadow-[0_25px_60px_rgba(0,0,0,0.95)] animate-slide-up relative overflow-hidden select-none space-y-3 mb-1">
-                  {/* Brilho radial ambiente sutil */}
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.04)_0%,transparent_70%)] pointer-events-none"></div>
-
+                <div className="chatgpt-voice-card p-5 shadow-lg animate-slide-up relative overflow-hidden select-none space-y-3 mb-1">
                   {/* Header superior */}
                   <div className="relative z-10 flex items-center justify-between pb-1">
                     <span className="text-sm font-bold text-white tracking-tight">
@@ -1139,7 +1179,7 @@ export default function App() {
               )}
 
               {/* A CÁPSULA DA HOMEBAR: 4 ITENS FIÉIS AO DESIGN SYSTEM (@jsav.design & WORKOUTS VIBE) */}
-              <nav className="h-[68px] bg-[#16161D]/95 border border-white/10 rounded-full px-3 py-2 flex items-center justify-between shadow-[0_16px_50px_rgba(0,0,0,0.95)] backdrop-blur-xl">
+              <nav className="h-[68px] bg-[#16161D]/95 border border-white/10 rounded-full px-3 py-2 flex items-center justify-between shadow-lg backdrop-blur-xl">
                 {/* 1. CÂMERA */}
                 <button
                   type="button"
@@ -1163,7 +1203,7 @@ export default function App() {
                   onClick={() => handleCliqueHomebar('audio')}
                   className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
                     gravandoAudio
-                      ? 'bg-[#EF4444] text-white animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.55)] border-transparent'
+                      ? 'bg-[#EF4444] text-white animate-pulse shadow-md border-transparent'
                       : abaAtivaHomebar === 'audio'
                       ? 'bg-white text-zinc-950 shadow-md scale-105 border-transparent'
                       : 'bg-[#252530] text-white hover:bg-[#343444] border border-white/10 shadow-sm active:scale-95'
@@ -1298,6 +1338,17 @@ export default function App() {
           </button>
         </div>
       )}
+
+      {/* MODAL DE CÂMERA INTEGRADA FULL-SCREEN (NUNCA RECARREGA A ABA NEM VOLTA AO SCANNER) */}
+      <CameraFotoModal
+        isOpen={modalCameraAberto}
+        onClose={() => setModalCameraAberto(false)}
+        onFotoConfirmada={(fotoDataUrl) => {
+          setFotoBase64(fotoDataUrl);
+          setModalCameraAberto(false);
+          setAbaAtivaHomebar('camera');
+        }}
+      />
 
       {/* DISPARADOR NATIVO DA CÂMERA DO CELULAR (SAMSUNG / IPHONE / MOTOROLA / XIAOMI) */}
       <input
