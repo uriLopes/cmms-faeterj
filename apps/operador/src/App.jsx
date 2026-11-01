@@ -677,14 +677,8 @@ export default function App() {
                 {ativoData?.tag_patrimonio || 'MV3-ROB-04'}
               </h1>
             </div>
-            <button
-              type="button"
-              onClick={voltarAoScanner}
-              className="w-10 h-10 rounded-full bg-[#2B2B36] border border-white/15 flex items-center justify-center text-white hover:bg-[#383848] transition-all active:scale-95 shadow-md"
-              title="Cancelar e escanear outra"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {/* Espaçador invisível simétrico para manter o título perfeitamente centralizado sem a redundância do X */}
+            <div className="w-10 h-10 shrink-0 pointer-events-none" aria-hidden="true" />
           </div>
 
           {/* CORPO DO HUD: SINTOMAS E IMPACTO COM ESPAÇAMENTOS GENEROSOS E HARMONIOSOS */}
