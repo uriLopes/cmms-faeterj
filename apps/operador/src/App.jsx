@@ -474,8 +474,9 @@ export default function App() {
     }
   }
 
+  const podeDisparar = sintomasSelecionados.length > 0 || observacaoTexto.trim() || fotoBase64;
+
   function handleDisparoHomebar() {
-    const podeDisparar = sintomasSelecionados.length > 0 || observacaoTexto.trim() || fotoBase64;
     if (!podeDisparar) {
       setAvisoValidacaoHomebar('Selecione ao menos 1 sintoma acima');
       setTimeout(() => setAvisoValidacaoHomebar(null), 3500);
@@ -857,8 +858,8 @@ export default function App() {
           )}
 
           {/* HOMEBAR FLUTUANTE INSPIRADA DIRETAMENTE NA REFERÊNCIA (@jsav.design) */}
-          <div className="fixed bottom-4 sm:bottom-6 left-0 right-0 z-40 px-4 pointer-events-none">
-            <div className="max-w-[340px] mx-auto pointer-events-auto flex flex-col gap-2.5">
+          <div className="fixed bottom-4 sm:bottom-6 left-0 right-0 z-40 px-3 sm:px-4 pointer-events-none">
+            <div className="max-w-[365px] mx-auto pointer-events-auto flex flex-col gap-2.5">
               {/* Aviso Flutuante de Validação (Toast) */}
               {avisoValidacaoHomebar && (
                 <div className="bg-amber-500 text-zinc-950 font-bold text-xs py-2 px-4 rounded-full text-center shadow-2xl animate-fade-in flex items-center justify-center gap-2 mx-auto">
@@ -1119,25 +1120,37 @@ export default function App() {
                   )}
                 </button>
 
-                {/* 4. ENVIAR TICKET */}
+                {/* 4. ENVIAR TICKET (UIVERSE.IO BY ADAMGIEBL) */}
                 <button
                   type="button"
                   disabled={enviando}
                   onClick={handleDisparoHomebar}
-                  className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
-                    enviando
-                      ? 'bg-zinc-800 text-white'
-                      : (sintomasSelecionados.length > 0 || observacaoTexto.trim() || fotoBase64)
-                      ? 'bg-[#EF4444] text-white shadow-lg shadow-red-950/60 hover:bg-[#dc2626] active:scale-95'
-                      : 'text-zinc-300 hover:text-white active:scale-95'
+                  className={`btn-uiverse-send ${
+                    podeDisparar ? 'btn-ready' : 'btn-disabled'
                   }`}
                   title="Enviar Ticket para Manutenção"
                 >
-                  {enviando ? (
-                    <RefreshCw className="w-5 h-5 animate-spin text-white" />
-                  ) : (
-                    <Send className="w-5 h-5 ml-0.5 stroke-[2.2]" />
-                  )}
+                  <div className="svg-wrapper-1">
+                    <div className="svg-wrapper">
+                      {enviando ? (
+                        <RefreshCw className="w-5 h-5 animate-spin text-white" />
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          width="20"
+                          height="20"
+                        >
+                          <path fill="none" d="M0 0h24v24H0z" />
+                          <path
+                            fill="currentColor"
+                            d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  <span>{enviando ? 'Enviando...' : 'Enviar'}</span>
                 </button>
               </nav>
             </div>
