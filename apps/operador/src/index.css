@@ -9,6 +9,8 @@
   body {
     font-family: var(--font-sans);
     -webkit-tap-highlight-color: transparent;
+    background-color: #000000;
+    color: #FFFFFF;
   }
 }
 
@@ -342,7 +344,7 @@
   transform: translateY(-50%) scale(0.85);
   margin-left: 0.8em;
   padding: 0 0.35em;
-  background-color: #212121;
+  background-color: #1C1C22;
   color: #ffffff;
   font-weight: 600;
 }
@@ -380,7 +382,7 @@
   position: absolute !important;
   inset: 0 !important;
   overflow: hidden !important;
-  background-color: #212121 !important;
+  background-color: #000000 !important;
 }
 
 #vanguard-camera-stream video {
@@ -503,11 +505,11 @@
 }
 
 .btn-uiverse-send.btn-disabled {
-  background: #27272A;
-  color: #71717A;
+  background: #252530;
+  color: #A1A1AA;
   box-shadow: none;
-  border: 1px solid #3F3F46;
-  opacity: 0.9;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  opacity: 0.85;
 }
 
 .btn-uiverse-send.btn-disabled svg {
@@ -533,11 +535,11 @@
   }
 }
 
-/* Card e Visualizador de Voz Estilo ChatGPT 4o (Referência do Usuário) */
+/* Card e Visualizador de Voz Estilo ChatGPT 4o e Tema Escuro Workouts */
 .chatgpt-voice-card {
-  background: #09090b;
-  border: 1px solid rgba(63, 63, 70, 0.7);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 255, 255, 0.03);
+  background: #1C1C22;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 255, 255, 0.02);
   border-radius: 24px;
 }
 
@@ -669,35 +671,35 @@
 
 /* Tooltip Speech Bubble Estilo Referência do Usuário */
 .tooltip-speech-bubble {
-  background: #18181b;
-  border: 1px solid rgba(63, 63, 70, 0.85);
+  background: #1C1C22;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9);
   position: relative;
 }
 
-/* From Uiverse.io by uiverse-astronaut - Penumbra Radio Group */
+/* From Uiverse.io by uiverse-astronaut - Penumbra Radio Group com Estética Elevada Workouts */
 .penumbra-radio-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   width: 100%;
   margin: 0;
   padding: 20px;
-  background-color: #101013;
-  border: 1px solid #27272f;
-  border-radius: 16px;
+  background-color: #1C1C22;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
   font-family: inherit;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85), 0 1px 2px rgba(255, 255, 255, 0.04);
 }
 
 .penumbra-radio-group__legend {
   margin: 0 0 14px;
   padding: 0 4px;
   color: #FFFFFF;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   display: block;
   width: 100%;
@@ -709,19 +711,21 @@
   align-items: flex-start;
   gap: 12px;
   padding: 12px 14px;
-  border-radius: 8px;
+  border-radius: 14px;
   cursor: pointer;
-  transition: background-color 180ms ease;
+  transition: background-color 180ms ease, transform 150ms ease, border-color 180ms ease;
   user-select: none;
   -webkit-user-select: none;
+  border: 1px solid transparent;
 }
 
 .penumbra-radio:hover {
-  background-color: #17171c;
+  background-color: #252530;
 }
 
 .penumbra-radio.is-selected {
-  background-color: rgba(232, 229, 220, 0.06);
+  background-color: #292936;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .penumbra-radio__input {
@@ -737,11 +741,11 @@
 .penumbra-radio__mark {
   position: relative;
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   margin-top: 2px;
-  background-color: #17171c;
-  border: 1px solid #23232a;
+  background-color: #24242E;
+  border: 1.5px solid #484858;
   border-radius: 999px;
   transition:
     border-color 180ms ease,
@@ -756,7 +760,7 @@
   left: 50%;
   width: 6px;
   height: 6px;
-  background-color: #08080a;
+  background-color: #0E0E12;
   border-radius: 999px;
   transform: translate(-50%, -50%) scale(0);
   transition: transform 160ms ease;
@@ -764,8 +768,9 @@
 
 .penumbra-radio__input:checked + .penumbra-radio__mark,
 .penumbra-radio.is-selected .penumbra-radio__mark {
-  background-color: #e8e5dc;
-  border-color: #e8e5dc;
+  background-color: #FFFFFF;
+  border-color: #FFFFFF;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
 }
 
 .penumbra-radio__input:checked + .penumbra-radio__mark::after,
@@ -774,8 +779,8 @@
 }
 
 .penumbra-radio__input:focus-visible + .penumbra-radio__mark {
-  box-shadow: 0 0 0 6px rgba(232, 229, 220, 0.18);
-  border-color: #e8e5dc;
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.18);
+  border-color: #FFFFFF;
 }
 
 .penumbra-radio__text {
@@ -787,13 +792,13 @@
 .penumbra-radio__title {
   color: #FFFFFF;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.005em;
   line-height: 1.3;
 }
 
 .penumbra-radio__hint {
-  color: #E4E4E7;
+  color: #D4D4D8;
   font-size: 12px;
   line-height: 1.4;
   font-weight: 500;
@@ -810,21 +815,21 @@
 .penumbra-radio[data-impact="alto"] .penumbra-radio__input:checked + .penumbra-radio__mark {
   background-color: #EF4444 !important;
   border-color: #EF4444 !important;
-  box-shadow: 0 0 14px rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.55) !important;
 }
 
 .penumbra-radio[data-impact="medio"].is-selected .penumbra-radio__mark,
 .penumbra-radio[data-impact="medio"] .penumbra-radio__input:checked + .penumbra-radio__mark {
   background-color: #F59E0B !important;
   border-color: #F59E0B !important;
-  box-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.55) !important;
 }
 
 .penumbra-radio[data-impact="baixo"].is-selected .penumbra-radio__mark,
 .penumbra-radio[data-impact="baixo"] .penumbra-radio__input:checked + .penumbra-radio__mark {
   background-color: #10B981 !important;
   border-color: #10B981 !important;
-  box-shadow: 0 0 14px rgba(16, 185, 129, 0.45);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.55) !important;
 }
 
 

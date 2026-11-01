@@ -268,7 +268,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
   }
 
   return (
-    <div className="flex-1 flex flex-col justify-between relative bg-[#212121] overflow-hidden select-none">
+    <div className="flex-1 flex flex-col justify-between relative bg-[#000000] overflow-hidden select-none">
       {/* Alerta de Conexão HTTP Insegura */}
       {inseguro && (
         <div className="relative z-30 bg-amber-500/20 border-b border-amber-500/40 p-2.5 px-4 text-xs text-amber-300 flex items-center justify-between">
@@ -283,13 +283,13 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
 
       {/* Aviso temporário se a lanterna física não responder */}
       {avisoLanterna && (
-        <div className="relative z-30 bg-zinc-900/95 border-b border-zinc-700 p-2 px-4 text-[11px] text-amber-300 text-center animate-fade-in">
+        <div className="relative z-30 bg-[#1C1C22]/95 border-b border-white/10 p-2 px-4 text-[11px] text-amber-300 text-center animate-fade-in">
           {avisoLanterna}
         </div>
       )}
 
       {/* CONTAINER DO VÍDEO DA CÂMERA EM TELA CHEIA (SEM BORDAS OU FUNDO PRETO) */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden bg-[#212121]">
+      <div className="absolute inset-0 w-full h-full overflow-hidden bg-[#000000]">
         <div id={containerId} className="w-full h-full object-cover"></div>
       </div>
 
@@ -299,7 +299,7 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
           <button
             type="button"
             onClick={onAbrirModalOperador}
-            className="cursor-pointer inline-flex items-center justify-center gap-2 py-1.5 px-4 rounded-[2px] bg-zinc-900/90 backdrop-blur-md hover:bg-zinc-800 active:scale-95 border border-zinc-700 transition-all text-xs shadow-lg"
+            className="cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-[#22222A]/90 backdrop-blur-md hover:bg-[#2D2D38] active:scale-95 border border-white/15 transition-all text-xs shadow-xl"
             title="Toque para validar ou alterar Identifiant da fábrica"
           >
             <span className="font-semibold text-white text-xs">
@@ -311,15 +311,17 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
         </div>
       )}
 
-      {/* RETÍCULO TRANSPARENTE COM CANTONEIRAS BRANCAS ARREDONDADAS E MÁSCARA CINZA EM TODA A TELA */}
+      {/* RETÍCULO TRANSPARENTE COM CANTONEIRAS BRANCAS ARREDONDADAS E MÁSCARA EM TODA A TELA */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10 p-4 overflow-hidden">
-        {/* Texto superior orientando o operador (z-20 garante renderização estrita na frente da máscara 9999px) */}
-        <span className="relative z-20 text-white font-black text-xs sm:text-sm tracking-wider uppercase mb-3.5 drop-shadow-[0_2px_8px_rgba(0,0,0,1)] text-center">
-          Aponte a câmera para o QR Code
-        </span>
+        {/* Texto superior orientando o operador (com pílula protetora de alto contraste) */}
+        <div className="relative z-20 mb-3.5 bg-[#1C1C22]/90 backdrop-blur-md border border-white/15 px-4 py-1.5 rounded-full shadow-2xl flex items-center justify-center">
+          <span className="text-white font-black text-xs sm:text-sm tracking-wider uppercase text-center">
+            Aponte a câmera para o QR Code
+          </span>
+        </div>
 
-        {/* Viewfinder 100% transparente com cantoneiras brancas e máscara externa cinza cobrindo toda a tela (z-10) */}
-        <div className="relative z-10 w-56 h-56 sm:w-64 sm:h-64 rounded-2xl shadow-[0_0_0_9999px_rgba(32,32,36,0.68)]">
+        {/* Viewfinder 100% transparente com cantoneiras brancas e máscara externa OLED cobrindo toda a tela (z-10) */}
+        <div className="relative z-10 w-56 h-56 sm:w-64 sm:h-64 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.72)]">
           {/* Cantoneira Superior Esquerda */}
           <span className="absolute -top-[1.5px] -left-[1.5px] w-9 h-9 border-t-[4px] border-l-[4px] border-white rounded-tl-2xl"></span>
 
@@ -333,15 +335,17 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
           <span className="absolute -bottom-[1.5px] -right-[1.5px] w-9 h-9 border-b-[4px] border-r-[4px] border-white rounded-br-2xl"></span>
         </div>
 
-        {/* Texto inferior auxiliar (z-20 garante renderização estrita na frente da máscara 9999px) */}
-        <span className="relative z-20 text-white font-mono font-bold text-xs sm:text-sm mt-3.5 drop-shadow-[0_2px_8px_rgba(0,0,0,1)] text-center">
-          Alinhe o código no centro do quadro
-        </span>
+        {/* Texto inferior auxiliar */}
+        <div className="relative z-20 mt-3.5 bg-[#1C1C22]/90 backdrop-blur-md border border-white/15 px-3.5 py-1 rounded-full shadow-2xl flex items-center justify-center">
+          <span className="text-zinc-200 font-mono font-bold text-xs sm:text-sm text-center">
+            Alinhe o código no centro do quadro
+          </span>
+        </div>
       </div>
 
-      {/* Loader de Inicialização com Retângulos Animados (100% Branco Puro e Corp.Vanguard sobre Fundo Cinza #212121) */}
+      {/* Loader de Inicialização com Retângulos Animados */}
       {iniciando && !erroCamera && (
-        <div className="absolute inset-0 bg-[#212121] z-20 flex flex-col items-center justify-center select-none p-4">
+        <div className="absolute inset-0 bg-[#000000] z-20 flex flex-col items-center justify-center select-none p-4">
           <div className="flex flex-col items-center gap-2">
             <img
               src="/brand/corp-vanguard-wordmark-transparent.png?v=20"
@@ -365,16 +369,16 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
         </div>
       )}
 
-      {/* Alerta de Câmera Bloqueada com Botão de Ação Direta sobre Fundo Cinza #212121 */}
+      {/* Alerta de Câmera Bloqueada com Botão de Ação Direta */}
       {erroCamera && (
-        <div className="absolute inset-0 bg-[#212121] p-5 flex flex-col items-center justify-center text-center gap-3 z-30">
+        <div className="absolute inset-0 bg-[#000000] p-5 flex flex-col items-center justify-center text-center gap-3 z-30">
           <AlertCircle className="w-10 h-10 text-amber-400" />
           <p className="text-xs text-zinc-100 max-w-xs font-medium">{erroCamera}</p>
 
           <button
             type="button"
             onClick={iniciarCameraComPermissao}
-            className="mt-2 px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-[2px] shadow-lg flex items-center gap-2 active:scale-95"
+            className="mt-2 px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow-lg flex items-center gap-2 active:scale-95 transition-all"
           >
             <Camera className="w-4 h-4" />
             <span>Permitir e Iniciar Câmera</span>
@@ -382,16 +386,16 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
         </div>
       )}
 
-      {/* CONTROLES: LANTERNA E ALTERNATIVA */}
+      {/* CONTROLES: LANTERNA E ALTERNATIVA (ESTILO WORKOUTS ELEVADO) */}
       <div className="mt-auto relative z-20 pb-8 pt-3 flex items-center justify-center gap-3">
         {/* Botão de Lanterna (Torch) com controle físico real */}
         <button
           type="button"
           onClick={() => alternarLanternaFisica(!lanternaAtiva, true)}
-          className={`cursor-pointer inline-flex items-center justify-center gap-2 py-1.5 px-4 rounded-[2px] text-xs transition-all active:scale-95 shadow-lg ${
+          className={`cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full text-xs transition-all active:scale-95 shadow-xl ${
             lanternaAtiva
-              ? 'bg-amber-500 text-zinc-950 shadow-amber-500/30 ring-2 ring-amber-400 font-black'
-              : 'bg-zinc-900/90 backdrop-blur-md border border-zinc-700 text-white hover:bg-zinc-800 font-semibold'
+              ? 'bg-amber-500 text-zinc-950 shadow-[0_0_24px_rgba(245,158,11,0.55)] font-black'
+              : 'bg-[#22222A]/90 backdrop-blur-md border border-white/15 text-white hover:bg-[#2D2D38] font-semibold'
           }`}
           title="Alternar lanterna / flash do leitor"
         >
@@ -408,11 +412,11 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
           )}
         </button>
 
-        {/* Opção de Digitar TAG (Estética Idêntica ao Botão do Operador) */}
+        {/* Opção de Digitar TAG (Estética Idêntica aos Botões Elevados) */}
         <button
           type="button"
           onClick={() => setModalTagManual(true)}
-          className="cursor-pointer inline-flex items-center justify-center gap-2 py-1.5 px-4 rounded-[2px] bg-zinc-900/90 backdrop-blur-md hover:bg-zinc-800 active:scale-95 border border-zinc-700 transition-all text-xs shadow-lg"
+          className="cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-[#22222A]/90 backdrop-blur-md hover:bg-[#2D2D38] active:scale-95 border border-white/15 transition-all text-xs shadow-xl font-semibold text-white"
           title="Digitar TAG manualmente caso a câmera não leia"
         >
           <span className="font-semibold text-white text-xs">Digitar TAG</span>
@@ -422,8 +426,8 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
 
       {/* MODAL PARA DIGITAÇÃO MANUAL DE TAG */}
       {modalTagManual && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#212121] border border-zinc-700 rounded-[2px] max-w-xs w-full p-4 space-y-3 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#1C1C22] border border-white/10 rounded-2xl max-w-xs w-full p-5 space-y-3.5 shadow-2xl">
             <h3 className="text-xs font-bold text-white flex items-center gap-2">
               <Keyboard className="w-4 h-4 text-red-500" />
               Digitar TAG da Máquina
@@ -437,20 +441,20 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
               value={tagDigitada}
               onChange={(e) => setTagDigitada(e.target.value.toUpperCase())}
               placeholder="Ex: MV3-ROB-04"
-              className="w-full bg-[#18181b] border border-zinc-700 rounded-[2px] p-3 text-sm font-mono text-white placeholder-zinc-300 text-center uppercase tracking-wider focus:outline-none focus:border-red-500"
+              className="w-full bg-[#141418] border border-white/15 rounded-xl p-3 text-sm font-mono text-white placeholder-zinc-400 text-center uppercase tracking-wider focus:outline-none focus:border-red-500"
             />
             <div className="flex gap-2 pt-1">
               <button
                 type="button"
                 onClick={() => setModalTagManual(false)}
-                className="flex-1 py-2.5 bg-zinc-800 text-zinc-200 font-bold text-xs rounded-[2px]"
+                className="flex-1 py-2.5 bg-[#252530] hover:bg-[#323240] text-zinc-200 font-bold text-xs rounded-xl border border-white/10 transition-all"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleConfirmarTagManual}
-                className="flex-1 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-[2px] flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 bg-[#EF4444] hover:bg-red-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>Confirmar</span>

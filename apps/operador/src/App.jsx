@@ -493,11 +493,11 @@ export default function App() {
   }
 
   return (
-    <div className={`${tela === 'scanner' ? 'h-screen' : 'min-h-screen'} bg-[#212121] text-slate-100 flex flex-col justify-between max-w-md mx-auto relative select-none overflow-hidden`}>
+    <div className={`${tela === 'scanner' ? 'h-screen' : 'min-h-screen'} bg-[#000000] text-slate-100 flex flex-col justify-between max-w-md mx-auto relative select-none overflow-hidden`}>
       {/* SPLASH SCREEN INICIAL COM LOGO CORP. VANGUARD E LOADER #EF4444 */}
       {splashVisivel && (
         <div
-          className="fixed inset-0 z-50 bg-[#212121] flex flex-col items-center justify-center select-none"
+          className="fixed inset-0 z-50 bg-[#000000] flex flex-col items-center justify-center select-none"
         >
           <div className="flex flex-col items-center gap-2.5">
             {/* Logo Oficial Corp.Vanguard */}
@@ -525,8 +525,8 @@ export default function App() {
       )}
       {/* MODAL ULTRA-MINIMALISTA DE IDENTIFIANT (3 ESTADOS: REPOUSO, SUCESSO VERDE #10B981, ERRO VERMELHO #EF4444) */}
       {modalEditarOperador && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-[#212121] border border-zinc-700 rounded-[2px] max-w-[310px] w-full overflow-hidden shadow-2xl flex flex-col">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-[#1C1C22] border border-white/10 rounded-2xl max-w-[320px] w-full overflow-hidden shadow-2xl flex flex-col">
             {/* Bloco Superior: Fechar + Linha de Ação */}
             <div className="p-4 space-y-3">
               {/* Fechar no canto superior direito */}
@@ -538,7 +538,7 @@ export default function App() {
                     setErroOperador(null);
                     setSucessoOperador(null);
                   }}
-                  className="text-zinc-200 hover:text-white font-bold text-lg leading-none p-1 transition-transform active:scale-90"
+                  className="w-7 h-7 rounded-full bg-[#252530] text-zinc-300 hover:text-white flex items-center justify-center font-bold text-sm leading-none transition-transform active:scale-90"
                   title="Fechar"
                 >
                   ✕
@@ -546,7 +546,7 @@ export default function App() {
               </div>
 
               {/* Linha com input Floating Label Uiverse.io (ClawHack1) e botão validar */}
-              <div className="flex gap-2.5 items-center pt-1.5">
+              <div className="flex gap-2.5 items-center pt-1">
                 <div
                   className={`ui-identifiant-input flex-1 min-w-0 ${
                     erroOperador ? 'has-error' : ''
@@ -575,7 +575,7 @@ export default function App() {
                   type="button"
                   disabled={validandoOperador || !codigoInput.trim()}
                   onClick={() => validarEConfirmarOperador(codigoInput)}
-                  className="bg-[#525252] hover:bg-[#616161] text-white font-medium text-xs sm:text-sm rounded-[2px] px-3.5 h-[42px] transition-all flex items-center justify-center min-w-[75px] shrink-0 active:scale-95 disabled:opacity-40"
+                  className="bg-[#282834] hover:bg-[#343444] text-white font-semibold text-xs sm:text-sm rounded-xl px-3.5 h-[42px] border border-white/10 transition-all flex items-center justify-center min-w-[75px] shrink-0 active:scale-95 disabled:opacity-40"
                 >
                   {validandoOperador ? (
                     <RefreshCw className="w-4 h-4 animate-spin text-white" />
@@ -619,10 +619,10 @@ export default function App() {
 
       {/* TELA DE ALERTA: TRAVA DE CHAMADO DUPLICADO */}
       {tela === 'duplicado_aviso' && (
-        <div className="flex-1 flex flex-col justify-between p-5 bg-zinc-950 space-y-4">
+        <div className="flex-1 flex flex-col justify-between p-5 bg-[#000000] space-y-4">
           <div className="space-y-4 my-auto">
             {/* Ícone de Alerta */}
-            <div className="w-16 h-16 bg-amber-500/20 border-2 border-amber-500 rounded-[2px] flex items-center justify-center mx-auto text-amber-400 shadow-2xl animate-pulse">
+            <div className="w-16 h-16 bg-amber-500/20 border-2 border-amber-500 rounded-2xl flex items-center justify-center mx-auto text-amber-400 shadow-2xl animate-pulse">
               <ShieldAlert className="w-9 h-9" />
             </div>
 
@@ -639,7 +639,7 @@ export default function App() {
             </div>
 
             {/* Dossiê do Chamado Ativo */}
-            <div className="bg-zinc-900 border border-amber-500/40 rounded-[2px] p-4 text-xs font-mono space-y-2 shadow-xl">
+            <div className="bg-[#1C1C22] border border-amber-500/40 rounded-2xl p-4 text-xs font-mono space-y-2 shadow-xl">
               <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
                 <span className="text-zinc-200 font-semibold">Ordem de Serviço:</span>
                 <span className="text-amber-400 font-black text-sm">{chamadoAtivoAlerta?.numero_os}</span>
@@ -668,7 +668,7 @@ export default function App() {
             <button
               type="button"
               onClick={voltarAoScanner}
-              className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-[2px] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
+              className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
             >
               <Check className="w-4 h-4 stroke-[3]" />
               <span>Voltar ao Scanner (Ciente)</span>
@@ -677,7 +677,7 @@ export default function App() {
             <button
               type="button"
               onClick={prosseguirComReforco}
-              className="w-full py-2.5 bg-zinc-900 border border-zinc-700 hover:border-zinc-500 text-zinc-200 hover:text-white font-bold text-[11px] rounded-[2px] transition-all"
+              className="w-full py-3 bg-[#252530] border border-white/10 hover:bg-[#323240] text-zinc-200 hover:text-white font-bold text-xs rounded-xl transition-all"
             >
               Agravou o problema? Abrir Reforço de OS
             </button>
@@ -687,13 +687,13 @@ export default function App() {
 
       {/* TELA 2: HUD DO OPERADOR COM BOTTOM SHEET RETRÁTIL (DASHBOARD DE DISPARO) */}
       {tela === 'gabarito' && (
-        <div className="flex-1 flex flex-col justify-between bg-[#212121] overflow-y-auto relative">
+        <div className="flex-1 flex flex-col justify-between bg-[#000000] overflow-y-auto relative">
           {/* TOPO: BANNER DA MÁQUINA (EX: MV3-ROB-04) COM PERFEITA SIMETRIA BILATERAL */}
-          <div className="bg-[#141416]/95 backdrop-blur-md py-4 px-4 sm:px-5 border-b border-zinc-800/80 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-md">
+          <div className="bg-[#000000]/90 backdrop-blur-md py-4 px-4 sm:px-5 border-b border-white/10 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-md">
             <button
               type="button"
               onClick={voltarAoScanner}
-              className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700/80 flex items-center justify-center text-zinc-200 hover:text-white hover:bg-zinc-800 transition-all active:scale-95 shadow-sm"
+              className="w-10 h-10 rounded-full bg-[#252530] border border-white/10 flex items-center justify-center text-white hover:bg-[#323240] transition-all active:scale-95 shadow-md"
               title="Voltar ao scanner"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -709,7 +709,7 @@ export default function App() {
             <button
               type="button"
               onClick={voltarAoScanner}
-              className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700/80 flex items-center justify-center text-zinc-200 hover:text-white hover:bg-zinc-800 transition-all active:scale-95 shadow-sm"
+              className="w-10 h-10 rounded-full bg-[#252530] border border-white/10 flex items-center justify-center text-white hover:bg-[#323240] transition-all active:scale-95 shadow-md"
               title="Cancelar e escanear outra"
             >
               <X className="w-5 h-5" />
@@ -867,8 +867,8 @@ export default function App() {
 
               {/* CARD CONTEXTUAL FLUTUANTE: CÂMERA */}
               {abaAtivaHomebar === 'camera' && (
-                <div className="bg-[#18181b] border border-zinc-700 rounded-2xl p-4 shadow-2xl animate-slide-up space-y-3">
-                  <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                <div className="bg-[#1C1C22] border border-white/10 rounded-2xl p-4 shadow-2xl animate-slide-up space-y-3">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
                     <div className="flex items-center gap-2">
                       <Camera className="w-4 h-4 text-white" />
                       <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
@@ -878,7 +878,7 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => setAbaAtivaHomebar(null)}
-                      className="text-zinc-200 hover:text-white p-1 text-xs"
+                      className="text-zinc-300 hover:text-white p-1 text-xs"
                       title="Fechar"
                     >
                       ✕
@@ -890,7 +890,7 @@ export default function App() {
                       <img
                         src={fotoBase64}
                         alt="Foto Anexada"
-                        className="w-16 h-16 object-cover rounded-[2px] border border-zinc-700"
+                        className="w-16 h-16 object-cover rounded-xl border border-white/10"
                       />
                       <div className="flex-1 space-y-2">
                         <span className="text-xs text-[#10B981] font-mono font-bold block">
@@ -900,14 +900,14 @@ export default function App() {
                           <button
                             type="button"
                             onClick={acionarCameraNativa}
-                            className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-xs rounded-[2px] font-semibold border border-zinc-700 active:scale-95 transition-all"
+                            className="px-3 py-1.5 bg-[#282834] hover:bg-[#343444] text-white text-xs rounded-xl font-semibold border border-white/10 active:scale-95 transition-all"
                           >
                             Tirar outra
                           </button>
                           <button
                             type="button"
                             onClick={() => setFotoBase64(null)}
-                            className="px-3 py-1.5 bg-red-950/40 text-red-400 hover:text-red-300 text-xs rounded-[2px] font-semibold flex items-center gap-1 border border-red-900/40 active:scale-95 transition-all"
+                            className="px-3 py-1.5 bg-red-950/40 text-red-400 hover:text-red-300 text-xs rounded-xl font-semibold flex items-center gap-1 border border-red-900/40 active:scale-95 transition-all"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                             <span>Excluir</span>
@@ -923,7 +923,7 @@ export default function App() {
                       <button
                         type="button"
                         onClick={acionarCameraNativa}
-                        className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs rounded-[2px] flex items-center justify-center gap-2 border border-zinc-700 shadow-md active:scale-95 transition-all"
+                        className="w-full py-2.5 bg-[#282834] hover:bg-[#343444] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 border border-white/10 shadow-md active:scale-95 transition-all"
                       >
                         <Camera className="w-4 h-4 text-emerald-400" />
                         <span>Abrir Câmera</span>
@@ -1122,7 +1122,7 @@ export default function App() {
                       value={observacaoTexto}
                       onChange={(e) => setObservacaoTexto(e.target.value)}
                       placeholder="Descreva detalhes específicos da falha, sintomas secundários ou orientações para a manutenção..."
-                      className="w-full bg-[#121214] border border-zinc-700/80 rounded-xl p-3 text-xs sm:text-sm text-white placeholder-zinc-400 focus:outline-none focus:border-white resize-none transition-all"
+                      className="w-full bg-[#141418] border border-white/10 rounded-xl p-3 text-xs sm:text-sm text-white placeholder-zinc-400 focus:outline-none focus:border-white resize-none transition-all"
                     />
                     <div className="flex items-center justify-end pt-0.5">
                       <button
@@ -1138,22 +1138,22 @@ export default function App() {
                 </div>
               )}
 
-              {/* A CÁPSULA DA HOMEBAR: 4 ITENS FIÉIS AO DESIGN SYSTEM (@jsav.design) */}
-              <nav className="h-[64px] bg-[#121214] border border-zinc-700/80 rounded-full px-2.5 py-1.5 flex items-center justify-between shadow-[0_12px_40px_rgba(0,0,0,0.85)] backdrop-blur-md">
+              {/* A CÁPSULA DA HOMEBAR: 4 ITENS FIÉIS AO DESIGN SYSTEM (@jsav.design & WORKOUTS VIBE) */}
+              <nav className="h-[68px] bg-[#16161D]/95 border border-white/10 rounded-full px-3 py-2 flex items-center justify-between shadow-[0_16px_50px_rgba(0,0,0,0.95)] backdrop-blur-xl">
                 {/* 1. CÂMERA */}
                 <button
                   type="button"
                   onClick={() => handleCliqueHomebar('camera')}
                   className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
                     abaAtivaHomebar === 'camera'
-                      ? 'bg-white text-zinc-950 shadow-md scale-105'
-                      : 'text-zinc-300 hover:text-white active:scale-95'
+                      ? 'bg-white text-zinc-950 shadow-md scale-105 border-transparent'
+                      : 'bg-[#252530] text-white hover:bg-[#343444] border border-white/10 shadow-sm active:scale-95'
                   }`}
                   title="Câmera da falha"
                 >
                   <Camera className={`w-5 h-5 ${abaAtivaHomebar === 'camera' ? 'stroke-[2.5]' : ''}`} />
                   {fotoBase64 && abaAtivaHomebar !== 'camera' && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-[#121214]"></span>
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#10B981] ring-2 ring-[#16161D]"></span>
                   )}
                 </button>
 
@@ -1163,10 +1163,10 @@ export default function App() {
                   onClick={() => handleCliqueHomebar('audio')}
                   className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
                     gravandoAudio
-                      ? 'bg-red-600 text-white animate-pulse shadow-red-900/50'
+                      ? 'bg-[#EF4444] text-white animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.55)] border-transparent'
                       : abaAtivaHomebar === 'audio'
-                      ? 'bg-white text-zinc-950 shadow-md scale-105'
-                      : 'text-zinc-300 hover:text-white active:scale-95'
+                      ? 'bg-white text-zinc-950 shadow-md scale-105 border-transparent'
+                      : 'bg-[#252530] text-white hover:bg-[#343444] border border-white/10 shadow-sm active:scale-95'
                   }`}
                   title="Gravar áudio do ruído"
                 >
@@ -1176,7 +1176,7 @@ export default function App() {
                     <Mic className={`w-5 h-5 ${abaAtivaHomebar === 'audio' ? 'stroke-[2.5]' : ''}`} />
                   )}
                   {audioBase64 && !gravandoAudio && abaAtivaHomebar !== 'audio' && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-[#121214]"></span>
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#10B981] ring-2 ring-[#16161D]"></span>
                   )}
                 </button>
 
@@ -1186,14 +1186,14 @@ export default function App() {
                   onClick={() => handleCliqueHomebar('registro')}
                   className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
                     abaAtivaHomebar === 'registro'
-                      ? 'bg-white text-zinc-950 shadow-md scale-105'
-                      : 'text-zinc-300 hover:text-white active:scale-95'
+                      ? 'bg-white text-zinc-950 shadow-md scale-105 border-transparent'
+                      : 'bg-[#252530] text-white hover:bg-[#343444] border border-white/10 shadow-sm active:scale-95'
                   }`}
                   title="Registro escrito complementar"
                 >
                   <FileText className={`w-5 h-5 ${abaAtivaHomebar === 'registro' ? 'stroke-[2.5]' : ''}`} />
                   {observacaoTexto.trim() && abaAtivaHomebar !== 'registro' && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-[#121214]"></span>
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#10B981] ring-2 ring-[#16161D]"></span>
                   )}
                 </button>
 
@@ -1237,9 +1237,9 @@ export default function App() {
 
       {/* TELA 3: SUCESSO / CONFIRMAÇÃO IMEDIATA */}
       {tela === 'sucesso' && (
-        <div className="flex-1 flex flex-col justify-between p-6 bg-zinc-950 text-center">
+        <div className="flex-1 flex flex-col justify-between p-6 bg-[#000000] text-center">
           <div className="my-auto space-y-4">
-            <div className="w-20 h-20 bg-emerald-500/20 border-2 border-emerald-500 rounded-[2px] flex items-center justify-center mx-auto text-emerald-400 shadow-2xl animate-bounce">
+            <div className="w-20 h-20 bg-emerald-500/20 border-2 border-emerald-500 rounded-2xl flex items-center justify-center mx-auto text-emerald-400 shadow-2xl animate-bounce">
               <CheckCircle2 className="w-12 h-12" />
             </div>
 
@@ -1256,8 +1256,8 @@ export default function App() {
             </div>
 
             {/* Dossiê da OS */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-[2px] p-4 text-left space-y-2 max-w-xs mx-auto shadow-lg text-xs font-mono">
-              <div className="flex justify-between border-b border-zinc-800 pb-2">
+            <div className="bg-[#1C1C22] border border-white/10 rounded-2xl p-4 text-left space-y-2 max-w-xs mx-auto shadow-xl text-xs font-mono">
+              <div className="flex justify-between border-b border-white/10 pb-2">
                 <span className="text-zinc-200 font-semibold">Número da OS:</span>
                 <span className="text-white font-bold text-sm">{chamadoCriado?.numero_os}</span>
               </div>
@@ -1280,7 +1280,7 @@ export default function App() {
                 <span className="text-white font-bold">{nomeOperador} ({identifiant})</span>
               </div>
               {fotoBase64 && (
-                <div className="flex justify-between items-center pt-1 border-t border-zinc-800">
+                <div className="flex justify-between items-center pt-1 border-t border-white/10">
                   <span className="text-zinc-200 font-semibold">Anexo:</span>
                   <span className="text-emerald-400 font-bold">1 Foto Anexada</span>
                 </div>
@@ -1291,7 +1291,7 @@ export default function App() {
           <button
             type="button"
             onClick={voltarAoScanner}
-            className="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider rounded-[2px] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
+            className="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
           >
             <Camera className="w-4 h-4" />
             <span>Escanear Próxima Máquina</span>
