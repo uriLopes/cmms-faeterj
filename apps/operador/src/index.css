@@ -778,18 +778,24 @@ html, body, #root, * {
   pointer-events: none;
 }
 
+/* Desativa auto-inversão de cor do navegador (Blink/Chromium Auto Dark Mode) em botões e controles */
+button, [role="button"], .penumbra-radio, .penumbra-radio__mark {
+  forced-color-adjust: none !important;
+}
+
 .penumbra-radio__mark {
   position: relative;
   flex-shrink: 0;
   width: 18px;
   height: 18px;
   margin-top: 2px;
-  background-color: #16161A !important;
-  border: 1.5px solid #484858 !important;
+  background-color: transparent !important;
+  border: 1.5px solid #58596D !important;
   border-radius: 999px;
   -webkit-appearance: none;
   appearance: none;
-  forced-color-adjust: none;
+  forced-color-adjust: none !important;
+  color-scheme: only dark !important;
   box-shadow: none !important;
   transition:
     border-color 180ms ease,
@@ -799,9 +805,11 @@ html, body, #root, * {
 
 /* Blindagem contra auto-dark mode mobile e herança indesejada */
 .penumbra-radio:not(.is-selected) .penumbra-radio__mark {
-  background-color: #16161A !important;
-  border: 1.5px solid #484858 !important;
+  background-color: transparent !important;
+  border: 1.5px solid #58596D !important;
   box-shadow: none !important;
+  forced-color-adjust: none !important;
+  color-scheme: only dark !important;
 }
 
 .penumbra-radio.is-selected .penumbra-radio__mark {

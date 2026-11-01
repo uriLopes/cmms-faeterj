@@ -798,8 +798,10 @@ export default function App() {
                       className="penumbra-radio__mark"
                       aria-hidden="true"
                       style={{
-                        backgroundColor: isChecked ? '#FFFFFF' : '#16161A',
-                        borderColor: isChecked ? '#FFFFFF' : '#484858'
+                        backgroundColor: isChecked ? '#FFFFFF' : 'transparent',
+                        borderColor: isChecked ? '#FFFFFF' : '#58596D',
+                        forcedColorAdjust: 'none',
+                        colorScheme: 'only dark'
                       }}
                     >
                       {isChecked && (
@@ -812,7 +814,8 @@ export default function App() {
                             width: '6px',
                             height: '6px',
                             borderRadius: '999px',
-                            backgroundColor: '#16161A'
+                            backgroundColor: '#16161A',
+                            forcedColorAdjust: 'none'
                           }}
                         />
                       )}
@@ -842,8 +845,10 @@ export default function App() {
                   className="penumbra-radio__mark"
                   aria-hidden="true"
                   style={{
-                    backgroundColor: statusImpacto === 'maquina_parada' ? '#EF4444' : '#16161A',
-                    borderColor: statusImpacto === 'maquina_parada' ? '#EF4444' : '#484858'
+                    backgroundColor: statusImpacto === 'maquina_parada' ? '#EF4444' : 'transparent',
+                    borderColor: statusImpacto === 'maquina_parada' ? '#EF4444' : '#58596D',
+                    forcedColorAdjust: 'none',
+                    colorScheme: 'only dark'
                   }}
                 >
                   {statusImpacto === 'maquina_parada' && (
@@ -856,7 +861,8 @@ export default function App() {
                         width: '6px',
                         height: '6px',
                         borderRadius: '999px',
-                        backgroundColor: '#FFFFFF'
+                        backgroundColor: '#FFFFFF',
+                        forcedColorAdjust: 'none'
                       }}
                     />
                   )}
@@ -884,8 +890,10 @@ export default function App() {
                   className="penumbra-radio__mark"
                   aria-hidden="true"
                   style={{
-                    backgroundColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#16161A',
-                    borderColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#484858'
+                    backgroundColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : 'transparent',
+                    borderColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#58596D',
+                    forcedColorAdjust: 'none',
+                    colorScheme: 'only dark'
                   }}
                 >
                   {statusImpacto === 'operando_com_restricao' && (
@@ -898,7 +906,8 @@ export default function App() {
                         width: '6px',
                         height: '6px',
                         borderRadius: '999px',
-                        backgroundColor: '#16161A'
+                        backgroundColor: '#16161A',
+                        forcedColorAdjust: 'none'
                       }}
                     />
                   )}
@@ -926,8 +935,10 @@ export default function App() {
                   className="penumbra-radio__mark"
                   aria-hidden="true"
                   style={{
-                    backgroundColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#16161A',
-                    borderColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#484858'
+                    backgroundColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : 'transparent',
+                    borderColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#58596D',
+                    forcedColorAdjust: 'none',
+                    colorScheme: 'only dark'
                   }}
                 >
                   {statusImpacto === 'melhoria_estetica' && (
@@ -940,7 +951,8 @@ export default function App() {
                         width: '6px',
                         height: '6px',
                         borderRadius: '999px',
-                        backgroundColor: '#16161A'
+                        backgroundColor: '#16161A',
+                        forcedColorAdjust: 'none'
                       }}
                     />
                   )}
