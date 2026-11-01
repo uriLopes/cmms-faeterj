@@ -786,7 +786,7 @@ export default function App() {
           <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar p-4 sm:p-5 pt-6 sm:pt-7 pb-36 flex flex-col gap-7 sm:gap-8 max-w-md mx-auto w-full">
             {/* 1. SEÇÃO POSSÍVEL PROBLEMA (PENUMBRA RADIO GROUP BY UIVERSE-ASTRONAUT) */}
             <fieldset
-              style={{ background: 'linear-gradient(#1C1C1E, #1C1C1E)', border: '1px solid rgba(255, 255, 255, 0.16)' }}
+              style={{ background: '#2C2C2E', backgroundColor: '#2C2C2E', border: '1px solid rgba(255, 255, 255, 0.16)', boxShadow: 'none' }}
               className="penumbra-radio-group"
             >
               <legend className="penumbra-radio-group__legend">Possível Problema</legend>
@@ -801,8 +801,9 @@ export default function App() {
                     role="button"
                     tabIndex={0}
                     style={{
-                      background: isChecked ? 'linear-gradient(#2C2C2E, #2C2C2E)' : undefined,
-                      borderColor: isChecked ? 'rgba(255, 255, 255, 0.16)' : 'transparent'
+                      background: isChecked ? '#363638' : 'transparent',
+                      backgroundColor: isChecked ? '#363638' : 'transparent',
+                      border: isChecked ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid transparent'
                     }}
                     className={`penumbra-radio ${isChecked ? 'is-selected' : ''}`}
                     onClick={() => toggleSintoma(item)}
@@ -827,7 +828,7 @@ export default function App() {
                             width: '6px',
                             height: '6px',
                             borderRadius: '999px',
-                            backgroundColor: '#1C1C1E',
+                            backgroundColor: '#363638',
                             forcedColorAdjust: 'none'
                           }}
                         />
@@ -844,7 +845,7 @@ export default function App() {
 
             {/* 2. SEÇÃO IMPACTO DO PROBLEMA NA LINHA (PENUMBRA RADIO GROUP) */}
             <fieldset
-              style={{ background: 'linear-gradient(#1C1C1E, #1C1C1E)', border: '1px solid rgba(255, 255, 255, 0.16)' }}
+              style={{ background: '#2C2C2E', backgroundColor: '#2C2C2E', border: '1px solid rgba(255, 255, 255, 0.16)', boxShadow: 'none' }}
               className="penumbra-radio-group"
             >
               <legend className="penumbra-radio-group__legend">Impacto do Problema na Linha</legend>
@@ -854,8 +855,9 @@ export default function App() {
                 role="button"
                 tabIndex={0}
                 style={{
-                  background: statusImpacto === 'maquina_parada' ? 'linear-gradient(#2C2C2E, #2C2C2E)' : undefined,
-                  borderColor: statusImpacto === 'maquina_parada' ? 'rgba(255, 255, 255, 0.16)' : 'transparent'
+                  background: statusImpacto === 'maquina_parada' ? '#363638' : 'transparent',
+                  backgroundColor: statusImpacto === 'maquina_parada' ? '#363638' : 'transparent',
+                  border: statusImpacto === 'maquina_parada' ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid transparent'
                 }}
                 className={`penumbra-radio ${statusImpacto === 'maquina_parada' ? 'is-selected' : ''}`}
                 data-impact="alto"
@@ -903,8 +905,9 @@ export default function App() {
                 role="button"
                 tabIndex={0}
                 style={{
-                  background: statusImpacto === 'operando_com_restricao' ? 'linear-gradient(#2C2C2E, #2C2C2E)' : undefined,
-                  borderColor: statusImpacto === 'operando_com_restricao' ? 'rgba(255, 255, 255, 0.16)' : 'transparent'
+                  background: statusImpacto === 'operando_com_restricao' ? '#363638' : 'transparent',
+                  backgroundColor: statusImpacto === 'operando_com_restricao' ? '#363638' : 'transparent',
+                  border: statusImpacto === 'operando_com_restricao' ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid transparent'
                 }}
                 className={`penumbra-radio ${statusImpacto === 'operando_com_restricao' ? 'is-selected' : ''}`}
                 data-impact="medio"
@@ -930,7 +933,7 @@ export default function App() {
                         width: '6px',
                         height: '6px',
                         borderRadius: '999px',
-                        backgroundColor: '#1C1C1E',
+                        backgroundColor: '#363638',
                         forcedColorAdjust: 'none'
                       }}
                     />
@@ -952,8 +955,9 @@ export default function App() {
                 role="button"
                 tabIndex={0}
                 style={{
-                  background: statusImpacto === 'melhoria_estetica' ? 'linear-gradient(#2C2C2E, #2C2C2E)' : undefined,
-                  borderColor: statusImpacto === 'melhoria_estetica' ? 'rgba(255, 255, 255, 0.16)' : 'transparent'
+                  background: statusImpacto === 'melhoria_estetica' ? '#363638' : 'transparent',
+                  backgroundColor: statusImpacto === 'melhoria_estetica' ? '#363638' : 'transparent',
+                  border: statusImpacto === 'melhoria_estetica' ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid transparent'
                 }}
                 className={`penumbra-radio ${statusImpacto === 'melhoria_estetica' ? 'is-selected' : ''}`}
                 data-impact="baixo"
@@ -979,7 +983,7 @@ export default function App() {
                         width: '6px',
                         height: '6px',
                         borderRadius: '999px',
-                        backgroundColor: '#1C1C1E',
+                        backgroundColor: '#363638',
                         forcedColorAdjust: 'none'
                       }}
                     />

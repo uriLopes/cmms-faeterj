@@ -476,19 +476,20 @@ html, body, #root, * {
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.02em;
-  background: #EF4444; /* Vermelho Industrial Corp.Vanguard */
+  background-color: #2C2C2E;
+  background: #2C2C2E;
   color: #FFFFFF;
   padding: 0 1.25em 0 1em;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   height: 48px;
-  box-shadow: 0 2px 10px rgba(239, 68, 68, 0.25);
+  box-shadow: none !important;
   user-select: none;
   -webkit-user-select: none;
   flex-shrink: 0;
@@ -543,11 +544,19 @@ html, body, #root, * {
 
 .btn-uiverse-send.btn-disabled {
   background-color: #2C2C2E !important;
-  background: linear-gradient(#2C2C2E, #2C2C2E) !important;
-  color: #8E8E93;
-  box-shadow: none;
+  background: #2C2C2E !important;
+  color: #8E8E93 !important;
+  box-shadow: none !important;
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
   opacity: 1;
+}
+
+.btn-uiverse-send.btn-ready {
+  background-color: #EF4444 !important;
+  background: #EF4444 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #EF4444 !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4) !important;
 }
 
 .btn-uiverse-send.btn-disabled svg {
@@ -710,11 +719,11 @@ html, body, #root, * {
 
 /* Tooltip Speech Bubble Estilo Referência do Usuário */
 .tooltip-speech-bubble {
-  background-color: #1C1C1E !important;
-  background: linear-gradient(#1C1C1E, #1C1C1E) !important;
+  background-color: #2C2C2E !important;
+  background: #2C2C2E !important;
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
   border-radius: 20px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+  box-shadow: none !important;
   position: relative;
 }
 
@@ -726,12 +735,15 @@ html, body, #root, * {
   width: 100%;
   margin: 0;
   padding: 20px;
-  background-color: #1C1C1E !important;
-  background: linear-gradient(#1C1C1E, #1C1C1E) !important;
+  background-color: #2C2C2E !important;
+  background: #2C2C2E !important;
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
   border-radius: 24px;
   font-family: inherit;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
 }
 
 .penumbra-radio-group__legend {
@@ -761,14 +773,14 @@ html, body, #root, * {
 }
 
 .penumbra-radio:hover {
-  background-color: #252528 !important;
-  background: linear-gradient(#252528, #252528) !important;
+  background-color: #323235 !important;
+  background: #323235 !important;
 }
 
 .penumbra-radio.is-selected {
-  background-color: #2C2C2E !important;
-  background: linear-gradient(#2C2C2E, #2C2C2E) !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  background-color: #363638 !important;
+  background: #363638 !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
 }
 
 .penumbra-radio__input {
