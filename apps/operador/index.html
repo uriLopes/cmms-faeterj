@@ -73,22 +73,46 @@
       .loaderRectangle div {
         width: 9px;
         height: 16px;
-        animation: 0.9s ease-in-out infinite;
         background: #FFFFFF !important;
         border-radius: 2px;
         box-shadow: none !important;
         opacity: 1 !important;
       }
-      .loaderRectangle div:nth-child(1) { animation-name: rectangleOneAnim; animation-delay: 1s; }
-      .loaderRectangle div:nth-child(2) { animation-name: rectangleTwoAnim; animation-delay: 1.1s; }
-      .loaderRectangle div:nth-child(3) { animation-name: rectangleThreeAnim; animation-delay: 1.2s; }
-      .loaderRectangle div:nth-child(4) { animation-name: rectangleFourAnim; animation-delay: 1.3s; }
-      .loaderRectangle div:nth-child(5) { animation-name: rectangleFiveAnim; animation-delay: 1.4s; }
-      @keyframes rectangleOneAnim { 0% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } 40% { height: 30px; background: #FFFFFF !important; opacity: 1 !important; } 100% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } }
-      @keyframes rectangleTwoAnim { 0% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } 40% { height: 40px; background: #FFFFFF !important; opacity: 1 !important; } 100% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } }
-      @keyframes rectangleThreeAnim { 0% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } 40% { height: 50px; background: #FFFFFF !important; opacity: 1 !important; } 100% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } }
-      @keyframes rectangleFourAnim { 0% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } 40% { height: 40px; background: #FFFFFF !important; opacity: 1 !important; } 100% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } }
-      @keyframes rectangleFiveAnim { 0% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } 40% { height: 30px; background: #FFFFFF !important; opacity: 1 !important; } 100% { height: 15px; background: #FFFFFF !important; opacity: 1 !important; } }
+      .loaderRectangle div:nth-child(1) {
+        animation: rectangleOneAnim 0.9s ease-in-out infinite -0.4s !important;
+      }
+      .loaderRectangle div:nth-child(2) {
+        animation: rectangleTwoAnim 0.9s ease-in-out infinite -0.3s !important;
+      }
+      .loaderRectangle div:nth-child(3) {
+        animation: rectangleThreeAnim 0.9s ease-in-out infinite -0.2s !important;
+      }
+      .loaderRectangle div:nth-child(4) {
+        animation: rectangleFourAnim 0.9s ease-in-out infinite -0.1s !important;
+      }
+      .loaderRectangle div:nth-child(5) {
+        animation: rectangleFiveAnim 0.9s ease-in-out infinite 0s !important;
+      }
+      @keyframes rectangleOneAnim {
+        0%, 100% { height: 14px; opacity: 0.5; }
+        50% { height: 32px; opacity: 1; }
+      }
+      @keyframes rectangleTwoAnim {
+        0%, 100% { height: 14px; opacity: 0.5; }
+        50% { height: 42px; opacity: 1; }
+      }
+      @keyframes rectangleThreeAnim {
+        0%, 100% { height: 14px; opacity: 0.5; }
+        50% { height: 52px; opacity: 1; }
+      }
+      @keyframes rectangleFourAnim {
+        0%, 100% { height: 14px; opacity: 0.5; }
+        50% { height: 42px; opacity: 1; }
+      }
+      @keyframes rectangleFiveAnim {
+        0%, 100% { height: 14px; opacity: 0.5; }
+        50% { height: 32px; opacity: 1; }
+      }
     </style>
   </head>
   <body class="bg-[#000000] text-slate-100 antialiased select-none touch-manipulation">
@@ -111,7 +135,7 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js?v=49').then((reg) => {
+          navigator.serviceWorker.register('/sw.js?v=50').then((reg) => {
             reg.update();
           }).catch((err) => {
             console.log('SW registration failed:', err);
