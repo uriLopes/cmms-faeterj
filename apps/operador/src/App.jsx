@@ -1109,49 +1109,51 @@ export default function App() {
                 </div>
               )}
 
-              {/* CARD CONTEXTUAL FLUTUANTE: REGISTRO ESCRITO */}
+              {/* CARD CONTEXTUAL FLUTUANTE: REGISTRO ESCRITO (ESTILO TOOLTIP SPEECH BUBBLE) */}
               {abaAtivaHomebar === 'registro' && (
-                <div className="bg-[#18181b] border border-zinc-700 rounded-2xl p-4 shadow-2xl animate-slide-up space-y-3">
-                  <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-white" />
-                      <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
-                        Registro Escrito / Detalhes
-                      </span>
-                    </div>
+                <div className="tooltip-speech-bubble p-4 sm:p-5 shadow-2xl animate-slide-up space-y-3 mb-1 select-none">
+                  {/* Header superior estilo Tooltip */}
+                  <div className="flex items-center justify-between pb-1">
+                    <span className="text-sm font-bold text-white tracking-tight">
+                      Registro Escrito
+                    </span>
                     <button
                       type="button"
                       onClick={() => setAbaAtivaHomebar(null)}
-                      className="text-zinc-200 hover:text-white p-1 text-xs"
+                      className="text-zinc-400 hover:text-white p-1 rounded-full hover:bg-zinc-800/60 transition-colors"
                       title="Fechar"
                     >
-                      ✕
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div className="space-y-2">
+                  {/* Corpo do Tooltip com Textarea */}
+                  <div className="space-y-2.5">
                     <textarea
                       rows={3}
                       autoFocus
                       value={observacaoTexto}
                       onChange={(e) => setObservacaoTexto(e.target.value)}
                       placeholder="Descreva detalhes específicos da falha, sintomas secundários ou orientações para a manutenção..."
-                      className="w-full bg-[#121214] border border-zinc-700 rounded-[2px] p-2.5 text-xs sm:text-sm text-white placeholder-zinc-300 focus:outline-none focus:border-white resize-none"
+                      className="w-full bg-[#121214] border border-zinc-700/80 rounded-xl p-3 text-xs sm:text-sm text-white placeholder-zinc-400 focus:outline-none focus:border-white resize-none transition-all"
                     />
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="text-[11px] font-mono text-zinc-200 font-medium">
+                    <div className="flex items-center justify-between pt-0.5">
+                      <span className="text-[11px] font-mono text-zinc-300 font-medium">
                         {observacaoTexto.trim() ? `${observacaoTexto.trim().length} caracteres` : 'Opcional'}
                       </span>
                       <button
                         type="button"
                         onClick={() => setAbaAtivaHomebar(null)}
-                        className="px-3.5 py-1.5 bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs rounded-[2px] flex items-center gap-1 shadow active:scale-95 transition-all"
+                        className="px-4 py-1.5 bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs rounded-full flex items-center gap-1.5 shadow active:scale-95 transition-all cursor-pointer"
                       >
                         <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                         <span>Confirmar</span>
                       </button>
                     </div>
                   </div>
+
+                  {/* Ponteiro / Triângulo da Fala (Tooltip Tail apontando para o botão da Homebar) */}
+                  <div className="absolute -bottom-2 left-[58%] -translate-x-1/2 w-4 h-4 bg-[#18181b] border-r border-b border-zinc-700/80 rotate-45 z-20"></div>
                 </div>
               )}
 

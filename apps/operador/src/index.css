@@ -667,3 +667,13 @@
   background-color: #EA580C;
 }
 
+/* Tooltip Speech Bubble Estilo Referência do Usuário */
+.tooltip-speech-bubble {
+  background: #18181b;
+  border: 1px solid rgba(63, 63, 70, 0.85);
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+  position: relative;
+}
+
+
