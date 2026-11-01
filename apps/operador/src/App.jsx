@@ -688,36 +688,36 @@ export default function App() {
       {/* TELA 2: HUD DO OPERADOR COM BOTTOM SHEET RETRÁTIL (DASHBOARD DE DISPARO) */}
       {tela === 'gabarito' && (
         <div className="flex-1 flex flex-col justify-between bg-[#212121] overflow-y-auto relative">
-          {/* TOPO: BANNER DA MÁQUINA (EX: MV3-ROB-04) */}
-          <div className="bg-[#161616] py-3.5 px-4 border-b border-zinc-800 flex items-center justify-between shrink-0 sticky top-0 z-20">
+          {/* TOPO: BANNER DA MÁQUINA (EX: MV3-ROB-04) COM PERFEITA SIMETRIA BILATERAL */}
+          <div className="bg-[#141416]/95 backdrop-blur-md py-4 px-4 sm:px-5 border-b border-zinc-800/80 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-md">
             <button
               type="button"
               onClick={voltarAoScanner}
-              className="text-zinc-200 hover:text-white p-1 transition-all active:scale-90"
+              className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700/80 flex items-center justify-center text-zinc-200 hover:text-white hover:bg-zinc-800 transition-all active:scale-95 shadow-sm"
               title="Voltar ao scanner"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div className="text-center">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-200 block">
+            <div className="text-center flex flex-col items-center">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-zinc-300">
                 Equipamento Selecionado
               </span>
-              <h1 className="font-mono font-black text-lg sm:text-xl text-white tracking-widest uppercase">
+              <h1 className="font-mono font-black text-xl sm:text-2xl text-white tracking-widest uppercase mt-0.5">
                 {ativoData?.tag_patrimonio || 'MV3-ROB-04'}
               </h1>
             </div>
             <button
               type="button"
               onClick={voltarAoScanner}
-              className="text-zinc-200 hover:text-white p-1 font-bold text-base transition-all active:scale-90"
+              className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700/80 flex items-center justify-center text-zinc-200 hover:text-white hover:bg-zinc-800 transition-all active:scale-95 shadow-sm"
               title="Cancelar e escanear outra"
             >
-              ✕
+              <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* CORPO DO HUD: SINTOMAS E IMPACTO (LIMPO, SEM ROLAGEM EXCESSIVA) */}
-          <div className="p-4 space-y-5 flex-1 pb-32">
+          {/* CORPO DO HUD: SINTOMAS E IMPACTO COM ESPAÇAMENTOS GENEROSOS E HARMONIOSOS */}
+          <div className="p-4 sm:p-5 pt-6 sm:pt-7 pb-36 flex-1 flex flex-col gap-7 sm:gap-8 max-w-md mx-auto w-full">
             {/* 1. SEÇÃO POSSÍVEL PROBLEMA (PENUMBRA RADIO GROUP BY UIVERSE-ASTRONAUT) */}
             <fieldset className="penumbra-radio-group">
               <legend className="penumbra-radio-group__legend">Possível Problema</legend>

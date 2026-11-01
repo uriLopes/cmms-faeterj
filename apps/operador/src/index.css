@@ -680,25 +680,27 @@
 .penumbra-radio-group {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   width: 100%;
   margin: 0;
-  padding: 16px;
+  padding: 20px;
   background-color: #101013;
-  border: 1px solid #23232a;
-  border-radius: 10px;
+  border: 1px solid #27272f;
+  border-radius: 16px;
   font-family: inherit;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
 }
 
 .penumbra-radio-group__legend {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   padding: 0 4px;
   color: #FFFFFF;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  display: block;
+  width: 100%;
 }
 
 .penumbra-radio {
@@ -706,8 +708,8 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 10px 12px;
-  border-radius: 6px;
+  padding: 12px 14px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 180ms ease;
   user-select: none;
