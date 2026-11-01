@@ -949,33 +949,27 @@ export default function App() {
                   {/* Brilho radial ambiente suave ao fundo das barras */}
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06)_0%,transparent_70%)] pointer-events-none"></div>
 
-                  {/* Header superior sutil estilo ChatGPT 4o */}
-                  <div className="relative z-10 flex items-center justify-between pb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                      <span className="text-[11px] font-mono font-bold tracking-wider text-zinc-300 uppercase">
-                        Vanguard 4o • Ruído
+                  {/* Header superior minimalista */}
+                  <div className="relative z-10 flex items-center justify-between pb-1">
+                    {gravandoAudio ? (
+                      <span className="text-[11px] font-mono font-bold text-orange-400 bg-orange-950/60 px-2.5 py-0.5 rounded-full border border-orange-800/60 animate-pulse">
+                        00:{tempoGravacao < 10 ? `0${tempoGravacao}` : tempoGravacao} / 10s
                       </span>
-                    </div>
+                    ) : (
+                      <div></div>
+                    )}
 
-                    <div className="flex items-center gap-2">
-                      {gravandoAudio && (
-                        <span className="text-[11px] font-mono font-bold text-orange-400 bg-orange-950/60 px-2 py-0.5 rounded-full border border-orange-800/60 animate-pulse">
-                          00:{tempoGravacao < 10 ? `0${tempoGravacao}` : tempoGravacao} / 10s
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (gravandoAudio) pararGravacaoAudio();
-                          setAbaAtivaHomebar(null);
-                        }}
-                        className="text-zinc-300 hover:text-white p-1 rounded-full hover:bg-zinc-800/60 transition-colors"
-                        title="Fechar"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (gravandoAudio) pararGravacaoAudio();
+                        setAbaAtivaHomebar(null);
+                      }}
+                      className="text-zinc-300 hover:text-white p-1 rounded-full hover:bg-zinc-800/60 transition-colors ml-auto"
+                      title="Fechar"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
 
                   {/* Centro: O Visualizador de Ondas Sonoras (9 Barras em Cápsula Fiel ao ChatGPT 4o) */}
@@ -992,27 +986,20 @@ export default function App() {
                       <div className="chatgpt-voice-bar"></div>
                     </div>
 
-                    {/* Texto dinâmico abaixo do visualizador */}
-                    <div className="mt-5 text-center">
-                      {gravandoAudio ? (
-                        <p className="text-sm font-medium text-white tracking-wide flex items-center justify-center gap-1.5">
-                          <span>Ouvindo ruído do motor</span>
-                          <span className="inline-flex text-zinc-200">
-                            <span className="animate-bounce" style={{ animationDelay: '0ms' }}>.</span>
-                            <span className="animate-bounce" style={{ animationDelay: '150ms' }}>.</span>
-                            <span className="animate-bounce" style={{ animationDelay: '300ms' }}>.</span>
-                          </span>
-                        </p>
-                      ) : audioBase64 ? (
-                        <p className="text-sm font-semibold text-white tracking-wide">
-                          {tocandoAudio ? 'Reproduzindo ruído sonoro...' : 'Ruído mecânico capturado ✓'}
-                        </p>
-                      ) : (
-                        <p className="text-sm font-medium text-zinc-200 tracking-wide">
-                          Toque no botão para gravar ruído
-                        </p>
-                      )}
-                    </div>
+                    {/* Texto dinâmico apenas após gravação ou em repouso */}
+                    {!gravandoAudio && (
+                      <div className="mt-4 text-center">
+                        {audioBase64 ? (
+                          <p className="text-sm font-semibold text-white tracking-wide">
+                            {tocandoAudio ? 'Reproduzindo ruído sonoro...' : 'Ruído mecânico capturado ✓'}
+                          </p>
+                        ) : (
+                          <p className="text-sm font-medium text-zinc-300 tracking-wide">
+                            Toque no botão para gravar ruído
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Rodapé: Ações e Botão Circular Laranja com Stop Quadrado */}
@@ -1070,9 +1057,7 @@ export default function App() {
                           </button>
                         </div>
                       ) : (
-                        <span className="text-[11px] font-mono text-zinc-300 font-medium">
-                          {gravandoAudio ? 'Gravação ativa (até 10s)' : 'Microfone sensível'}
-                        </span>
+                        <div></div>
                       )}
                     </div>
 
