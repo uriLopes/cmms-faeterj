@@ -559,7 +559,7 @@ export default function App() {
   }
 
   return (
-    <div className={`${tela === 'scanner' ? 'h-screen' : 'min-h-screen'} bg-[#000000] text-slate-100 flex flex-col justify-between max-w-md mx-auto relative select-none overflow-hidden`}>
+    <div className={`${tela === 'scanner' ? 'h-screen' : 'min-h-screen'} bg-[#000000] text-slate-100 flex flex-col justify-between max-w-md mx-auto relative select-none overflow-hidden no-scrollbar`}>
       {/* SPLASH SCREEN INICIAL COM LOGO CORP. VANGUARD E LOADER #EF4444 */}
       {splashVisivel && (
         <div
@@ -753,7 +753,7 @@ export default function App() {
 
       {/* TELA 2: HUD DO OPERADOR COM BOTTOM SHEET RETRÁTIL (DASHBOARD DE DISPARO) */}
       {tela === 'gabarito' && (
-        <div className="flex-1 flex flex-col justify-between bg-[#000000] overflow-y-auto relative">
+        <div className="flex-1 flex flex-col justify-between bg-[#000000] overflow-y-auto no-scrollbar relative">
           {/* TOPO: BANNER DA MÁQUINA (EX: MV3-ROB-04) COM PERFEITA SIMETRIA BILATERAL */}
           <div className="bg-[#000000]/90 backdrop-blur-md py-4 px-4 sm:px-5 border-b border-white/10 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-md">
             <button
