@@ -33,8 +33,10 @@ import {
   History,
   Check,
   Building2,
-  ExternalLink
+  ExternalLink,
+  Menu
 } from 'lucide-react';
+import CockpitSidebar from '../components/CockpitSidebar';
 import { api } from '../services/api';
 import { getSocket } from '../services/socket';
 import { soundAlert } from '../services/soundAlert';
@@ -54,6 +56,7 @@ export default function CockpitPCM() {
 
   // Aba ativa: 'triagem', 'ativos', 'indicadores'
   const [abaAtiva, setAbaAtiva] = useState('triagem');
+  const [isOpenMobile, setIsOpenMobile] = useState(false);
 
   // Estados dos chamados e triagem
   const [chamados, setChamados] = useState([]);
@@ -482,115 +485,106 @@ export default function CockpitPCM() {
   const totalConcluidosHoje = chamados.filter((c) => c.status === 'concluido').length;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between">
-      {/* Topo / Barra Superior Fixa da Vanguard Central */}
-      <div className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-3">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-[#0E0F14] text-slate-100 flex">
+      {/* Sidebar Inspirada no Redesign do Discord */}
+      <CockpitSidebar
+        abaAtiva={abaAtiva}
+        setAbaAtiva={setAbaAtiva}
+        totalAguardandoAtribuicao={totalAguardandoAtribuicao}
+        totalParadas={totalParadas}
+        somAtivo={somAtivo}
+        toggleSom={() => {
+          const novoEstado = soundAlert.toggleSom();
+          setSomAtivo(novoEstado);
+        }}
+        loading={loading}
+        recarregarDados={() => {
+          if (abaAtiva === 'triagem') carregarDados();
+          if (abaAtiva === 'ativos') carregarAtivosESintomas();
+          if (abaAtiva === 'indicadores') carregarMetricas();
+        }}
+        isOpenMobile={isOpenMobile}
+        setIsOpenMobile={setIsOpenMobile}
+      />
+
+      {/* Área Principal de Conteúdo (Direita) */}
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen overflow-y-auto">
+        {/* Top Header Bar Integrada */}
+        <header className="sticky top-0 z-30 bg-[#121319]/90 backdrop-blur-md border-b border-white/[0.08] px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Botão Hambúrguer Mobile */}
             <button
-              onClick={() => navigate('/')}
-              className="p-1.5 text-slate-400 hover:text-white rounded-[2px] hover:bg-slate-800 transition-colors"
-              title="Voltar ao início"
+              onClick={() => setIsOpenMobile(true)}
+              className="lg:hidden p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors shrink-0"
+              title="Abrir menu lateral"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <Menu className="w-5 h-5" />
             </button>
-            <VanguardLogo variant="horizontal" size="sm" />
-            <div className="hidden sm:block border-l border-slate-800 pl-3">
+
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h1 className="font-bold text-xs tracking-wider uppercase text-slate-200">
-                  Vanguard Central
+                <h1 className="font-bold text-sm sm:text-base tracking-wide text-white truncate">
+                  {abaAtiva === 'triagem' && 'Central de Triagem & Fila Operacional'}
+                  {abaAtiva === 'ativos' && 'Gestão do Parque Fabril & Árvore de Falhas'}
+                  {abaAtiva === 'indicadores' && 'Dashboard de Inteligência & Métricas TCC'}
                 </h1>
-                <span className="text-[10px] font-bold px-2 py-0.2 rounded bg-red-500/20 text-red-400 border border-red-500/30">
-                  Gestão & Triagem
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hidden sm:inline-flex items-center gap-1 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Ao Vivo
                 </span>
               </div>
-              <p className="text-[10px] text-slate-500">
-                Cérebro Operacional: Matriz de Priorização, SLA, Prontuário e Despacho de Especialistas
+              <p className="text-xs text-zinc-400 hidden sm:block truncate">
+                {abaAtiva === 'triagem' && 'Matriz de Priorização dinâmica, SLA T0 → T1 e despacho imediato de especialistas'}
+                {abaAtiva === 'ativos' && 'Cadastro de maquinário, geração de etiquetas industriais QR e prontuários históricos'}
+                {abaAtiva === 'indicadores' && 'Cálculo automatizado de MTBF, MTTR, Disponibilidade Geral e tempos de resposta'}
               </p>
             </div>
           </div>
 
-          {/* Abas de Navegação Principal */}
-          <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-[2px] border border-slate-800 self-center md:self-auto">
-            <button
-              onClick={() => setAbaAtiva('triagem')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] text-xs font-bold transition-all ${
-                abaAtiva === 'triagem'
-                  ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Activity className="w-4 h-4" />
-              <span>Triagem & Fila</span>
-              {totalAguardandoAtribuicao > 0 && (
-                <span className="ml-1 px-1.5 py-0.2 text-[10px] bg-white text-red-700 rounded-full font-black">
-                  {totalAguardandoAtribuicao}
-                </span>
-              )}
-            </button>
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Ações Rápidas Contextuais por Aba */}
+            {abaAtiva === 'ativos' && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setModalNovoAtivo(true)}
+                  className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Novo Ativo</span>
+                </button>
+                <button
+                  onClick={() => setModalNovoSintoma(true)}
+                  className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all border border-white/10"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Novo Sintoma</span>
+                </button>
+              </div>
+            )}
 
-            <button
-              onClick={() => setAbaAtiva('ativos')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] text-xs font-bold transition-all ${
-                abaAtiva === 'ativos'
-                  ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Boxes className="w-4 h-4" />
-              <span>Ativos & Prontuário</span>
-            </button>
-
-            <button
-              onClick={() => setAbaAtiva('indicadores')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] text-xs font-bold transition-all ${
-                abaAtiva === 'indicadores'
-                  ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span>Dashboard TCC</span>
-            </button>
-          </div>
-
-          {/* Ações Rápidas: Alarme Sonoro, Rede e Atualizar */}
-          <div className="flex items-center gap-2 self-end md:self-auto">
-            <button
-              onClick={() => {
-                const novoEstado = soundAlert.toggleSom();
-                setSomAtivo(novoEstado);
-              }}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-[2px] text-xs font-semibold border transition-all ${
-                somAtivo
-                  ? 'bg-red-600/20 border-red-500/40 text-red-300 hover:bg-red-600/30'
-                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-300'
-              }`}
-              title={somAtivo ? 'Silenciar alarme de emergência' : 'Ativar sirene sonora'}
-            >
-              {somAtivo ? <Volume2 className="w-4 h-4 text-red-400" /> : <VolumeX className="w-4 h-4" />}
-              <span className="hidden sm:inline">{somAtivo ? 'Sirene Ativa' : 'Mudo'}</span>
-            </button>
+            {abaAtiva === 'indicadores' && (
+              <div className="flex items-center gap-1 bg-[#1A1B23] p-1 rounded-lg border border-white/10 text-xs font-mono">
+                {[7, 15, 30, 90].map((dias) => (
+                  <button
+                    key={dias}
+                    onClick={() => setPeriodoDias(dias)}
+                    className={`px-2 py-1 rounded text-xs transition-colors ${
+                      periodoDias === dias ? 'bg-red-600 text-white font-bold' : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {dias}d
+                  </button>
+                ))}
+              </div>
+            )}
 
             <NetworkStatusBadge />
-
-            <button
-              onClick={() => {
-                if (abaAtiva === 'triagem') carregarDados();
-                if (abaAtiva === 'ativos') carregarAtivosESintomas();
-                if (abaAtiva === 'indicadores') carregarMetricas();
-              }}
-              className="p-1.5 text-slate-400 hover:text-white rounded-[2px] hover:bg-slate-800"
-              title="Atualizar dados"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            </button>
           </div>
-        </div>
+        </header>
 
         {/* Notificação Flutuante de Chamado Recebido via Socket.io */}
         {novoAlerta && (
-          <div className="max-w-7xl mx-auto mt-2 bg-rose-600 border border-rose-400 text-white rounded-[2px] p-3 shadow-2xl flex items-center justify-between animate-bounce">
+          <div className="mx-4 sm:mx-6 mt-4 bg-rose-600 border border-rose-400 text-white rounded-xl p-3 shadow-2xl flex items-center justify-between animate-bounce">
             <div className="flex items-center gap-3">
               <ShieldAlert className="w-6 h-6 text-white shrink-0 animate-pulse" />
               <div>
@@ -608,10 +602,9 @@ export default function CockpitPCM() {
             </button>
           </div>
         )}
-      </div>
 
-      {/* CONTEÚDO PRINCIPAL: MUDANÇA CONFORME ABA */}
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 w-full space-y-6">
+        {/* CONTEÚDO PRINCIPAL: MUDANÇA CONFORME ABA */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
 
         {/* ======================================================== */}
         {/* ABA 1: FILA DE TRIAGEM, PRIORIZAÇÃO E DESPACHO ($T_0 \to T_1$) */}
@@ -1366,7 +1359,7 @@ export default function CockpitPCM() {
             ) : null}
           </div>
         )}
-      </div>
+      </main>
 
       {/* ======================================================== */}
       {/* MODAL 1: ATRIBUIÇÃO E DESPACHO DE TÉCNICO ($T_1$) */}
@@ -2106,9 +2099,10 @@ export default function CockpitPCM() {
         </div>
       )}
 
-      {/* Rodapé institucional */}
-      <div className="border-t border-slate-900 p-3 text-center text-[10px] text-slate-500">
-        Corp.Vanguard • Vanguard Central (Gestão, Triagem, Prontuário e Métricas) • FAETERJ Barra Mansa
+        {/* Rodapé institucional */}
+        <footer className="border-t border-white/[0.06] py-3.5 px-6 text-center text-[10px] text-zinc-500 font-mono">
+          Corp.Vanguard • Vanguard Central (Gestão, Triagem, Prontuário e Métricas) • FAETERJ Barra Mansa
+        </footer>
       </div>
     </div>
   );
