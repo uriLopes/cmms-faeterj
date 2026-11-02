@@ -5,8 +5,6 @@ import {
   Boxes,
   BarChart3,
   QrCode,
-  Flame,
-  Wrench,
   Layers,
   Volume2,
   VolumeX,
@@ -69,18 +67,6 @@ export default function CockpitSidebar({
       hint: 'Plaquetas das Máquinas',
       icon: QrCode,
       onClick: () => navigate('/totem-qr')
-    },
-    {
-      label: 'Terminal Operador',
-      hint: 'Trigger (Mobile)',
-      icon: Flame,
-      onClick: () => navigate('/operador')
-    },
-    {
-      label: 'Terminal Mantenedor',
-      hint: 'Field (Mobile)',
-      icon: Wrench,
-      onClick: () => navigate('/mantenedor')
     },
     {
       label: 'Almoxarifado & Peças',
@@ -178,13 +164,13 @@ export default function CockpitSidebar({
             </div>
           </div>
 
-          {/* Seção 2: Ecossistema CMMS (Atalhos Integrados) */}
+          {/* Seção 2: Módulos de Apoio Integrados */}
           <div>
             <div className="px-3 mb-2 flex items-center justify-between">
               <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest font-mono">
-                Ecossistema
+                Módulos de Apoio
               </span>
-              <span className="text-[9px] font-mono text-[#8E8E93]">9 etapas</span>
+              <span className="text-[9px] font-mono text-[#8E8E93]">Desktop</span>
             </div>
 
             <div className="space-y-1">
