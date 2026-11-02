@@ -34,7 +34,7 @@ import {
   Check,
   Building2,
   ExternalLink,
-  Menu
+  Laptop
 } from 'lucide-react';
 import CockpitSidebar from '../components/CockpitSidebar';
 import { api } from '../services/api';
@@ -56,7 +56,6 @@ export default function CockpitPCM() {
 
   // Aba ativa: 'triagem', 'ativos', 'indicadores'
   const [abaAtiva, setAbaAtiva] = useState('triagem');
-  const [isOpenMobile, setIsOpenMobile] = useState(false);
 
   // Estados dos chamados e triagem
   const [chamados, setChamados] = useState([]);
@@ -485,7 +484,7 @@ export default function CockpitPCM() {
   const totalConcluidosHoje = chamados.filter((c) => c.status === 'concluido').length;
 
   return (
-    <div className="min-h-screen bg-[#0E0F14] text-slate-100 flex">
+    <div className="min-h-screen bg-[#000000] text-white flex">
       {/* Sidebar Inspirada no Redesign do Discord */}
       <CockpitSidebar
         abaAtiva={abaAtiva}
@@ -503,39 +502,33 @@ export default function CockpitPCM() {
           if (abaAtiva === 'ativos') carregarAtivosESintomas();
           if (abaAtiva === 'indicadores') carregarMetricas();
         }}
-        isOpenMobile={isOpenMobile}
-        setIsOpenMobile={setIsOpenMobile}
+        
       />
 
       {/* Área Principal de Conteúdo (Direita) */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen overflow-y-auto">
         {/* Top Header Bar Integrada */}
-        <header className="sticky top-0 z-30 bg-[#121319]/90 backdrop-blur-md border-b border-white/[0.08] px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            {/* Botão Hambúrguer Mobile */}
-            <button
-              onClick={() => setIsOpenMobile(true)}
-              className="lg:hidden p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors shrink-0"
-              title="Abrir menu lateral"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-
+        <header className="sticky top-0 z-30 bg-[#000000]/95 backdrop-blur-md border-b border-white/[0.08] px-6 py-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="font-bold text-sm sm:text-base tracking-wide text-white truncate">
+              <div className="flex items-center gap-2.5">
+                <h1 className="font-black text-base tracking-wide text-white truncate">
                   {abaAtiva === 'triagem' && 'Central de Triagem & Fila Operacional'}
                   {abaAtiva === 'ativos' && 'Gestão do Parque Fabril & Árvore de Falhas'}
                   {abaAtiva === 'indicadores' && 'Dashboard de Inteligência & Métricas TCC'}
                 </h1>
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hidden sm:inline-flex items-center gap-1 shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Ao Vivo
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30 inline-flex items-center gap-1.5 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+                  Ao Vivo • WebSocket
+                </span>
+                <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#16161A] text-[#8E8E93] border border-white/[0.12] hidden md:inline-flex items-center gap-1.5 shrink-0">
+                  <Laptop className="w-3 h-3 text-[#8E8E93]" />
+                  <span>Estação PC / Notebook</span>
                 </span>
               </div>
-              <p className="text-xs text-zinc-400 hidden sm:block truncate">
-                {abaAtiva === 'triagem' && 'Matriz de Priorização dinâmica, SLA T0 → T1 e despacho imediato de especialistas'}
-                {abaAtiva === 'ativos' && 'Cadastro de maquinário, geração de etiquetas industriais QR e prontuários históricos'}
+              <p className="text-xs text-[#8E8E93] mt-0.5 truncate">
+                {abaAtiva === 'triagem' && 'Matriz de Priorização dinâmica, SLA T0 → T1 e despacho imediato de especialistas da planta'}
+                {abaAtiva === 'ativos' && 'Cadastro de maquinário, geração de etiquetas industriais QR e prontuários históricos de intervenções'}
                 {abaAtiva === 'indicadores' && 'Cálculo automatizado de MTBF, MTTR, Disponibilidade Geral e tempos de resposta'}
               </p>
             </div>
@@ -547,14 +540,14 @@ export default function CockpitPCM() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setModalNovoAtivo(true)}
-                  className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                  className="px-3 py-1.5 bg-[#EF4444] hover:bg-red-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Novo Ativo</span>
                 </button>
                 <button
                   onClick={() => setModalNovoSintoma(true)}
-                  className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all border border-white/10"
+                  className="px-3 py-1.5 bg-[#2C2C2E] hover:bg-[#36363A] text-white border border-white/[0.16] rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all border border-white/10"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Novo Sintoma</span>
@@ -563,13 +556,13 @@ export default function CockpitPCM() {
             )}
 
             {abaAtiva === 'indicadores' && (
-              <div className="flex items-center gap-1 bg-[#1A1B23] p-1 rounded-lg border border-white/10 text-xs font-mono">
+              <div className="flex items-center gap-1 bg-[#1C1C1E] p-1 rounded-xl border border-white/[0.16] text-xs font-mono">
                 {[7, 15, 30, 90].map((dias) => (
                   <button
                     key={dias}
                     onClick={() => setPeriodoDias(dias)}
                     className={`px-2 py-1 rounded text-xs transition-colors ${
-                      periodoDias === dias ? 'bg-red-600 text-white font-bold' : 'text-zinc-400 hover:text-white'
+                      periodoDias === dias ? 'bg-[#EF4444] text-white font-bold' : 'text-[#8E8E93] hover:text-white'
                     }`}
                   >
                     {dias}d
@@ -613,7 +606,7 @@ export default function CockpitPCM() {
           <div className="space-y-6">
             {/* Faixa de KPIs Operacionais (Ergonomia Cognitiva NBR 7195) */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="bg-slate-900 border border-rose-500/30 rounded-[2px] p-4 shadow-lg relative overflow-hidden">
+              <div className="bg-[#1C1C1E] border border-rose-500/30 rounded-xl p-4 shadow-lg relative overflow-hidden">
                 <div className="flex justify-between items-start">
                   <span className="text-xs font-bold uppercase tracking-wider text-rose-400">
                     Máquinas Paradas
@@ -623,10 +616,10 @@ export default function CockpitPCM() {
                 <div className="text-3xl font-black text-white mt-2 font-mono">
                   {totalParadas}
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">Downtime fabril em andamento</p>
+                <p className="text-[11px] text-[#8E8E93] mt-1">Downtime fabril em andamento</p>
               </div>
 
-              <div className="bg-slate-900 border border-amber-500/30 rounded-[2px] p-4 shadow-lg">
+              <div className="bg-[#1C1C1E] border border-amber-500/30 rounded-xl p-4 shadow-lg">
                 <div className="flex justify-between items-start">
                   <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
                     Aguardando Triagem ($T_0$)
@@ -636,10 +629,10 @@ export default function CockpitPCM() {
                 <div className="text-3xl font-black text-white mt-2 font-mono">
                   {totalAguardandoAtribuicao}
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">Tempo de resposta correndo na Central</p>
+                <p className="text-[11px] text-[#8E8E93] mt-1">Tempo de resposta correndo na Central</p>
               </div>
 
-              <div className="bg-slate-900 border border-indigo-500/30 rounded-[2px] p-4 shadow-lg">
+              <div className="bg-[#1C1C1E] border border-indigo-500/30 rounded-xl p-4 shadow-lg">
                 <div className="flex justify-between items-start">
                   <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
                     Em Atendimento ($T_2$)
@@ -649,10 +642,10 @@ export default function CockpitPCM() {
                 <div className="text-3xl font-black text-white mt-2 font-mono">
                   {totalEmAtendimento}
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">Mantenedores em campo no posto</p>
+                <p className="text-[11px] text-[#8E8E93] mt-1">Mantenedores em campo no posto</p>
               </div>
 
-              <div className="bg-slate-900 border border-emerald-500/30 rounded-[2px] p-4 shadow-lg">
+              <div className="bg-[#1C1C1E] border border-emerald-500/30 rounded-xl p-4 shadow-lg">
                 <div className="flex justify-between items-start">
                   <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
                     OSs Concluídas ($T_3$)
@@ -662,18 +655,18 @@ export default function CockpitPCM() {
                 <div className="text-3xl font-black text-white mt-2 font-mono">
                   {totalConcluidosHoje}
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">Ativos liberados para produção</p>
+                <p className="text-[11px] text-[#8E8E93] mt-1">Ativos liberados para produção</p>
               </div>
             </div>
 
             {/* Barra de Filtros, Ordenação Inteligente e Busca */}
-            <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-3 flex flex-col md:flex-row gap-3 items-center justify-between">
+            <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-3 flex flex-col md:flex-row gap-3 items-center justify-between">
               <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                 {/* Seletor de Linha */}
                 <select
                   value={linhaSelecionada}
                   onChange={(e) => setLinhaSelecionada(e.target.value)}
-                  className="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-[2px] px-3 py-2 font-medium focus:outline-none focus:border-red-500"
+                  className="bg-[#121216] border border-white/[0.16] text-xs text-zinc-200 rounded-xl px-3 py-2 font-medium focus:outline-none focus:border-red-500"
                 >
                   <option value="">Todas as Linhas da Planta</option>
                   {linhas.map((l) => (
@@ -686,10 +679,10 @@ export default function CockpitPCM() {
                 {/* Alternância de Ordenação por Matriz de Priorização Industrial */}
                 <button
                   onClick={() => setOrdenacao(ordenacao === 'prioridade' ? 'recentes' : 'prioridade')}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-[2px] text-xs font-bold border transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
                     ordenacao === 'prioridade'
                       ? 'bg-red-600/20 text-red-300 border-red-500/50 shadow-md'
-                      : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
+                      : 'bg-[#262629] text-[#8E8E93] border-white/[0.16] hover:text-white'
                   }`}
                   title="Ordenar por Matriz de Priorização (Criticidade + Impacto + Tempo de Espera)"
                 >
@@ -713,10 +706,10 @@ export default function CockpitPCM() {
                     <button
                       key={s.id}
                       onClick={() => setStatusFiltro(s.id)}
-                      className={`px-3 py-1.5 rounded-[2px] font-medium transition-all ${
+                      className={`px-3 py-1.5 rounded-xl font-medium transition-all ${
                         statusFiltro === s.id
-                          ? 'bg-red-600 text-white font-bold'
-                          : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
+                          ? 'bg-[#EF4444] text-white font-bold'
+                          : 'bg-[#262629] text-[#8E8E93] hover:bg-[#36363A] hover:text-white'
                       }`}
                     >
                       {s.label}
@@ -727,13 +720,13 @@ export default function CockpitPCM() {
 
               {/* Campo de Busca Rápida */}
               <div className="relative w-full md:w-64">
-                <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                <Search className="w-4 h-4 text-[#8E8E93] absolute left-3 top-2.5" />
                 <input
                   type="text"
                   value={busca}
                   onChange={(e) => setBusca(e.target.value)}
                   placeholder="Buscar TAG, OS ou Operador..."
-                  className="w-full bg-slate-950 border border-slate-700 rounded-[2px] pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500"
+                  className="w-full bg-[#121216] border border-white/[0.16] rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-[#8E8E93] focus:outline-none focus:border-red-500"
                 />
               </div>
             </div>
@@ -742,15 +735,15 @@ export default function CockpitPCM() {
             {loading ? (
               <div className="py-20 text-center space-y-3">
                 <div className="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="text-xs text-slate-400">Carregando fila de triagem da planta...</p>
+                <p className="text-xs text-[#8E8E93]">Carregando fila de triagem da planta...</p>
               </div>
             ) : chamadosFiltrados.length === 0 ? (
-              <div className="py-16 text-center bg-slate-900/40 border border-slate-800/80 rounded-[2px]">
+              <div className="py-16 text-center bg-[#121216]/60 border border-white/[0.08] rounded-xl">
                 <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
                 <h3 className="text-base font-bold text-white mt-3">
                   Nenhuma ordem de serviço pendente neste filtro
                 </h3>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1">
+                <p className="text-xs text-[#8E8E93] max-w-sm mx-auto mt-1">
                   Todas as máquinas operando em regime estável ou chamados arquivados.
                 </p>
               </div>
@@ -769,12 +762,12 @@ export default function CockpitPCM() {
                   return (
                     <div
                       key={item.id}
-                      className={`bg-slate-900 rounded-[2px] border transition-all p-4 flex flex-col justify-between shadow-xl relative overflow-hidden ${
+                      className={`bg-[#1C1C1E] rounded-xl border transition-all p-4 flex flex-col justify-between shadow-xl relative overflow-hidden ${
                         isConcluido
                           ? 'border-emerald-500/30'
                           : isCritico
                           ? 'border-rose-500/50 shadow-rose-950/20'
-                          : 'border-slate-800 hover:border-slate-700'
+                          : 'border-white/[0.08] hover:border-white/[0.16]'
                       }`}
                     >
                       {/* Topo do Card: Número OS + TAG + Criticidade do Ativo */}
@@ -782,7 +775,7 @@ export default function CockpitPCM() {
                         <div className="flex justify-between items-start">
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-xs font-bold text-slate-400">
+                              <span className="font-mono text-xs font-bold text-[#8E8E93]">
                                 {item.numero_os}
                               </span>
                               {item.score_prioridade && item.status !== 'concluido' && (
@@ -807,8 +800,8 @@ export default function CockpitPCM() {
                                 Criticidade {item.ativo_criticidade}
                               </span>
                             </div>
-                            <p className="text-xs text-slate-300 font-medium">{item.ativo_nome}</p>
-                            <p className="text-[11px] text-slate-500">
+                            <p className="text-xs text-zinc-300 font-medium">{item.ativo_nome}</p>
+                            <p className="text-[11px] text-[#8E8E93]">
                               {item.linha_nome} • {item.posto_trabalho}
                             </p>
                           </div>
@@ -816,7 +809,7 @@ export default function CockpitPCM() {
                           {/* Ticker de Downtime */}
                           <div className="text-right">
                             <div
-                              className={`font-mono text-xs font-bold px-2 py-1 rounded-[2px] inline-flex items-center gap-1.5 ${
+                              className={`font-mono text-xs font-bold px-2 py-1 rounded-xl inline-flex items-center gap-1.5 ${
                                 isConcluido
                                   ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                                   : 'bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse'
@@ -825,7 +818,7 @@ export default function CockpitPCM() {
                               <Clock className="w-3.5 h-3.5" />
                               <span>{formatarTempoDowntime(segundosDowntime)}</span>
                             </div>
-                            <span className="block text-[9px] text-slate-500 mt-0.5">
+                            <span className="block text-[9px] text-[#8E8E93] mt-0.5">
                               {isConcluido ? 'Downtime Total' : 'Parada em Curso'}
                             </span>
                           </div>
@@ -835,7 +828,7 @@ export default function CockpitPCM() {
                         {item.status === 'aberto' && (
                           <div className="mt-2.5">
                             {item.sla_estourado ? (
-                              <div className="bg-rose-950/40 border border-rose-500/40 text-rose-300 rounded-[2px] px-2.5 py-1 text-[10px] font-bold flex items-center justify-between animate-pulse">
+                              <div className="bg-rose-950/40 border border-rose-500/40 text-rose-300 rounded-xl px-2.5 py-1 text-[10px] font-bold flex items-center justify-between animate-pulse">
                                 <span className="flex items-center gap-1">
                                   <AlertTriangle className="w-3 h-3 text-rose-400" />
                                   SLA ESTOURADO (+{item.minutos_em_aberto - item.sla_limite_t1} min além do limite)
@@ -843,7 +836,7 @@ export default function CockpitPCM() {
                                 <span>T0: {item.sla_limite_t1}m max</span>
                               </div>
                             ) : (
-                              <div className="bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 rounded-[2px] px-2.5 py-1 text-[10px] font-bold flex items-center justify-between">
+                              <div className="bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 rounded-xl px-2.5 py-1 text-[10px] font-bold flex items-center justify-between">
                                 <span className="flex items-center gap-1">
                                   <Clock className="w-3 h-3 text-emerald-400" />
                                   Dentro do SLA de Triagem
@@ -855,11 +848,11 @@ export default function CockpitPCM() {
                         )}
 
                         {/* Sintoma Reportado no Vanguard Trigger */}
-                        <div className="mt-2.5 bg-slate-950/60 border border-slate-800/80 rounded-[2px] p-2.5">
-                          <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                        <div className="mt-2.5 bg-[#121216] border border-white/[0.08] rounded-xl p-2.5">
+                          <span className="text-[10px] text-[#8E8E93] uppercase tracking-wider font-semibold">
                             Sintoma Inicial Reportado:
                           </span>
-                          <p className="text-xs text-slate-200 font-medium mt-0.5 line-clamp-2">
+                          <p className="text-xs text-zinc-200 font-medium mt-0.5 line-clamp-2">
                             {item.descricao_sintoma || item.sintoma_descricao || 'Não especificado'}
                           </p>
                         </div>
@@ -894,9 +887,9 @@ export default function CockpitPCM() {
                             <img
                               src={item.foto_anexo}
                               alt="Evidência fotográfica"
-                              className="w-full h-24 object-cover rounded-[2px] border border-slate-700/80 group-hover:opacity-90 transition-all"
+                              className="w-full h-24 object-cover rounded-xl border border-white/[0.16] group-hover:opacity-90 transition-all"
                             />
-                            <span className="absolute bottom-1.5 right-1.5 bg-black/80 backdrop-blur-sm text-[9px] text-emerald-300 font-bold px-2 py-0.5 rounded border border-emerald-500/30">
+                            <span className="absolute bottom-1.5 right-1.5 bg-black/85 backdrop-blur-md text-[9px] text-emerald-300 font-bold px-2 py-0.5 rounded border border-emerald-500/30">
                               📸 Evidência Anexada
                             </span>
                           </div>
@@ -904,16 +897,16 @@ export default function CockpitPCM() {
 
                         {/* Player de Áudio do Ruído (se houver) */}
                         {item.audio_anexo && (
-                          <div className="mt-2 bg-slate-950/80 border border-slate-800 rounded-[2px] p-2 flex items-center gap-2">
+                          <div className="mt-2 bg-[#121216] border border-white/[0.08] rounded-xl p-2 flex items-center gap-2">
                             <Volume2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                             <audio src={item.audio_anexo} controls className="h-6 w-full" />
                           </div>
                         )}
 
                         {/* Identificação de Operador e Técnico Atribuído */}
-                        <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-400">
+                        <div className="mt-2.5 flex items-center justify-between text-[11px] text-[#8E8E93]">
                           <span>Operador: {item.operador_nome || item.operador_matricula}</span>
-                          <span className="font-medium text-slate-300">
+                          <span className="font-medium text-zinc-300">
                             {item.mantenedor_nome ? (
                               <span className="text-red-400">Téc: {item.mantenedor_nome}</span>
                             ) : (
@@ -924,7 +917,7 @@ export default function CockpitPCM() {
                       </div>
 
                       {/* Rodapé do Card: Máquina de Estados e Ações */}
-                      <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+                      <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between gap-2">
                         {/* Status da Máquina de Estados */}
                         <span
                           className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
@@ -962,7 +955,7 @@ export default function CockpitPCM() {
                                 setModalAtribuir(item);
                                 if (tecnicos.length > 0) setTecnicoAtribuirId(tecnicos[0].id);
                               }}
-                              className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-[2px] text-xs flex items-center gap-1 shadow-lg shadow-red-600/20 active:scale-95 transition-all"
+                              className="px-3 py-1.5 bg-[#EF4444] hover:bg-red-500 text-white font-bold rounded-xl text-xs flex items-center gap-1 shadow-lg shadow-red-600/20 active:scale-95 transition-all"
                             >
                               <UserCheck className="w-3.5 h-3.5" />
                               <span>Despachar ($T_1$)</span>
@@ -971,7 +964,7 @@ export default function CockpitPCM() {
 
                           <button
                             onClick={() => abrirDossieOS(item)}
-                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-[2px] transition-colors"
+                            className="p-1.5 bg-[#2C2C2E] hover:bg-[#36363A] text-white border border-white/[0.16] hover:text-white rounded-xl transition-colors"
                             title="Ver dossiê técnico e confronto Trigger vs Field"
                           >
                             <Eye className="w-4 h-4" />
@@ -992,13 +985,13 @@ export default function CockpitPCM() {
         {abaAtiva === 'ativos' && (
           <div className="space-y-6">
             {/* Topo da Aba de Ativos */}
-            <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                   <Boxes className="w-5 h-5 text-red-500" />
                   <span>Cadastro de Dispositivos e Histórico de Manutenção (Prontuário)</span>
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-[#8E8E93] mt-0.5">
                   Gere plaquetas industriais QR Code para os postos e consulte o histórico de vida de cada máquina.
                 </p>
               </div>
@@ -1006,7 +999,7 @@ export default function CockpitPCM() {
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => setModalNovoSintoma(true)}
-                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-[2px] flex items-center gap-1.5 border border-slate-700 transition-colors"
+                  className="px-3 py-2 bg-[#2C2C2E] hover:bg-[#36363A] text-white border border-white/[0.16] text-xs font-semibold rounded-xl flex items-center gap-1.5 border border-white/[0.16] transition-colors"
                 >
                   <Plus className="w-4 h-4 text-amber-400" />
                   <span>Árvore de Falhas</span>
@@ -1014,7 +1007,7 @@ export default function CockpitPCM() {
 
                 <button
                   onClick={() => setModalNovoAtivo(true)}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-[2px] flex items-center gap-1.5 shadow-lg shadow-red-600/30 transition-all active:scale-95"
+                  className="px-4 py-2 bg-[#EF4444] hover:bg-red-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-lg shadow-red-600/30 transition-all active:scale-95"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Cadastrar Novo Ativo</span>
@@ -1028,7 +1021,7 @@ export default function CockpitPCM() {
                 <select
                   value={filtroCriticidadeAtivo}
                   onChange={(e) => setFiltroCriticidadeAtivo(e.target.value)}
-                  className="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-[2px] px-3 py-2 font-medium focus:outline-none focus:border-red-500"
+                  className="bg-[#1C1C1E] border border-white/[0.16] text-xs text-zinc-200 rounded-xl px-3 py-2 font-medium focus:outline-none focus:border-red-500"
                 >
                   <option value="">Todas as Criticidades</option>
                   <option value="A">Criticidade A (Gargalo da Linha)</option>
@@ -1039,7 +1032,7 @@ export default function CockpitPCM() {
                 <select
                   value={linhaSelecionada}
                   onChange={(e) => setLinhaSelecionada(e.target.value)}
-                  className="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-[2px] px-3 py-2 font-medium focus:outline-none focus:border-red-500"
+                  className="bg-[#1C1C1E] border border-white/[0.16] text-xs text-zinc-200 rounded-xl px-3 py-2 font-medium focus:outline-none focus:border-red-500"
                 >
                   <option value="">Todas as Linhas</option>
                   {linhas.map((l) => (
@@ -1051,39 +1044,39 @@ export default function CockpitPCM() {
               </div>
 
               <div className="relative w-full sm:w-72">
-                <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                <Search className="w-4 h-4 text-[#8E8E93] absolute left-3 top-2.5" />
                 <input
                   type="text"
                   value={buscaAtivo}
                   onChange={(e) => setBuscaAtivo(e.target.value)}
                   placeholder="Filtrar por TAG ou nome da máquina..."
-                  className="w-full bg-slate-900 border border-slate-700 rounded-[2px] pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500"
+                  className="w-full bg-[#1C1C1E] border border-white/[0.16] rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-[#8E8E93] focus:outline-none focus:border-red-500"
                 />
               </div>
             </div>
 
             {/* Grid dos Ativos Cadastrados */}
             {loadingAtivos ? (
-              <div className="py-20 text-center text-xs text-slate-400">
+              <div className="py-20 text-center text-xs text-[#8E8E93]">
                 Carregando parque fabril...
               </div>
             ) : ativosFiltrados.length === 0 ? (
-              <div className="py-16 text-center bg-slate-900/40 border border-slate-800 rounded-[2px]">
-                <Boxes className="w-12 h-12 text-slate-600 mx-auto" />
+              <div className="py-16 text-center bg-[#121216]/60 border border-white/[0.08] rounded-xl">
+                <Boxes className="w-12 h-12 text-[#8E8E93] mx-auto" />
                 <h3 className="text-base font-bold text-white mt-3">Nenhum ativo encontrado</h3>
-                <p className="text-xs text-slate-400 mt-1">Ajuste os filtros ou cadastre uma nova máquina.</p>
+                <p className="text-xs text-[#8E8E93] mt-1">Ajuste os filtros ou cadastre uma nova máquina.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {ativosFiltrados.map((ativo) => (
                   <div
                     key={ativo.id}
-                    className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-[2px] p-4 flex flex-col justify-between shadow-xl transition-all"
+                    className="bg-[#1C1C1E] border border-white/[0.08] hover:border-white/[0.16] rounded-xl p-4 flex flex-col justify-between shadow-xl transition-all"
                   >
                     <div>
                       <div className="flex justify-between items-start">
                         <div>
-                          <span className="text-[10px] font-mono text-slate-400 block">
+                          <span className="text-[10px] font-mono text-[#8E8E93] block">
                             {ativo.linha_nome}
                           </span>
                           <h3 className="text-base font-black text-white font-mono mt-0.5">
@@ -1103,11 +1096,11 @@ export default function CockpitPCM() {
                         </span>
                       </div>
 
-                      <h4 className="text-sm font-semibold text-slate-200 mt-2">{ativo.nome}</h4>
-                      <p className="text-xs text-slate-400 mt-0.5">{ativo.posto_trabalho}</p>
+                      <h4 className="text-sm font-semibold text-zinc-200 mt-2">{ativo.nome}</h4>
+                      <p className="text-xs text-[#8E8E93] mt-0.5">{ativo.posto_trabalho}</p>
 
-                      <div className="mt-3 bg-slate-950/70 border border-slate-800 rounded-[2px] p-2.5 flex items-center justify-between text-xs">
-                        <span className="text-slate-400 text-[11px]">Status Operacional:</span>
+                      <div className="mt-3 bg-[#121216] border border-white/[0.08] rounded-xl p-2.5 flex items-center justify-between text-xs">
+                        <span className="text-[#8E8E93] text-[11px]">Status Operacional:</span>
                         <span
                           className={`font-bold text-[11px] ${
                             ativo.status_operacional === 'em_operacao'
@@ -1127,10 +1120,10 @@ export default function CockpitPCM() {
                     </div>
 
                     {/* Botões de Ação do Ativo */}
-                    <div className="mt-4 pt-3 border-t border-slate-800 grid grid-cols-2 gap-2">
+                    <div className="mt-4 pt-3 border-t border-white/[0.08] grid grid-cols-2 gap-2">
                       <button
                         onClick={() => setModalEtiqueta(ativo)}
-                        className="py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-[2px] flex items-center justify-center gap-1.5 transition-colors border border-slate-700"
+                        className="py-2 bg-[#2C2C2E] hover:bg-[#36363A] text-white border border-white/[0.16] text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors border border-white/[0.16]"
                       >
                         <QrCode className="w-3.5 h-3.5 text-red-400" />
                         <span>Gerar Etiqueta</span>
@@ -1138,7 +1131,7 @@ export default function CockpitPCM() {
 
                       <button
                         onClick={() => abrirProntuario(ativo)}
-                        className="py-2 bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/40 text-xs font-bold rounded-[2px] flex items-center justify-center gap-1.5 transition-colors"
+                        className="py-2 bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/40 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
                       >
                         <FileText className="w-3.5 h-3.5" />
                         <span>Prontuário</span>
@@ -1150,14 +1143,14 @@ export default function CockpitPCM() {
             )}
 
             {/* Painel da Árvore de Falhas e Sintomas Cadastrados */}
-            <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-5 space-y-3">
+            <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-5 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
                     <Layers className="w-4 h-4 text-amber-400" />
                     <span>Árvore de Falhas do Catálogo Operacional (Vanguard Trigger)</span>
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-[#8E8E93]">
                     Sintomas disponibilizados em 2 toques no celular do operador quando escaneia a etiqueta.
                   </p>
                 </div>
@@ -1167,10 +1160,10 @@ export default function CockpitPCM() {
                 {sintomas.map((s) => (
                   <div
                     key={s.id}
-                    className="bg-slate-950 border border-slate-800 p-2.5 rounded-[2px] text-xs flex flex-col justify-between"
+                    className="bg-[#121216] border border-white/[0.08] p-2.5 rounded-xl text-xs flex flex-col justify-between"
                   >
-                    <span className="text-slate-200 font-medium">{s.descricao}</span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-1">
+                    <span className="text-zinc-200 font-medium">{s.descricao}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E8E93] mt-1">
                       Subsistema: {s.categoria}
                     </span>
                   </div>
@@ -1186,13 +1179,13 @@ export default function CockpitPCM() {
         {abaAtiva === 'indicadores' && (
           <div className="space-y-6">
             {/* Topo do Dashboard */}
-            <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-red-500" />
                   <span>Dashboard de Confiabilidade & Engenharia de Manutenção (TCC FAETERJ)</span>
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-[#8E8E93] mt-0.5">
                   Cálculo automático de MTTR, MTBF, Wait Time e Pareto de Confiabilidade em tempo real.
                 </p>
               </div>
@@ -1201,7 +1194,7 @@ export default function CockpitPCM() {
                 <select
                   value={periodoDias}
                   onChange={(e) => setPeriodoDias(Number(e.target.value))}
-                  className="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-[2px] px-3 py-2 font-medium focus:outline-none focus:border-red-500"
+                  className="bg-[#121216] border border-white/[0.16] text-xs text-zinc-200 rounded-xl px-3 py-2 font-medium focus:outline-none focus:border-red-500"
                 >
                   <option value={7}>Últimos 7 dias</option>
                   <option value={15}>Últimos 15 dias</option>
@@ -1212,7 +1205,7 @@ export default function CockpitPCM() {
                 <select
                   value={linhaSelecionada}
                   onChange={(e) => setLinhaSelecionada(e.target.value)}
-                  className="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-[2px] px-3 py-2 font-medium focus:outline-none focus:border-red-500"
+                  className="bg-[#121216] border border-white/[0.16] text-xs text-zinc-200 rounded-xl px-3 py-2 font-medium focus:outline-none focus:border-red-500"
                 >
                   <option value="">Todas as Linhas</option>
                   {linhas.map((l) => (
@@ -1225,7 +1218,7 @@ export default function CockpitPCM() {
             </div>
 
             {loadingMetricas ? (
-              <div className="py-20 text-center text-xs text-slate-400">
+              <div className="py-20 text-center text-xs text-[#8E8E93]">
                 Processando fórmulas analíticas de MTTR e MTBF...
               </div>
             ) : metricasDashboard ? (
@@ -1233,53 +1226,53 @@ export default function CockpitPCM() {
                 {/* 4 Cards de Métricas Industriais */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* MTTR */}
-                  <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 shadow-xl">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-4 shadow-xl">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#8E8E93]">
                       MTTR Líquido Médio
                     </span>
                     <div className="text-3xl font-black text-white font-mono mt-2">
-                      {metricasDashboard.resumo_geral?.mttr_medio_minutos || 0} <span className="text-base text-slate-400">min</span>
+                      {metricasDashboard.resumo_geral?.mttr_medio_minutos || 0} <span className="text-base text-[#8E8E93]">min</span>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1">
+                    <p className="text-[11px] text-[#8E8E93] mt-1">
                       Tempo médio que a equipe leva para consertar (descontando pausas).
                     </p>
                   </div>
 
                   {/* MTBF */}
-                  <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 shadow-xl">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-4 shadow-xl">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#8E8E93]">
                       MTBF Médio Estimado
                     </span>
                     <div className="text-3xl font-black text-emerald-400 font-mono mt-2">
-                      {metricasDashboard.resumo_geral?.mtbf_medio_horas || 0} <span className="text-base text-slate-400">h</span>
+                      {metricasDashboard.resumo_geral?.mtbf_medio_horas || 0} <span className="text-base text-[#8E8E93]">h</span>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1">
+                    <p className="text-[11px] text-[#8E8E93] mt-1">
                       Tempo médio de operação ininterrupta entre falhas mecânicas.
                     </p>
                   </div>
 
                   {/* Wait Time / Tempo de Resposta */}
-                  <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 shadow-xl">
+                  <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-4 shadow-xl">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400">
                       Tempo Médio Resposta (Wait Time)
                     </span>
                     <div className="text-3xl font-black text-amber-300 font-mono mt-2">
-                      {metricasDashboard.resumo_geral?.tempo_medio_resposta_minutos || 0} <span className="text-base text-slate-400">min</span>
+                      {metricasDashboard.resumo_geral?.tempo_medio_resposta_minutos || 0} <span className="text-base text-[#8E8E93]">min</span>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1">
+                    <p className="text-[11px] text-[#8E8E93] mt-1">
                       Tempo entre o operador disparar no Trigger e o despacho da Central ($T_0 \to T_1$).
                     </p>
                   </div>
 
                   {/* Disponibilidade Operacional */}
-                  <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 shadow-xl">
+                  <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-4 shadow-xl">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
                       Disponibilidade Inerente (A%)
                     </span>
                     <div className="text-3xl font-black text-indigo-300 font-mono mt-2">
                       {metricasDashboard.resumo_geral?.disponibilidade_percentual || 100}%
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1">
+                    <p className="text-[11px] text-[#8E8E93] mt-1">
                       Régua World Class Manufacturing (WCM &gt; 95%).
                     </p>
                   </div>
@@ -1288,12 +1281,12 @@ export default function CockpitPCM() {
                 {/* Pareto de Quebras por Subsistema & Top Ofensores */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {/* Diagrama de Pareto */}
-                  <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-5 space-y-3">
+                  <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-5 space-y-3">
                     <h3 className="text-sm font-bold text-white flex items-center gap-2">
                       <TrendingUp className="w-4 h-4 text-red-500" />
                       <span>Diagrama de Pareto de Falhas por Subsistema (Curva 80/20)</span>
                     </h3>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-[#8E8E93]">
                       Identifica a categoria de falha que mais consome downtime na fábrica.
                     </p>
 
@@ -1301,12 +1294,12 @@ export default function CockpitPCM() {
                       {metricasDashboard.pareto_subsistemas?.map((sub, idx) => (
                         <div key={idx} className="space-y-1 text-xs">
                           <div className="flex justify-between font-medium">
-                            <span className="text-slate-200 capitalize font-mono">{sub.subsistema}</span>
-                            <span className="text-slate-400">
+                            <span className="text-zinc-200 capitalize font-mono">{sub.subsistema}</span>
+                            <span className="text-[#8E8E93]">
                               {sub.quantidade_ocorrencias} falhas ({sub.percentual_impacto}%) • Acumulado: {sub.percentual_acumulado}%
                             </span>
                           </div>
-                          <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                          <div className="w-full bg-[#121216] h-2.5 rounded-full overflow-hidden border border-white/[0.08]">
                             <div
                               className="bg-red-500 h-full rounded-full transition-all"
                               style={{ width: `${Math.min(100, sub.percentual_impacto)}%` }}
@@ -1318,12 +1311,12 @@ export default function CockpitPCM() {
                   </div>
 
                   {/* Top 3 Máquinas Ofensoras de Downtime */}
-                  <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-5 space-y-3">
+                  <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-5 space-y-3">
                     <h3 className="text-sm font-bold text-white flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-amber-500" />
                       <span>Top Máquinas Ofensoras de Downtime (Bad Actors)</span>
                     </h3>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-[#8E8E93]">
                       Equipamentos com maior somatório de horas paradas no período selecionado.
                     </p>
 
@@ -1331,14 +1324,14 @@ export default function CockpitPCM() {
                       {metricasDashboard.top_ofensores?.map((ofensor, idx) => (
                         <div
                           key={idx}
-                          className="bg-slate-950 border border-slate-800 p-3 rounded-[2px] flex items-center justify-between text-xs"
+                          className="bg-[#121216] border border-white/[0.08] p-3 rounded-xl flex items-center justify-between text-xs"
                         >
                           <div>
                             <span className="text-xs font-mono font-bold text-red-400">
                               {ofensor.tag_patrimonio}
                             </span>
-                            <p className="font-semibold text-slate-200">{ofensor.ativo_nome}</p>
-                            <p className="text-[10px] text-slate-500">
+                            <p className="font-semibold text-zinc-200">{ofensor.ativo_nome}</p>
+                            <p className="text-[10px] text-[#8E8E93]">
                               {ofensor.linha_nome} • {ofensor.total_falhas} falhas reportadas
                             </p>
                           </div>
@@ -1346,7 +1339,7 @@ export default function CockpitPCM() {
                             <span className="text-base font-bold text-white">
                               {ofensor.downtime_total_minutos} min
                             </span>
-                            <span className="block text-[10px] text-slate-500">
+                            <span className="block text-[10px] text-[#8E8E93]">
                               {Math.round(ofensor.downtime_total_minutos / 60)}h paradas
                             </span>
                           </div>
@@ -1365,33 +1358,33 @@ export default function CockpitPCM() {
       {/* MODAL 1: ATRIBUIÇÃO E DESPACHO DE TÉCNICO ($T_1$) */}
       {/* ======================================================== */}
       {modalAtribuir && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-[2px] max-w-md w-full p-5 space-y-4 shadow-2xl">
-            <div className="flex justify-between items-start border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#1C1C1E] border border-white/[0.16] rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div className="flex justify-between items-start border-b border-white/[0.08] pb-3">
               <div>
                 <h3 className="text-base font-bold text-white">
                   Despachar Técnico da Linha ($T_1$)
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-[#8E8E93] mt-0.5">
                   {modalAtribuir.numero_os} • {modalAtribuir.tag_patrimonio} ({modalAtribuir.linha_nome})
                 </p>
               </div>
               <button
                 onClick={() => setModalAtribuir(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-[#8E8E93] hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3">
-              <label className="text-xs font-semibold text-slate-300">
+              <label className="text-xs font-semibold text-zinc-300">
                 Selecione o mantenedor responsável pelo atendimento:
               </label>
               <select
                 value={tecnicoAtribuirId}
                 onChange={(e) => setTecnicoAtribuirId(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 text-sm text-white rounded-[2px] p-3 focus:outline-none focus:border-red-500"
+                className="w-full bg-[#121216] border border-white/[0.16] text-sm text-white rounded-xl p-3 focus:outline-none focus:border-red-500"
               >
                 {tecnicos.map((t) => (
                   <option key={t.id} value={t.id}>
@@ -1400,11 +1393,11 @@ export default function CockpitPCM() {
                 ))}
               </select>
 
-              <div className="bg-red-950/30 border border-red-500/20 rounded-[2px] p-3 text-xs text-red-300 space-y-1">
+              <div className="bg-red-950/30 border border-red-500/20 rounded-xl p-3 text-xs text-red-300 space-y-1">
                 <p className="font-semibold text-red-200">
                   Transição da Máquina de Estados:
                 </p>
-                <p className="text-slate-400">
+                <p className="text-[#8E8E93]">
                   A confirmação congela o marco <strong>$T_1$ (Tempo de Resposta / Wait Time)</strong> e envia a ordem diretamente para o <strong>Vanguard Field</strong> do mantenedor.
                 </p>
               </div>
@@ -1414,7 +1407,7 @@ export default function CockpitPCM() {
               <button
                 type="button"
                 onClick={() => setModalAtribuir(null)}
-                className="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-[2px] text-xs"
+                className="w-1/2 py-2.5 bg-[#2C2C2E] hover:bg-[#36363A] text-white border border-white/[0.16] font-semibold rounded-xl text-xs"
               >
                 Cancelar
               </button>
@@ -1422,7 +1415,7 @@ export default function CockpitPCM() {
                 type="button"
                 disabled={submetendoAcao}
                 onClick={handleConfirmarAtribuicao}
-                className="w-1/2 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-[2px] text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/30"
+                className="w-1/2 py-2.5 bg-[#EF4444] hover:bg-red-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/30"
               >
                 {submetendoAcao ? 'Despachando...' : 'Confirmar Despacho'}
               </button>
@@ -1435,9 +1428,9 @@ export default function CockpitPCM() {
       {/* MODAL 2: DOSSIÊ TÉCNICO & CONFRONTO (TRIGGER VS FIELD) */}
       {/* ======================================================== */}
       {modalDossie && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-[2px] max-w-2xl w-full max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-2xl">
-            <div className="flex justify-between items-start border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#1C1C1E] border border-white/[0.16] rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-2xl">
+            <div className="flex justify-between items-start border-b border-white/[0.08] pb-3">
               <div>
                 <span className="text-[10px] font-mono text-red-400 font-bold uppercase tracking-wider">
                   Dossiê Integrado Vanguard
@@ -1445,59 +1438,59 @@ export default function CockpitPCM() {
                 <h3 className="text-lg font-black text-white">
                   {modalDossie.numero_os} • {modalDossie.tag_patrimonio}
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[#8E8E93]">
                   {modalDossie.linha_nome} • {modalDossie.posto_trabalho}
                 </p>
               </div>
               <button
                 onClick={() => setModalDossie(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-[#8E8E93] hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {loadingDossie ? (
-              <div className="py-12 text-center text-xs text-slate-400">
+              <div className="py-12 text-center text-xs text-[#8E8E93]">
                 Carregando apontamentos técnicos...
               </div>
             ) : (
               <div className="space-y-4 text-xs">
                 {/* 1. Cronologia dos 4 Marcos de Engenharia (T0 a T3) */}
-                <div className="bg-slate-950/80 border border-slate-800 rounded-[2px] p-3.5 space-y-2">
-                  <h4 className="font-bold text-slate-200 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                <div className="bg-[#121216] border border-white/[0.08] rounded-xl p-3.5 space-y-2">
+                  <h4 className="font-bold text-zinc-200 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                     <Clock className="w-4 h-4 text-red-400" />
                     Ciclo de Vida do Chamado (Marcos $T_0$ a $T_3$):
                   </h4>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-[11px]">
-                    <div className="bg-slate-900 p-2 rounded-[2px] border border-slate-800">
-                      <span className="text-slate-500 block text-[9px]">$T_0$ Disparo Trigger</span>
-                      <span className="text-slate-200 font-bold">
+                    <div className="bg-[#1C1C1E] p-2 rounded-xl border border-white/[0.08]">
+                      <span className="text-[#8E8E93] block text-[9px]">$T_0$ Disparo Trigger</span>
+                      <span className="text-zinc-200 font-bold">
                         {modalDossie.t0_abertura ? new Date(modalDossie.t0_abertura).toLocaleTimeString() : 'N/A'}
                       </span>
                     </div>
-                    <div className="bg-slate-900 p-2 rounded-[2px] border border-slate-800">
-                      <span className="text-slate-500 block text-[9px]">$T_1$ Despacho Central</span>
-                      <span className="text-slate-200 font-bold">
+                    <div className="bg-[#1C1C1E] p-2 rounded-xl border border-white/[0.08]">
+                      <span className="text-[#8E8E93] block text-[9px]">$T_1$ Despacho Central</span>
+                      <span className="text-zinc-200 font-bold">
                         {modalDossie.t1_atribuicao ? new Date(modalDossie.t1_atribuicao).toLocaleTimeString() : 'Pendente'}
                       </span>
                     </div>
-                    <div className="bg-slate-900 p-2 rounded-[2px] border border-slate-800">
-                      <span className="text-slate-500 block text-[9px]">$T_2$ Chegada Field</span>
-                      <span className="text-slate-200 font-bold">
+                    <div className="bg-[#1C1C1E] p-2 rounded-xl border border-white/[0.08]">
+                      <span className="text-[#8E8E93] block text-[9px]">$T_2$ Chegada Field</span>
+                      <span className="text-zinc-200 font-bold">
                         {modalDossie.t2_inicio_reparo ? new Date(modalDossie.t2_inicio_reparo).toLocaleTimeString() : 'Pendente'}
                       </span>
                     </div>
-                    <div className="bg-slate-900 p-2 rounded-[2px] border border-slate-800">
-                      <span className="text-slate-500 block text-[9px]">$T_3$ Liberação</span>
-                      <span className="text-slate-200 font-bold">
+                    <div className="bg-[#1C1C1E] p-2 rounded-xl border border-white/[0.08]">
+                      <span className="text-[#8E8E93] block text-[9px]">$T_3$ Liberação</span>
+                      <span className="text-zinc-200 font-bold">
                         {modalDossie.t3_conclusao_reparo ? new Date(modalDossie.t3_conclusao_reparo).toLocaleTimeString() : 'Em curso'}
                       </span>
                     </div>
                   </div>
 
                   {modalDossie.tempo_reparo_liquido_minutos && (
-                    <div className="mt-2 pt-2 border-t border-slate-800 flex justify-between font-mono text-emerald-400 font-bold">
+                    <div className="mt-2 pt-2 border-t border-white/[0.08] flex justify-between font-mono text-emerald-400 font-bold">
                       <span>MTTR Líquido Puro (Intervenção):</span>
                       <span>{modalDossie.tempo_reparo_liquido_minutos} min</span>
                     </div>
@@ -1505,46 +1498,46 @@ export default function CockpitPCM() {
                 </div>
 
                 {/* 2. Confronto: Diagnóstico Inicial do Trigger vs Causa Raiz Real do Field */}
-                <div className="bg-slate-950/80 border border-slate-800 rounded-[2px] p-3.5 space-y-3">
-                  <h4 className="font-bold text-slate-200 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                <div className="bg-[#121216] border border-white/[0.08] rounded-xl p-3.5 space-y-3">
+                  <h4 className="font-bold text-zinc-200 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                     <Wrench className="w-4 h-4 text-amber-400" />
                     Confronto: Operador (Trigger) vs Mantenedor (Field)
                   </h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {/* Lado Operador */}
-                    <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-[2px] space-y-1.5">
+                    <div className="bg-[#1C1C1E] border border-white/[0.08] p-3 rounded-xl space-y-1.5">
                       <span className="text-[10px] font-bold uppercase text-red-400">
                         1. Relato Inicial (Vanguard Trigger):
                       </span>
                       <p className="text-white font-medium">
                         {modalDossie.sintoma_descricao || 'Sintoma de catálogo'}
                       </p>
-                      <p className="text-slate-400 text-[11px]">
+                      <p className="text-[#8E8E93] text-[11px]">
                         "{modalDossie.descricao_sintoma || 'Sem descrição livre adicional'}"
                       </p>
-                      <p className="text-[10px] text-slate-500 pt-1">
+                      <p className="text-[10px] text-[#8E8E93] pt-1">
                         Reportado por: <strong>{modalDossie.operador_nome || modalDossie.operador_matricula}</strong>
                       </p>
                     </div>
 
                     {/* Lado Técnico (Field) */}
-                    <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-[2px] space-y-1.5">
+                    <div className="bg-[#1C1C1E] border border-white/[0.08] p-3 rounded-xl space-y-1.5">
                       <span className="text-[10px] font-bold uppercase text-emerald-400">
                         2. Causa Raiz Real (Vanguard Field):
                       </span>
                       {modalDossie.apontamento ? (
                         <>
                           <p className="text-white font-bold">{modalDossie.apontamento.causa_raiz}</p>
-                          <p className="text-slate-300 text-[11px]">
+                          <p className="text-zinc-300 text-[11px]">
                             Ação: {modalDossie.apontamento.acao_executada}
                           </p>
-                          <p className="text-[10px] text-slate-500 pt-1">
-                            Subsistema: <strong className="uppercase text-slate-300">{modalDossie.apontamento.arvore_falha_sistema}</strong> • Téc: {modalDossie.apontamento.mantenedor_nome}
+                          <p className="text-[10px] text-[#8E8E93] pt-1">
+                            Subsistema: <strong className="uppercase text-zinc-300">{modalDossie.apontamento.arvore_falha_sistema}</strong> • Téc: {modalDossie.apontamento.mantenedor_nome}
                           </p>
                         </>
                       ) : (
-                        <p className="text-slate-500 italic">
+                        <p className="text-[#8E8E93] italic">
                           Aguardando laudo técnico e encerramento no Vanguard Field.
                         </p>
                       )}
@@ -1554,8 +1547,8 @@ export default function CockpitPCM() {
 
                 {/* 3. Evidências Multimídia do Vanguard Trigger */}
                 {(modalDossie.foto_anexo || modalDossie.audio_anexo) && (
-                  <div className="bg-slate-950/80 border border-slate-800 rounded-[2px] p-3.5 space-y-2">
-                    <h4 className="font-bold text-slate-200 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                  <div className="bg-[#121216] border border-white/[0.08] rounded-xl p-3.5 space-y-2">
+                    <h4 className="font-bold text-zinc-200 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                       <ShieldAlert className="w-4 h-4 text-emerald-400" />
                       Evidências Registradas pelo Operador (Foto / Áudio):
                     </h4>
@@ -1564,13 +1557,13 @@ export default function CockpitPCM() {
                         <img
                           src={modalDossie.foto_anexo}
                           alt="Evidência da peça"
-                          className="w-full max-h-72 object-contain rounded-[2px] border border-slate-800 bg-black"
+                          className="w-full max-h-72 object-contain rounded-xl border border-white/[0.08] bg-black"
                         />
                       </div>
                     )}
                     {modalDossie.audio_anexo && (
                       <div className="mt-2">
-                        <span className="text-[10px] text-slate-400 block mb-1">Ruído Mecânico Gravado:</span>
+                        <span className="text-[10px] text-[#8E8E93] block mb-1">Ruído Mecânico Gravado:</span>
                         <audio src={modalDossie.audio_anexo} controls className="h-8 w-full" />
                       </div>
                     )}
@@ -1578,18 +1571,18 @@ export default function CockpitPCM() {
                 )}
 
                 {/* 4. Peças Sobressalentes Baixadas */}
-                <div className="bg-slate-950/80 border border-slate-800 rounded-[2px] p-3.5 space-y-2">
-                  <h4 className="font-bold text-slate-200 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                <div className="bg-[#121216] border border-white/[0.08] rounded-xl p-3.5 space-y-2">
+                  <h4 className="font-bold text-zinc-200 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                     <Boxes className="w-4 h-4 text-amber-400" />
                     Peças Sobressalentes Utilizadas no Reparo:
                   </h4>
                   {modalDossie.pecas?.length > 0 ? (
                     <div className="space-y-1.5">
                       {modalDossie.pecas.map((p) => (
-                        <div key={p.id} className="flex justify-between items-center bg-slate-900 p-2 rounded-[2px] border border-slate-800">
+                        <div key={p.id} className="flex justify-between items-center bg-[#1C1C1E] p-2 rounded-xl border border-white/[0.08]">
                           <div>
                             <span className="font-mono text-white font-bold">{p.codigo_sap}</span>
-                            <span className="text-slate-400 ml-2">{p.descricao}</span>
+                            <span className="text-[#8E8E93] ml-2">{p.descricao}</span>
                           </div>
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                             p.status_movimentacao === 'baixado_almoxarifado'
@@ -1602,7 +1595,7 @@ export default function CockpitPCM() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-slate-500">Nenhum componente substituído nesta intervenção.</p>
+                    <p className="text-[#8E8E93]">Nenhum componente substituído nesta intervenção.</p>
                   )}
                 </div>
               </div>
@@ -1612,7 +1605,7 @@ export default function CockpitPCM() {
               <button
                 type="button"
                 onClick={() => setModalDossie(null)}
-                className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-[2px] text-xs"
+                className="w-full py-2.5 bg-[#2C2C2E] hover:bg-[#36363A] text-white border border-white/[0.16] font-bold rounded-xl text-xs"
               >
                 Fechar Dossiê
               </button>
@@ -1625,17 +1618,17 @@ export default function CockpitPCM() {
       {/* MODAL 3: GERADOR E IMPRESSÃO DE ETIQUETA QR CODE */}
       {/* ======================================================== */}
       {modalEtiqueta && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-[2px] max-w-md w-full p-5 space-y-4 shadow-2xl">
-            <div className="flex justify-between items-start border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#1C1C1E] border border-white/[0.16] rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div className="flex justify-between items-start border-b border-white/[0.08] pb-3">
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <Printer className="w-5 h-5 text-red-500" />
                   <span>Etiqueta Industrial de Posto</span>
                 </h3>
-                <p className="text-xs text-slate-400">Plaqueta física com código QR de alta densidade.</p>
+                <p className="text-xs text-[#8E8E93]">Plaqueta física com código QR de alta densidade.</p>
               </div>
-              <button onClick={() => setModalEtiqueta(null)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setModalEtiqueta(null)} className="text-[#8E8E93] hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1643,12 +1636,12 @@ export default function CockpitPCM() {
             {/* Plaqueta Industrial Padronizada (Área Imprimível) */}
             <div
               id="etiqueta-industrial-print"
-              className="bg-white text-slate-900 rounded-[2px] p-5 border-4 border-black space-y-3 shadow-inner"
+              className="bg-white text-slate-900 rounded-xl p-5 border-4 border-black space-y-3 shadow-inner"
             >
               {/* Cabeçalho da Placa com Logo e Indústria */}
               <div className="flex items-center justify-between border-b-2 border-black pb-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-red-600 rounded-[2px] flex items-center justify-center text-white font-black text-sm">
+                  <div className="w-8 h-8 bg-red-600 rounded-xl flex items-center justify-center text-white font-black text-sm">
                     V
                   </div>
                   <div>
@@ -1680,7 +1673,7 @@ export default function CockpitPCM() {
 
               {/* Canvas do QR Code em Alta Resolução */}
               <div className="flex justify-center py-1">
-                <canvas ref={qrCanvasRef} className="rounded-[2px] shadow-sm" />
+                <canvas ref={qrCanvasRef} className="rounded-xl shadow-sm" />
               </div>
 
               {/* Instrução ao Operador no Chão de Fábrica */}
@@ -1688,7 +1681,7 @@ export default function CockpitPCM() {
                 <span className="text-[10px] font-black uppercase text-red-600 tracking-wide block">
                   VANGUARD TRIGGER • APONTE A CÂMERA
                 </span>
-                <p className="text-[8px] text-slate-500">
+                <p className="text-[8px] text-[#8E8E93]">
                   Abertura imediata de chamado em 2 toques sem digitação.
                 </p>
               </div>
@@ -1699,14 +1692,14 @@ export default function CockpitPCM() {
               <button
                 type="button"
                 onClick={() => setModalEtiqueta(null)}
-                className="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-[2px] text-xs"
+                className="w-1/2 py-2.5 bg-[#2C2C2E] hover:bg-[#36363A] text-white border border-white/[0.16] font-semibold rounded-xl text-xs"
               >
                 Fechar
               </button>
               <button
                 type="button"
                 onClick={handleImprimirEtiqueta}
-                className="w-1/2 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-[2px] text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/30"
+                className="w-1/2 py-2.5 bg-[#EF4444] hover:bg-red-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/30"
               >
                 <Printer className="w-4 h-4" />
                 <span>Imprimir Etiqueta</span>
@@ -1720,9 +1713,9 @@ export default function CockpitPCM() {
       {/* MODAL 4: PRONTUÁRIO DE MANUTENÇÃO (HISTÓRICO DO ATIVO) */}
       {/* ======================================================== */}
       {modalProntuario && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-[2px] max-w-3xl w-full max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-2xl">
-            <div className="flex justify-between items-start border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#1C1C1E] border border-white/[0.16] rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-2xl">
+            <div className="flex justify-between items-start border-b border-white/[0.08] pb-3">
               <div>
                 <span className="text-[10px] font-mono text-red-400 font-bold uppercase tracking-wider">
                   Prontuário Médico do Equipamento
@@ -1730,46 +1723,46 @@ export default function CockpitPCM() {
                 <h3 className="text-lg font-black text-white">
                   {modalProntuario.tag_patrimonio} • {modalProntuario.nome}
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[#8E8E93]">
                   {modalProntuario.linha_nome} • {modalProntuario.posto_trabalho} • Criticidade {modalProntuario.criticidade}
                 </p>
               </div>
-              <button onClick={() => setModalProntuario(null)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setModalProntuario(null)} className="text-[#8E8E93] hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {loadingProntuario ? (
-              <div className="py-12 text-center text-xs text-slate-400">
+              <div className="py-12 text-center text-xs text-[#8E8E93]">
                 Consultando histórico de intervenções deste ativo...
               </div>
             ) : dadosProntuario ? (
               <div className="space-y-4 text-xs">
                 {/* 1. Indicadores de Saúde Deste Ativo Específico */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  <div className="bg-slate-950 p-3 rounded-[2px] border border-slate-800">
-                    <span className="text-slate-500 block text-[10px] font-bold uppercase">Total de Chamados</span>
+                  <div className="bg-[#121216] p-3 rounded-xl border border-white/[0.08]">
+                    <span className="text-[#8E8E93] block text-[10px] font-bold uppercase">Total de Chamados</span>
                     <span className="text-xl font-black text-white font-mono mt-1 block">
                       {dadosProntuario.metricas?.total_chamados || 0}
                     </span>
                   </div>
 
-                  <div className="bg-slate-950 p-3 rounded-[2px] border border-slate-800">
-                    <span className="text-slate-500 block text-[10px] font-bold uppercase">Downtime Acumulado</span>
+                  <div className="bg-[#121216] p-3 rounded-xl border border-white/[0.08]">
+                    <span className="text-[#8E8E93] block text-[10px] font-bold uppercase">Downtime Acumulado</span>
                     <span className="text-xl font-black text-rose-400 font-mono mt-1 block">
                       {dadosProntuario.metricas?.total_downtime_horas || 0}h
                     </span>
                   </div>
 
-                  <div className="bg-slate-950 p-3 rounded-[2px] border border-slate-800">
-                    <span className="text-slate-500 block text-[10px] font-bold uppercase">MTTR Individual</span>
+                  <div className="bg-[#121216] p-3 rounded-xl border border-white/[0.08]">
+                    <span className="text-[#8E8E93] block text-[10px] font-bold uppercase">MTTR Individual</span>
                     <span className="text-xl font-black text-amber-300 font-mono mt-1 block">
                       {dadosProntuario.metricas?.mttr_medio_minutos || 0} min
                     </span>
                   </div>
 
-                  <div className="bg-slate-950 p-3 rounded-[2px] border border-slate-800">
-                    <span className="text-slate-500 block text-[10px] font-bold uppercase">MTBF Máquina</span>
+                  <div className="bg-[#121216] p-3 rounded-xl border border-white/[0.08]">
+                    <span className="text-[#8E8E93] block text-[10px] font-bold uppercase">MTBF Máquina</span>
                     <span className="text-xl font-black text-emerald-400 font-mono mt-1 block">
                       {dadosProntuario.metricas?.mtbf_horas || 0}h
                     </span>
@@ -1777,15 +1770,15 @@ export default function CockpitPCM() {
                 </div>
 
                 {/* 2. Reincidência de Falhas por Subsistema */}
-                <div className="bg-slate-950 border border-slate-800 rounded-[2px] p-3 space-y-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                <div className="bg-[#121216] border border-white/[0.08] rounded-xl p-3 space-y-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E8E93] block">
                     Reincidência por Subsistema (Detecção de Bad Actor):
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(dadosProntuario.metricas?.reincidencia_sistemas || {}).map(([sist, count]) => (
                       <span
                         key={sist}
-                        className="px-2.5 py-1 rounded-[2px] bg-slate-900 border border-slate-700 text-slate-200 text-xs font-medium"
+                        className="px-2.5 py-1 rounded-xl bg-[#1C1C1E] border border-white/[0.16] text-zinc-200 text-xs font-medium"
                       >
                         <strong className="uppercase text-red-400">{sist}:</strong> {count} falhas
                       </span>
@@ -1795,13 +1788,13 @@ export default function CockpitPCM() {
 
                 {/* 3. Linha do Tempo de Chamados e Laudos do Ativo */}
                 <div className="space-y-2.5">
-                  <h4 className="font-bold text-slate-200 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                  <h4 className="font-bold text-zinc-200 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                     <History className="w-4 h-4 text-red-400" />
                     Histórico Cronológico de Ordens de Serviço Desta Máquina:
                   </h4>
 
                   {dadosProntuario.historico?.length === 0 ? (
-                    <p className="text-slate-500 italic py-4 text-center">
+                    <p className="text-[#8E8E93] italic py-4 text-center">
                       Nenhum chamado registrado para esta máquina até o momento.
                     </p>
                   ) : (
@@ -1809,12 +1802,12 @@ export default function CockpitPCM() {
                       {dadosProntuario.historico?.map((ch) => (
                         <div
                           key={ch.id}
-                          className="bg-slate-950 border border-slate-800 p-3 rounded-[2px] space-y-2 text-xs"
+                          className="bg-[#121216] border border-white/[0.08] p-3 rounded-xl space-y-2 text-xs"
                         >
                           <div className="flex justify-between items-start">
                             <div>
                               <span className="font-mono font-bold text-white">{ch.numero_os}</span>
-                              <span className="text-slate-500 ml-2">
+                              <span className="text-[#8E8E93] ml-2">
                                 {new Date(ch.t0_abertura).toLocaleDateString()} às {new Date(ch.t0_abertura).toLocaleTimeString()}
                               </span>
                             </div>
@@ -1831,14 +1824,14 @@ export default function CockpitPCM() {
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                             <div>
-                              <span className="text-slate-500 block">Sintoma Trigger (Operação):</span>
-                              <span className="text-slate-300 font-medium">
+                              <span className="text-[#8E8E93] block">Sintoma Trigger (Operação):</span>
+                              <span className="text-zinc-300 font-medium">
                                 {ch.descricao_sintoma || ch.sintoma_descricao || 'Não informado'}
                               </span>
                             </div>
                             <div>
-                              <span className="text-slate-500 block">Causa Raiz Constatada (Field):</span>
-                              <span className="text-slate-200 font-medium">
+                              <span className="text-[#8E8E93] block">Causa Raiz Constatada (Field):</span>
+                              <span className="text-zinc-200 font-medium">
                                 {ch.causa_raiz || 'Em diagnóstico/aberto no campo'}
                               </span>
                             </div>
@@ -1846,17 +1839,17 @@ export default function CockpitPCM() {
 
                           {/* Log Escrito da Manutenção Pós-Operatório */}
                           {(ch.acao_executada || ch.observacoes_tecnicas) && (
-                            <div className="bg-slate-900/80 p-2 rounded-[2px] border border-slate-800 text-[11px] space-y-1">
+                            <div className="bg-[#1C1C1E] p-2 rounded-xl border border-white/[0.08] text-[11px] space-y-1">
                               <span className="text-emerald-400 font-bold block text-[10px] uppercase tracking-wider">
                                 Log Escrito da Manutenção (Pós-Operatório):
                               </span>
                               {ch.acao_executada && (
-                                <p className="text-slate-200 leading-relaxed font-mono text-[10.5px]">
+                                <p className="text-zinc-200 leading-relaxed font-mono text-[10.5px]">
                                   {ch.acao_executada}
                                 </p>
                               )}
                               {ch.observacoes_tecnicas && ch.observacoes_tecnicas !== ch.acao_executada && (
-                                <p className="text-slate-400 text-[10px] italic">
+                                <p className="text-[#8E8E93] text-[10px] italic">
                                   Obs: {ch.observacoes_tecnicas}
                                 </p>
                               )}
@@ -1864,10 +1857,10 @@ export default function CockpitPCM() {
                           )}
 
                           {ch.pecas?.length > 0 && (
-                            <div className="border-t border-slate-900 pt-1.5 flex flex-wrap gap-1.5 text-[10px]">
-                              <span className="text-slate-500 font-bold">Peças trocadas:</span>
+                            <div className="border-t border-white/[0.08] pt-1.5 flex flex-wrap gap-1.5 text-[10px]">
+                              <span className="text-[#8E8E93] font-bold">Peças trocadas:</span>
                               {ch.pecas.map((p, idx) => (
-                                <span key={idx} className="bg-slate-900 px-1.5 py-0.5 rounded text-slate-300 border border-slate-800">
+                                <span key={idx} className="bg-[#1C1C1E] px-1.5 py-0.5 rounded text-zinc-300 border border-white/[0.08]">
                                   {p.codigo_sap} - {p.descricao} ({p.quantidade} un)
                                 </span>
                               ))}
@@ -1885,7 +1878,7 @@ export default function CockpitPCM() {
               <button
                 type="button"
                 onClick={() => setModalProntuario(null)}
-                className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-[2px] text-xs"
+                className="w-full py-2.5 bg-[#2C2C2E] hover:bg-[#36363A] text-white border border-white/[0.16] font-bold rounded-xl text-xs"
               >
                 Fechar Prontuário
               </button>
@@ -1898,23 +1891,23 @@ export default function CockpitPCM() {
       {/* MODAL 5: CADASTRO DE NOVO ATIVO / DISPOSITIVO */}
       {/* ======================================================== */}
       {modalNovoAtivo && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
           <form
             onSubmit={handleSalvarNovoAtivo}
-            className="bg-slate-900 border border-slate-700 rounded-[2px] max-w-md w-full p-5 space-y-4 shadow-2xl"
+            className="bg-[#1C1C1E] border border-white/[0.16] rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl"
           >
-            <div className="flex justify-between items-start border-b border-slate-800 pb-3">
+            <div className="flex justify-between items-start border-b border-white/[0.08] pb-3">
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <Plus className="w-5 h-5 text-red-500" />
                   <span>Cadastrar Novo Ativo</span>
                 </h3>
-                <p className="text-xs text-slate-400">Adiciona uma máquina ao parque fabril da montadora.</p>
+                <p className="text-xs text-[#8E8E93]">Adiciona uma máquina ao parque fabril da montadora.</p>
               </div>
               <button
                 type="button"
                 onClick={() => setModalNovoAtivo(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-[#8E8E93] hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1922,11 +1915,11 @@ export default function CockpitPCM() {
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">Linha de Produção:</label>
+                <label className="text-zinc-300 font-semibold block mb-1">Linha de Produção:</label>
                 <select
                   value={formAtivo.linha_id}
                   onChange={(e) => setFormAtivo({ ...formAtivo, linha_id: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-[2px] p-2.5 text-white focus:outline-none focus:border-red-500"
+                  className="w-full bg-[#121216] border border-white/[0.16] rounded-xl p-2.5 text-white focus:outline-none focus:border-red-500"
                   required
                 >
                   <option value="">Selecione a Linha</option>
@@ -1939,64 +1932,64 @@ export default function CockpitPCM() {
               </div>
 
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">TAG de Patrimônio:</label>
+                <label className="text-zinc-300 font-semibold block mb-1">TAG de Patrimônio:</label>
                 <input
                   type="text"
                   placeholder="Ex: MV3-PRS-02"
                   value={formAtivo.tag_patrimonio}
                   onChange={(e) => setFormAtivo({ ...formAtivo, tag_patrimonio: e.target.value.toUpperCase() })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-[2px] p-2.5 text-white font-mono uppercase focus:outline-none focus:border-red-500"
+                  className="w-full bg-[#121216] border border-white/[0.16] rounded-xl p-2.5 text-white font-mono uppercase focus:outline-none focus:border-red-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">Nome do Dispositivo / Máquina:</label>
+                <label className="text-zinc-300 font-semibold block mb-1">Nome do Dispositivo / Máquina:</label>
                 <input
                   type="text"
                   placeholder="Ex: Prensa Hidráulica 400T Komatsu"
                   value={formAtivo.nome}
                   onChange={(e) => setFormAtivo({ ...formAtivo, nome: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-[2px] p-2.5 text-white focus:outline-none focus:border-red-500"
+                  className="w-full bg-[#121216] border border-white/[0.16] rounded-xl p-2.5 text-white focus:outline-none focus:border-red-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">Posto de Trabalho Físico:</label>
+                <label className="text-zinc-300 font-semibold block mb-1">Posto de Trabalho Físico:</label>
                 <input
                   type="text"
                   placeholder="Ex: Posto 10 - Estamparia Lateral"
                   value={formAtivo.posto_trabalho}
                   onChange={(e) => setFormAtivo({ ...formAtivo, posto_trabalho: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-[2px] p-2.5 text-white focus:outline-none focus:border-red-500"
+                  className="w-full bg-[#121216] border border-white/[0.16] rounded-xl p-2.5 text-white focus:outline-none focus:border-red-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">Classificação de Criticidade:</label>
+                <label className="text-zinc-300 font-semibold block mb-1">Classificação de Criticidade:</label>
                 <div className="grid grid-cols-3 gap-2">
                   {['A', 'B', 'C'].map((crit) => (
                     <button
                       key={crit}
                       type="button"
                       onClick={() => setFormAtivo({ ...formAtivo, criticidade: crit })}
-                      className={`py-2 rounded-[2px] text-xs font-bold border transition-all ${
+                      className={`py-2 rounded-xl text-xs font-bold border transition-all ${
                         formAtivo.criticidade === crit
                           ? crit === 'A'
                             ? 'bg-rose-500/20 text-rose-300 border-rose-500'
                             : crit === 'B'
                             ? 'bg-amber-500/20 text-amber-300 border-amber-500'
                             : 'bg-blue-500/20 text-blue-300 border-blue-500'
-                          : 'bg-slate-950 text-slate-400 border-slate-800'
+                          : 'bg-[#121216] text-[#8E8E93] border-white/[0.08]'
                       }`}
                     >
                       Classe {crit}
                     </button>
                   ))}
                 </div>
-                <p className="text-[10px] text-slate-500 mt-1">
+                <p className="text-[10px] text-[#8E8E93] mt-1">
                   A: Gargalo crítico (15 min SLA) | B: Linha normal (30 min) | C: Secundário (60 min)
                 </p>
               </div>
@@ -2006,14 +1999,14 @@ export default function CockpitPCM() {
               <button
                 type="button"
                 onClick={() => setModalNovoAtivo(false)}
-                className="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-[2px] text-xs"
+                className="w-1/2 py-2.5 bg-[#2C2C2E] hover:bg-[#36363A] text-white border border-white/[0.16] font-semibold rounded-xl text-xs"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={salvandoAtivo}
-                className="w-1/2 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-[2px] text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/30"
+                className="w-1/2 py-2.5 bg-[#EF4444] hover:bg-red-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/30"
               >
                 {salvandoAtivo ? 'Salvando...' : 'Cadastrar Ativo'}
               </button>
@@ -2026,23 +2019,23 @@ export default function CockpitPCM() {
       {/* MODAL 6: NOVO SINTOMA NA ÁRVORE DE FALHAS */}
       {/* ======================================================== */}
       {modalNovoSintoma && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
           <form
             onSubmit={handleSalvarNovoSintoma}
-            className="bg-slate-900 border border-slate-700 rounded-[2px] max-w-md w-full p-5 space-y-4 shadow-2xl"
+            className="bg-[#1C1C1E] border border-white/[0.16] rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl"
           >
-            <div className="flex justify-between items-start border-b border-slate-800 pb-3">
+            <div className="flex justify-between items-start border-b border-white/[0.08] pb-3">
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <Plus className="w-5 h-5 text-amber-500" />
                   <span>Novo Sintoma na Árvore de Falhas</span>
                 </h3>
-                <p className="text-xs text-slate-400">Adicione uma opção ao catálogo do Vanguard Trigger.</p>
+                <p className="text-xs text-[#8E8E93]">Adicione uma opção ao catálogo do Vanguard Trigger.</p>
               </div>
               <button
                 type="button"
                 onClick={() => setModalNovoSintoma(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-[#8E8E93] hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2050,11 +2043,11 @@ export default function CockpitPCM() {
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">Subsistema / Categoria Técnica:</label>
+                <label className="text-zinc-300 font-semibold block mb-1">Subsistema / Categoria Técnica:</label>
                 <select
                   value={formSintoma.categoria}
                   onChange={(e) => setFormSintoma({ ...formSintoma, categoria: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-[2px] p-2.5 text-white focus:outline-none focus:border-red-500"
+                  className="w-full bg-[#121216] border border-white/[0.16] rounded-xl p-2.5 text-white focus:outline-none focus:border-red-500"
                 >
                   <option value="mecanica">Mecânica</option>
                   <option value="eletrica">Elétrica / Automação</option>
@@ -2067,13 +2060,13 @@ export default function CockpitPCM() {
               </div>
 
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">Descrição do Sintoma (2 toques):</label>
+                <label className="text-zinc-300 font-semibold block mb-1">Descrição do Sintoma (2 toques):</label>
                 <input
                   type="text"
                   placeholder="Ex: Aquecimento Anormal no Motorredutor"
                   value={formSintoma.descricao}
                   onChange={(e) => setFormSintoma({ ...formSintoma, descricao: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-[2px] p-2.5 text-white focus:outline-none focus:border-red-500"
+                  className="w-full bg-[#121216] border border-white/[0.16] rounded-xl p-2.5 text-white focus:outline-none focus:border-red-500"
                   required
                 />
               </div>
@@ -2083,14 +2076,14 @@ export default function CockpitPCM() {
               <button
                 type="button"
                 onClick={() => setModalNovoSintoma(false)}
-                className="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-[2px] text-xs"
+                className="w-1/2 py-2.5 bg-[#2C2C2E] hover:bg-[#36363A] text-white border border-white/[0.16] font-semibold rounded-xl text-xs"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={salvandoSintoma}
-                className="w-1/2 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-[2px] text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-amber-600/30"
+                className="w-1/2 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-amber-600/30"
               >
                 {salvandoSintoma ? 'Gravando...' : 'Salvar Sintoma'}
               </button>
