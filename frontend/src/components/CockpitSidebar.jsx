@@ -9,7 +9,6 @@ import {
   Volume2,
   VolumeX,
   RefreshCw,
-  ArrowLeft,
   ExternalLink,
   Laptop
 } from 'lucide-react';
@@ -249,15 +248,6 @@ export default function CockpitSidebar({
             title="Sincronizar dados"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#EF4444]' : ''}`} />
-          </button>
-
-          {/* Voltar ao Hub */}
-          <button
-            onClick={() => navigate('/')}
-            className="p-1.5 text-[#8E8E93] hover:text-white rounded-lg hover:bg-white/[0.08] transition-all"
-            title="Voltar ao Hub Principal"
-          >
-            <ArrowLeft className="w-4 h-4" />
           </button>
         </div>
       </div>
