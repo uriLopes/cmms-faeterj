@@ -100,6 +100,20 @@ async function runTests() {
     });
     assert(resOperador.status === 200 && resOperador.data.valido === true, 'POST /api/auth/operador-check valida operador sem senha');
 
+    const resOperadorInvalido = await request('POST', '/api/auth/operador-check', {
+      matricula: '99999'
+    });
+    assert(resOperadorInvalido.status === 404 && resOperadorInvalido.data.valido === false, 'POST /api/auth/operador-check rejeita matricula inexistente (404)');
+
+    // 5.1 Rejeição de abertura de OS com matrícula/Identifiant não cadastrado
+    const resAberturaInvalida = await request('POST', '/api/chamados', {
+      qr_code_token: qrTokenMV3,
+      operador_matricula: '99999',
+      sintoma_id: 2,
+      descricao_sintoma: 'Teste matricula invalida'
+    });
+    assert(resAberturaInvalida.status === 400 && resAberturaInvalida.data.erro, 'POST /api/chamados bloqueia chamado com operador não cadastrado (400)');
+
     // 6. Resolução de QR Code
     const resQR = await request('GET', `/api/ativos/qr/${qrTokenMV3}`);
     assert(

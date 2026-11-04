@@ -59,6 +59,25 @@ const chamadoController = {
         return res.status(400).json({ erro: 'Matrícula do operador é obrigatória.' });
       }
 
+      // Validação estrita de operador previamente cadastrado no sistema fabril
+      const matOperador = String(operador_matricula).trim();
+      const semPrefixoMat = matOperador.replace(/^RE-?/i, '').trim();
+
+      const usuarioOperador = await db('usuarios')
+        .where({ ativo: true })
+        .andWhere(function() {
+          this.where('matricula', matOperador)
+            .orWhere('matricula', `RE-${semPrefixoMat}`)
+            .orWhere('matricula', semPrefixoMat);
+        })
+        .first();
+
+      if (!usuarioOperador) {
+        return res.status(400).json({
+          erro: `Identifiant "${matOperador}" não cadastrado no sistema fabril. Procure o Team Leader.`
+        });
+      }
+
       // Localiza ativo por QR Code ou por ID direto
       let ativo;
       if (qr_code_token) {
@@ -106,8 +125,8 @@ const chamadoController = {
           prioridade: prioridadeFinal,
           status: 'aberto',
           status_impacto: status_impacto || 'maquina_parada',
-          operador_matricula: operador_matricula.trim(),
-          operador_nome: operador_nome || `Operador RE-${operador_matricula.trim()}`,
+          operador_matricula: usuarioOperador.matricula,
+          operador_nome: usuarioOperador.nome,
           sintoma_id: sintoma_id || null,
           descricao_sintoma: descricao_sintoma || null,
           foto_anexo: foto_anexo || null,

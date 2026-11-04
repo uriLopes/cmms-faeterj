@@ -47,6 +47,15 @@ export default function App() {
       localStorage.removeItem('cmms_trigger_active_draft');
     } catch (e) {}
 
+    // Sanitização de inicialização: reseta operadores inventados salvos em testes passados
+    const salvoNome = localStorage.getItem('cmms_operador_nome');
+    if (salvoNome && (salvoNome.startsWith('Operador RE-') || salvoNome === 'Operador')) {
+      localStorage.setItem('cmms_operador_identifiant', '226244');
+      localStorage.setItem('cmms_operador_nome', 'Jhon Doe');
+      setIdentifiant('226244');
+      setNomeOperador('Jhon Doe');
+    }
+
     // Transição limpa e sólida para evitar qualquer oscilação de cor entre branco e cinza
     const timerRemover = setTimeout(() => {
       setSplashVisivel(false);
@@ -170,7 +179,7 @@ export default function App() {
 
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
         const res = await fetch(`/api/auth/operador/${encodeURIComponent(limpo)}`, {
           signal: controller.signal
         });
@@ -182,21 +191,34 @@ export default function App() {
             nomeEncontrado = data.operador.nome;
             matriculaEncontrada = data.operador.matricula;
           }
+        } else {
+          // Se o servidor respondeu ativamente (404 / 400), o usuário NÃO existe no cadastro!
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.erro || 'Usuário não encontrado!');
         }
       } catch (e) {
-        console.warn('API de operador indisponível, consultando catálogo de contingência:', e);
+        // Se foi um erro explícito retornado pela API ("não cadastrado" ou "Usuário não encontrado!"), repassa imediatamente!
+        if (e.message && (e.message.includes('não cadastrado') || e.message === 'Usuário não encontrado!')) {
+          throw e;
+        }
+        console.warn('API de operador indisponível por falha de conexão/timeout, consultando contingência estrita:', e);
       }
 
-      // Se a API não respondeu ou deu 404, recorre ao catálogo de contingência
+      // Se e SOMENTE se a API estava inacessível (offline/sem sinal), consulta o catálogo de contingência oficial
       if (!nomeEncontrado) {
-        if (OPERADORES_FALLBACK[limpo]) {
-          nomeEncontrado = OPERADORES_FALLBACK[limpo];
-        } else if (limpo.length >= 4) {
-          // Permite qualquer RE plausível em modo offline/demonstração
-          nomeEncontrado = `Operador RE-${limpo}`;
+        const semPrefixo = limpo.replace(/^RE-?/i, '').trim();
+        const chaveEncontrada = Object.keys(OPERADORES_FALLBACK).find(
+          (k) =>
+            k.toLowerCase() === limpo.toLowerCase() ||
+            k.replace(/^RE-?/i, '').toLowerCase() === semPrefixo.toLowerCase()
+        );
+        if (chaveEncontrada) {
+          nomeEncontrado = OPERADORES_FALLBACK[chaveEncontrada];
+          matriculaEncontrada = chaveEncontrada;
         }
       }
 
+      // Se não constar no cadastro oficial, REJEITA terminantemente!
       if (!nomeEncontrado) {
         throw new Error('Usuário não encontrado!');
       }
@@ -214,7 +236,7 @@ export default function App() {
       }, 1400);
     } catch (err) {
       setSucessoOperador(null);
-      setErroOperador('Usuário não encontrado!');
+      setErroOperador(err.message || 'Usuário não encontrado!');
     } finally {
       setValidandoOperador(false);
     }
@@ -480,8 +502,15 @@ export default function App() {
           throw new Error(errData.erro || errData.mensagem || `Falha ao registrar chamado (Status ${res.status}).`);
         }
       } catch (fetchErr) {
-        if (fetchErr.message && fetchErr.message.includes('Status') && !fetchErr.message.includes('404')) {
-          throw fetchErr;
+        if (
+          fetchErr.message &&
+          (fetchErr.message.includes('não cadastrado') ||
+            fetchErr.message.includes('Identifiant') ||
+            (fetchErr.message.includes('Status') && !fetchErr.message.includes('404')))
+        ) {
+          alert(fetchErr.message);
+          setEnviando(false);
+          return;
         }
         console.warn('Backend indisponível, ativando contingência offline:', fetchErr);
       }

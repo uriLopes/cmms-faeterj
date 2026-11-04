@@ -153,6 +153,10 @@ export default function OperadorChamado() {
         });
       }
     } catch (err) {
+      if (err.message && (err.message.includes('não cadastrado') || err.message.includes('Identifiant'))) {
+        alert(err.message);
+        return;
+      }
       alert('Falha ao abrir chamado online. Salvando offline no aparelho...');
       const itemFila = offlineStorage.enfileirarChamado(payload);
       setSucessoChamado({
