@@ -1,4 +1,6 @@
 const db = require('../database/db');
+const chamadoCoreService = require('../services/chamadoCoreService');
+const despachoService = require('../services/despachoService');
 
 /**
  * Função utilitária para gerar número sequencial amigável de OS (ex: OS-2026-0001)
@@ -47,10 +49,12 @@ const chamadoController = {
         operador_matricula,
         operador_nome,
         sintoma_id,
+        subsistema,
         descricao_sintoma,
-        tipo_manutencao,
-        prioridade,
         status_impacto,
+        origem_abertura,
+        idempotency_key,
+        forcar_nova_os,
         foto_anexo,
         audio_anexo
       } = req.body;
@@ -90,83 +94,54 @@ const chamadoController = {
         return res.status(404).json({ erro: 'Ativo/posto não encontrado.' });
       }
 
-      // Impacto operacional imediato (3 Estados do Vanguard Trigger)
-      // A. Máquina Parada (Crítico / Emergência)
-      // B. Operando com Restrição / Anomalia (Alerta)
-      // C. Melhoria / Falha Estética (Baixa prioridade)
-      let prioridadeFinal = prioridade;
-      let tipoManutencaoFinal = tipo_manutencao || 'corretiva_emergencial';
-      let statusOperacionalAtivo = 'parado_quebra';
+      const io = req.app.get('io');
+      const origemFinal =
+        origem_abertura || (qr_code_token ? 'OPERADOR_QR' : 'OPERADOR_HIERARQUIA');
 
-      if (status_impacto === 'operando_com_restricao') {
-        prioridadeFinal = 'alta';
-        tipoManutencaoFinal = 'corretiva_programada';
-        statusOperacionalAtivo = 'alerta_preditivo';
-      } else if (status_impacto === 'melhoria_estetica') {
-        prioridadeFinal = 'baixa';
-        tipoManutencaoFinal = 'preventiva';
-        statusOperacionalAtivo = 'em_operacao';
-      } else {
-        prioridadeFinal = 'critica';
-        tipoManutencaoFinal = 'corretiva_emergencial';
-        statusOperacionalAtivo = 'parado_quebra';
-      }
-
-      const numero_os = await gerarNumeroOS();
-      const t0 = new Date();
-
-      // Transação: cria OS e atualiza status da máquina
-      let novoChamadoId;
-      await db.transaction(async (trx) => {
-        const [id] = await trx('chamados_os').insert({
-          numero_os,
-          ativo_id: ativo.id,
-          tipo_manutencao: tipoManutencaoFinal,
-          prioridade: prioridadeFinal,
-          status: 'aberto',
-          status_impacto: status_impacto || 'maquina_parada',
-          operador_matricula: usuarioOperador.matricula,
-          operador_nome: usuarioOperador.nome,
-          sintoma_id: sintoma_id || null,
-          descricao_sintoma: descricao_sintoma || null,
-          foto_anexo: foto_anexo || null,
-          audio_anexo: audio_anexo || null,
-          t0_abertura: t0,
-          created_at: t0,
-          updated_at: t0
-        });
-
-        novoChamadoId = id;
-
-        // Atualiza status do ativo
-        await trx('ativos_postos')
-          .where({ id: ativo.id })
-          .update({
-            status_operacional: statusOperacionalAtivo,
-            updated_at: t0
-          });
+      const resultado = await chamadoCoreService.abrirOuDeduplicarOS({
+        ativoId: ativo.id,
+        origemAbertura: origemFinal,
+        operadorMatricula: usuarioOperador.matricula,
+        operadorNome: usuarioOperador.nome || operador_nome,
+        subsistema: subsistema || null,
+        sintomaId: sintoma_id || null,
+        descricaoSintoma: descricao_sintoma || null,
+        statusImpacto: status_impacto || 'maquina_parada',
+        fotoAnexo: foto_anexo || null,
+        audioAnexo: audio_anexo || null,
+        idempotencyKey: idempotency_key || null,
+        forcarNovaOS: Boolean(forcar_nova_os),
+        io
       });
 
-      // Busca OS completa para retorno e emissão no WebSocket
-      const chamadoCompleto = await chamadoController._buscarDetalhado(novoChamadoId);
+      if (resultado.acao === 'DEDUPLICADO_ADENDO') {
+        return res.status(200).json({
+          mensagem: 'Chamado agrupado como adendo de contexto na OS já em aberto.',
+          acao: 'AGRUPADO_COMO_ADENDO',
+          elevou_prioridade: resultado.elevouPrioridade,
+          adendo: resultado.adendo,
+          chamado: resultado.chamado
+        });
+      }
 
-      // Emite evento em tempo real via Socket.io
-      const io = req.app.get('io');
-      if (io) {
-        io.emit('novo_chamado', {
-          chamado: chamadoCompleto,
-          mensagem: `Nova OS ${numero_os} aberta na linha ${chamadoCompleto.linha_nome}!`,
-          timestamp: t0
+      if (resultado.acao === 'IDEMPOTENTE') {
+        return res.status(200).json({
+          mensagem: 'Chamado recuperado por chave de idempotencia.',
+          acao: 'IDEMPOTENTE',
+          chamado: resultado.chamado
         });
       }
 
       return res.status(201).json({
         mensagem: 'Ordem de serviço aberta com sucesso.',
-        chamado: chamadoCompleto
+        acao: 'OS_CRIADA',
+        despacho_automatico: Boolean(resultado.despacho?.despachado),
+        despacho: resultado.despacho || null,
+        chamado: resultado.chamado
       });
     } catch (error) {
       console.error('[Chamados] Erro ao abrir chamado:', error);
-      return res.status(500).json({ erro: 'Erro interno ao registrar ordem de serviço.' });
+      return res.status(error.statusCode || 500).json({ erro: error.message || 'Erro interno ao registrar ordem de serviço.' });
     }
   },
 
@@ -205,6 +180,12 @@ const chamadoController = {
           'm.nome as mantenedor_nome',
           'c.chamado_invalido',
           'c.status_impacto',
+          'c.origem_abertura',
+          'c.subsistema',
+          'c.despacho_automatico',
+          'c.total_adendos',
+          'c.sla_nivel_escalonado',
+          'c.iot_evento_ref',
           'c.foto_anexo',
           'c.audio_anexo',
           'c.t0_abertura',
@@ -246,13 +227,15 @@ const chamadoController = {
         // Peso Impacto Operacional Imediato
         const pesoImpacto = item.status_impacto === 'maquina_parada'
           ? 300
-          : item.status_impacto === 'operando_com_restricao'
+          : (item.status_impacto === 'operando_com_restricao' || item.status_impacto === 'degradacao_funcao')
             ? 150
             : 50;
 
         // Fator de aceleração por tempo decorrido
         const fatorTempo = item.status_impacto === 'maquina_parada' ? 2.5 : 1.0;
-        const score_prioridade = Math.round(pesoCriticidade + pesoImpacto + (minutos_em_aberto * fatorTempo));
+        const gut = despachoService.calcularScoreGUT(item);
+        const adendosBonus = (item.total_adendos || 0) * 15;
+        const score_prioridade = Math.round(pesoCriticidade + pesoImpacto + adendosBonus + (minutos_em_aberto * fatorTempo));
 
         // 2. SLA de Triagem e Despacho T0 -> T1 (em minutos)
         // Crítico (A): 15 min | Alerta (B): 30 min | Baixo (C): 60 min
@@ -262,6 +245,7 @@ const chamadoController = {
 
         return {
           ...item,
+          gut,
           minutos_em_aberto,
           score_prioridade,
           sla_limite_t1,
@@ -269,6 +253,16 @@ const chamadoController = {
           sla_restante_minutos
         };
       });
+
+      const abertosRecomendados = await despachoService.recomendarTriagemParaChamados(
+        formatados.filter((f) => f.status === 'aberto')
+      );
+      const recMap = new Map(abertosRecomendados.map((r) => [r.id, r.tecnico_recomendado]));
+      for (const item of formatados) {
+        if (recMap.has(item.id)) {
+          item.tecnico_recomendado = recMap.get(item.id);
+        }
+      }
 
       // Ordenação: se ordenar='prioridade' (ou padrão nos ativos), prioriza score dos ativos não concluídos
       if (ordenar === 'prioridade' || !ordenar) {
@@ -338,11 +332,23 @@ const chamadoController = {
       // Busca apontamento técnico de encerramento se existir
       const apontamento = await db('apontamentos_os as ap')
         .join('usuarios as u', 'ap.mantenedor_id', 'u.id')
+        .leftJoin('iso_modos_falha as mf', 'ap.modo_falha_id', 'mf.id')
+        .leftJoin('iso_causas_raiz as cr', 'ap.causa_raiz_id', 'cr.id')
+        .leftJoin('iso_acoes_corretivas as ac', 'ap.acao_corretiva_id', 'ac.id')
         .select(
           'ap.id',
           'ap.causa_raiz',
           'ap.acao_executada',
           'ap.arvore_falha_sistema',
+          'ap.modo_falha_id',
+          'ap.causa_raiz_id',
+          'ap.acao_corretiva_id',
+          'mf.codigo_iso as modo_falha_codigo',
+          'mf.nome as modo_falha_nome',
+          'cr.codigo_iso as causa_raiz_codigo',
+          'cr.nome as causa_raiz_nome',
+          'ac.codigo_iso as acao_corretiva_codigo',
+          'ac.nome as acao_corretiva_nome',
           'ap.necessita_revisao_preventiva',
           'ap.observacoes_tecnicas',
           'ap.created_at',
@@ -351,10 +357,22 @@ const chamadoController = {
         .where('ap.chamado_id', id)
         .first();
 
+      const adendos = await db('chamado_adendos')
+        .where({ chamado_pai_id: id })
+        .orderBy('created_at', 'desc');
+
+      const escalonamentos = await db('escalonamento_sla_logs as es')
+        .leftJoin('usuarios as dest', 'es.destinatario_id', 'dest.id')
+        .select('es.*', 'dest.nome as destinatario_nome')
+        .where('es.chamado_id', id)
+        .orderBy('es.escalonado_em', 'desc');
+
       return res.status(200).json({
         ...chamado,
         pausas,
         pecas,
+        adendos,
+        escalonamentos,
         apontamento: apontamento || null
       });
     } catch (error) {
@@ -606,88 +624,49 @@ const chamadoController = {
     try {
       const { id } = req.params;
       const {
+        modo_falha_id,
+        causa_raiz_id,
+        acao_corretiva_id,
         causa_raiz,
         acao_executada,
         arvore_falha_sistema,
         necessita_revisao_preventiva,
-        observacoes_tecnicas
+        observacoes_tecnicas,
+        pecas_consumidas
       } = req.body;
       const mantenedor_id = req.user.id;
 
-      if (!causa_raiz || !acao_executada || !arvore_falha_sistema) {
-        return res.status(400).json({
-          erro: 'Causa raiz, ação executada e sistema na árvore de falhas são obrigatórios.'
-        });
-      }
-
-      const chamado = await db('chamados_os').where({ id }).first();
-      if (!chamado) {
-        return res.status(404).json({ erro: 'Ordem de serviço não encontrada.' });
-      }
-
-      if (chamado.status === 'concluido') {
-        return res.status(400).json({ erro: 'Esta OS já se encontra concluída.' });
-      }
-
       const t3 = new Date();
-
-      // Encerra qualquer pausa que tenha ficado aberta
-      await db('os_pausas')
-        .where({ chamado_id: id, t_fim_pausa: null })
-        .update({
-          t_fim_pausa: t3,
-          duracao_minutos: db.raw('TIMESTAMPDIFF(MINUTE, t_inicio_pausa, NOW())')
-        });
-
-      // Soma de todas as pausas da OS em minutos
-      const totalPausas = await db('os_pausas')
-        .where({ chamado_id: id })
-        .sum('duracao_minutos as total');
-
-      const somaPausasMinutos = Number(totalPausas[0].total) || 0;
-
-      // Cálculo de métricas
-      const t0 = chamado.t0_abertura;
-      const t2 = chamado.t2_inicio_reparo || chamado.t1_atribuicao || t0;
-
-      // MTTR Puro: tempo de reparo líquido descontando pausas de peça/turno
-      const tempoBrutoReparo = diferencaMinutos(t2, t3);
-      const tempo_reparo_liquido = Math.max(1, tempoBrutoReparo - somaPausasMinutos);
-
-      // Downtime Total: máquina parada desde a abertura até a liberação
-      const tempo_downtime_total = diferencaMinutos(t0, t3);
+      let resumoConclusao;
 
       await db.transaction(async (trx) => {
-        // 1. Registra o apontamento técnico de encerramento
-        await trx('apontamentos_os').insert({
-          chamado_id: id,
-          mantenedor_id,
+        const chamado = await trx('chamados_os').where({ id }).forUpdate().first();
+        if (!chamado) {
+          const err = new Error('Ordem de serviço não encontrada.');
+          err.statusCode = 404;
+          throw err;
+        }
+
+        if (chamado.status === 'concluido') {
+          const err = new Error('Esta OS já se encontra concluída.');
+          err.statusCode = 400;
+          throw err;
+        }
+
+        resumoConclusao = await chamadoCoreService.concluirOSTrx(trx, {
+          chamado,
+          mantenedorId: mantenedor_id,
+          dataConclusao: t3,
+          modo_falha_id,
+          causa_raiz_id,
+          acao_corretiva_id,
           causa_raiz,
           acao_executada,
           arvore_falha_sistema,
-          necessita_revisao_preventiva: Boolean(necessita_revisao_preventiva),
-          observacoes_tecnicas: observacoes_tecnicas || null,
-          created_at: t3
+          necessita_revisao_preventiva,
+          observacoes_tecnicas,
+          pecas_consumidas: pecas_consumidas || []
         });
-
-        // 2. Conclui a OS gravando os marcos consolidados
-        await trx('chamados_os')
-          .where({ id })
-          .update({
-            status: 'concluido',
-            t3_conclusao_reparo: t3,
-            tempo_reparo_liquido_minutos: tempo_reparo_liquido,
-            tempo_downtime_total_minutos: tempo_downtime_total,
-            updated_at: t3
-          });
-
-        // 3. Libera o ativo de volta para operação normal
-        await trx('ativos_postos')
-          .where({ id: chamado.ativo_id })
-          .update({
-            status_operacional: 'em_operacao',
-            updated_at: t3
-          });
       });
 
       const chamadoFinal = await chamadoController._buscarDetalhado(id);
@@ -701,22 +680,26 @@ const chamadoController = {
           mensagem: `Máquina ${chamadoFinal.tag_patrimonio} liberada! Reparo concluído.`
         });
         io.emit('os_concluida', { chamado: chamadoFinal });
+        if (resumoConclusao.baixasEstoque?.some((b) => b.abaixo_minimo)) {
+          io.emit('alerta_estoque_critico', { chamado_id: id, baixas: resumoConclusao.baixasEstoque });
+        }
       }
 
       return res.status(200).json({
         mensagem: 'Ordem de serviço concluída e máquina liberada (T3 registrado).',
         metricas: {
-          tempo_resposta_minutos: chamado.tempo_resposta_minutos,
-          tempo_deslocamento_minutos: chamado.tempo_deslocamento_minutos,
-          tempo_reparo_liquido_minutos: tempo_reparo_liquido, // MTTR Puro
-          soma_pausas_minutos: somaPausasMinutos,
-          tempo_downtime_total_minutos: tempo_downtime_total
+          tempo_resposta_minutos: chamadoFinal.tempo_resposta_minutos,
+          tempo_deslocamento_minutos: chamadoFinal.tempo_deslocamento_minutos,
+          tempo_reparo_liquido_minutos: resumoConclusao.tempoReparoLiquido,
+          soma_pausas_minutos: resumoConclusao.totalPausadoMin,
+          tempo_downtime_total_minutos: resumoConclusao.tempoDowntimeTotal
         },
+        baixas_estoque: resumoConclusao.baixasEstoque,
         chamado: chamadoFinal
       });
     } catch (error) {
       console.error('[Chamados] Erro ao concluir OS:', error);
-      return res.status(500).json({ erro: 'Erro interno ao concluir ordem de serviço.' });
+      return res.status(error.statusCode || 500).json({ erro: error.message || 'Erro interno ao concluir ordem de serviço.' });
     }
   },
 
@@ -785,6 +768,12 @@ const chamadoController = {
         'm.nome as mantenedor_nome',
         'tl.nome as team_leader_nome',
         'c.status_impacto',
+        'c.origem_abertura',
+        'c.subsistema',
+        'c.despacho_automatico',
+        'c.total_adendos',
+        'c.sla_nivel_escalonado',
+        'c.iot_evento_ref',
         'c.foto_anexo',
         'c.audio_anexo',
         'c.chamado_invalido',

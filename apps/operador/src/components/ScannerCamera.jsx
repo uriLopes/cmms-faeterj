@@ -20,6 +20,9 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
   const [suportaLanterna, setSuportaLanterna] = useState(false);
   const [modalTagManual, setModalTagManual] = useState(false);
   const [tagDigitada, setTagDigitada] = useState('');
+  const [linhasHierarquia, setLinhasHierarquia] = useState([]);
+  const [ativosHierarquia, setAtivosHierarquia] = useState([]);
+  const [linhaSelecionadaHierarquia, setLinhaSelecionadaHierarquia] = useState(null);
   const [avisoLanterna, setAvisoLanterna] = useState(null);
 
   const html5QrCodeRef = useRef(null);
@@ -260,11 +263,33 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
     } catch (e) {}
   }
 
+  async function abrirModalSelecaoAtivo() {
+    setLinhaSelecionadaHierarquia(null);
+    setModalTagManual(true);
+    try {
+      const [resLinhas, resAtivos] = await Promise.all([
+        fetch('/api/linhas'),
+        fetch('/api/ativos')
+      ]);
+      if (resLinhas.ok) setLinhasHierarquia(await resLinhas.json());
+      if (resAtivos.ok) setAtivosHierarquia(await resAtivos.json());
+    } catch {
+      // Fallback caso offline
+    }
+  }
+
+  function handleSelecionarAtivoHierarquia(ativo) {
+    if (!ativo || jaLeuQrCode.current) return;
+    jaLeuQrCode.current = true;
+    finalizarCamera();
+    onScanSuccess(ativo.qr_code_token || ativo.tag_patrimonio, 'OPERADOR_HIERARQUIA');
+  }
+
   function handleConfirmarTagManual() {
     if (!tagDigitada.trim() || jaLeuQrCode.current) return;
     jaLeuQrCode.current = true;
     finalizarCamera();
-    onScanSuccess(tagDigitada.trim().toUpperCase());
+    onScanSuccess(tagDigitada.trim().toUpperCase(), 'OPERADOR_HIERARQUIA');
   }
 
   return (
@@ -408,56 +433,105 @@ export default function ScannerCamera({ onScanSuccess, nomeOperador, matricula, 
           )}
         </button>
 
-        {/* Opção de Digitar TAG (Estética Idêntica aos Botões Elevados) */}
+        {/* Opção de Selecionar Ativo via Hierarquia Linha->Posto ou TAG */}
         <button
           type="button"
-          onClick={() => setModalTagManual(true)}
+          onClick={abrirModalSelecaoAtivo}
           className="cursor-pointer inline-flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-[#1C1C1E]/95 backdrop-blur-md hover:bg-[#2C2C2E] active:scale-95 border border-white/[0.16] transition-all text-xs shadow-md font-semibold text-white"
-          title="Digitar TAG manualmente caso a câmera não leia"
+          title="Selecionar linha e máquina ou digitar TAG caso a câmera não leia"
         >
-          <span className="font-semibold text-white text-xs">Digitar TAG</span>
+          <span className="font-semibold text-white text-xs">Selecionar Ativo</span>
           <Keyboard className="w-3.5 h-3.5 text-[#8E8E93] ml-0.5" />
         </button>
       </div>
 
-      {/* MODAL PARA DIGITAÇÃO MANUAL DE TAG */}
+      {/* MODAL PARA HIERARQUIA VISUAL (LINHA -> CELULA) OU TAG MANUAL */}
       {modalTagManual && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
           <div
             style={{ background: 'linear-gradient(#1C1C1E, #1C1C1E)', border: '1px solid rgba(255, 255, 255, 0.16)' }}
-            className="rounded-2xl max-w-xs w-full p-5 space-y-3.5 shadow-2xl"
+            className="rounded-2xl max-w-sm w-full p-5 space-y-3.5 shadow-2xl max-h-[85vh] overflow-y-auto"
           >
             <h3 className="text-xs font-bold text-white flex items-center gap-2">
               <Keyboard className="w-4 h-4 text-red-500" />
-              Digitar TAG da Máquina
+              {linhaSelecionadaHierarquia
+                ? `Células - ${linhaSelecionadaHierarquia.nome}`
+                : 'Passo 1: Selecionar Linha / Célula'}
             </h3>
-            <p className="text-xs text-[#8E8E93] font-medium">
-              Digite a TAG gravada na placa de patrimônio do equipamento:
-            </p>
-            <input
-              type="text"
-              autoFocus
-              value={tagDigitada}
-              onChange={(e) => setTagDigitada(e.target.value.toUpperCase())}
-              placeholder="Ex: MV3-ROB-04"
-              className="w-full bg-[#141416] border border-white/[0.16] rounded-xl p-3 text-sm font-mono text-white placeholder-[#8E8E93] text-center uppercase tracking-wider focus:outline-none focus:border-red-500"
-            />
-            <div className="flex gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => setModalTagManual(false)}
-                className="flex-1 py-2.5 bg-[#2C2C2E] hover:bg-[#3A3A3C] text-[#8E8E93] hover:text-white font-bold text-xs rounded-xl border border-white/[0.16] transition-all"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmarTagManual}
-                className="flex-1 py-2.5 bg-[#EF4444] hover:bg-red-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all"
-              >
-                <Check className="w-3.5 h-3.5" />
-                <span>Confirmar</span>
-              </button>
+
+            {linhasHierarquia.length > 0 && !linhaSelecionadaHierarquia && (
+              <div className="space-y-1.5">
+                <p className="text-[11px] text-[#8E8E93]">Escolha a linha de produção (1 toque):</p>
+                {linhasHierarquia.map((l) => (
+                  <button
+                    key={l.id}
+                    type="button"
+                    onClick={() => setLinhaSelecionadaHierarquia(l)}
+                    className="w-full text-left px-3 py-2.5 bg-[#141416] hover:bg-[#2C2C2E] border border-white/[0.12] rounded-xl flex justify-between items-center text-xs text-white font-semibold"
+                  >
+                    <span>{l.nome}</span>
+                    <span className="text-[10px] text-[#8E8E93]">{l.setor}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {linhaSelecionadaHierarquia && (
+              <div className="space-y-1.5">
+                <button
+                  type="button"
+                  onClick={() => setLinhaSelecionadaHierarquia(null)}
+                  className="text-[11px] text-amber-400 font-semibold mb-1"
+                >
+                  &larr; Trocar Linha
+                </button>
+                {ativosHierarquia
+                  .filter((a) => a.linha_id === linhaSelecionadaHierarquia.id)
+                  .map((a) => (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() => handleSelecionarAtivoHierarquia(a)}
+                      className="w-full text-left px-3 py-2.5 bg-[#141416] hover:bg-red-500/20 border border-white/[0.14] rounded-xl text-xs"
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="font-mono font-bold text-white">{a.tag_patrimonio}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-zinc-200">
+                          Crit. {a.criticidade}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#8E8E93] mt-0.5">{a.nome}</p>
+                    </button>
+                  ))}
+              </div>
+            )}
+
+            <div className="pt-2 border-t border-white/[0.12] space-y-2">
+              <p className="text-[11px] text-[#8E8E93] font-medium">Ou digite a TAG / QR manualmente:</p>
+              <input
+                type="text"
+                value={tagDigitada}
+                onChange={(e) => setTagDigitada(e.target.value.toUpperCase())}
+                placeholder="Ex: MV3-ROB-04"
+                className="w-full bg-[#141416] border border-white/[0.16] rounded-xl p-2.5 text-sm font-mono text-white placeholder-[#8E8E93] text-center uppercase tracking-wider focus:outline-none focus:border-red-500"
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setModalTagManual(false)}
+                  className="flex-1 py-2.5 bg-[#2C2C2E] hover:bg-[#3A3A3C] text-[#8E8E93] hover:text-white font-bold text-xs rounded-xl border border-white/[0.16] transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmarTagManual}
+                  className="flex-1 py-2.5 bg-[#EF4444] hover:bg-red-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Confirmar TAG</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
