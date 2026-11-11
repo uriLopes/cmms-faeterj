@@ -74,8 +74,12 @@ export default function IndicadoresPainel() {
 
   const resumo = metricas?.resumo_geral || {};
   const pareto = metricas?.pareto_subsistemas || [];
-  const ofensores = metricas?.top_ofensores || [];
+  const ofensoresDowntime = metricas?.top_ofensores_downtime || metricas?.top_ofensores || [];
+  const ofensoresVolume = metricas?.top_ofensores_volume || [];
+  const causasPorSetor = metricas?.causas_raiz_por_setor || [];
   const linhasData = metricas?.metricas_linhas || [];
+  const [modoOfensores, setModoOfensores] = useState('downtime'); // 'downtime' | 'volume'
+  const ofensores = modoOfensores === 'volume' && ofensoresVolume.length > 0 ? ofensoresVolume : ofensoresDowntime;
 
   // Classificação WCM de Disponibilidade
   const disp = resumo.disponibilidade_percentual || 100;
@@ -201,21 +205,24 @@ export default function IndicadoresPainel() {
                 <div className="flex justify-between items-start">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                     <Activity className={`w-3.5 h-3.5 ${statusWcm.cor}`} />
-                    Disponibilidade ($A$)
+                    Disp. Operacional (Aop)
                   </span>
                   <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${statusWcm.bg} ${statusWcm.cor} border ${statusWcm.borda}`}>
                     WCM
                   </span>
                 </div>
-                <div className="text-3xl sm:text-4xl font-black font-mono tracking-tight text-white">
-                  {resumo.disponibilidade_percentual}%
+                <div className="text-3xl sm:text-4xl font-black font-mono tracking-tight text-white flex items-baseline gap-2">
+                  <span>{resumo.disponibilidade_operacional_pct ?? resumo.disponibilidade_percentual}%</span>
+                  <span className="text-xs font-semibold text-indigo-300">
+                    Inerente: {resumo.disponibilidade_inerente_pct ?? 100}%
+                  </span>
                 </div>
                 <div className="space-y-1">
                   <div className={`text-[11px] font-semibold ${statusWcm.cor}`}>
                     {statusWcm.texto}
                   </div>
                   <p className="text-[10px] text-slate-400">
-                    Calculado por: A = MTBF / (MTBF + MTTR) * 100%
+                    Espera/Logística ({resumo.tempo_perdido_espera_horas || 0}h) separada da Disponibilidade Inerente ({resumo.linhas_ativas_consideradas || 1} linha(s))
                   </p>
                 </div>
               </div>
@@ -323,9 +330,14 @@ export default function IndicadoresPainel() {
                   <div className="space-y-3 pt-2">
                     {pareto.map((item, idx) => {
                       const subsistemaNomes = {
+                        mecanico: 'Mecânico (Guias / Rolamentos / Estrutura)',
                         mecanica: 'Mecânica (Guias / Rolamentos / Estrutura)',
+                        pneumatico: 'Pneumático (Válvulas / Cilindros)',
                         pneumatica: 'Pneumática (Válvulas / Cilindros)',
+                        eletrico: 'Elétrico / Automação (Sensores / CLP)',
                         eletrica: 'Elétrica (Sensores / Motores / Cabos)',
+                        hidraulico: 'Hidráulico (Pressão / Bombas / Mangueiras)',
+                        operacional: 'Operacional / Setup / Dispositivo',
                         automacao: 'Automação / Software (PLC / Robôs)'
                       };
 
@@ -363,17 +375,37 @@ export default function IndicadoresPainel() {
                 )}
               </div>
 
-              {/* TOP 5 MAIORES OFENSORES DA PLANTA */}
+              {/* TOP 5 MAIORES OFENSORES DA PLANTA (DUAL PARETO: DOWNTIME VS VOLUME) */}
               <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 sm:p-5 space-y-4">
-                <div className="flex justify-between items-start">
+                <div className="flex flex-wrap justify-between items-start gap-2">
                   <div>
                     <h3 className="font-bold text-sm text-white flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-rose-400" />
-                      Top 5 Ofensores de Disponibilidade
+                      Top 5 Bad Actors (Dual Pareto)
                     </h3>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      Maquinários que mais acumulam tempo de parada no chão de fábrica
+                      Ranking por horas paradas (Downtime) ou repetitividade (Frequência)
                     </p>
+                  </div>
+                  <div className="flex gap-1 bg-slate-950 p-1 rounded-[2px] border border-slate-800 text-[10px]">
+                    <button
+                      type="button"
+                      onClick={() => setModoOfensores('downtime')}
+                      className={`px-2 py-1 rounded-[2px] font-bold ${
+                        modoOfensores === 'downtime' ? 'bg-rose-600 text-white' : 'text-slate-400'
+                      }`}
+                    >
+                      Downtime (h)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setModoOfensores('volume')}
+                      className={`px-2 py-1 rounded-[2px] font-bold ${
+                        modoOfensores === 'volume' ? 'bg-amber-600 text-white' : 'text-slate-400'
+                      }`}
+                    >
+                      Volume (Qtd)
+                    </button>
                   </div>
                 </div>
 
@@ -426,6 +458,42 @@ export default function IndicadoresPainel() {
                 )}
               </div>
             </div>
+
+            {/* SEÇÃO 2B: CAUSAS RAIZ ISO 14224 (% POR SETOR FABRIL) */}
+            {causasPorSetor.length > 0 && (
+              <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 sm:p-5 space-y-3">
+                <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  Distribuição de Causas Raiz ISO 14224 (% por Setor)
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                  {causasPorSetor.slice(0, 6).map((item, idx) => (
+                    <div
+                      key={`${item.setor}-${item.codigo_iso}-${idx}`}
+                      className="bg-slate-950 border border-slate-800 p-3 rounded-[2px] text-xs space-y-1.5"
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-indigo-300 uppercase text-[10px]">
+                          Setor: {item.setor}
+                        </span>
+                        <span className="font-mono font-bold text-emerald-400">
+                          {item.percentual_setor}% ({item.quantidade}x)
+                        </span>
+                      </div>
+                      <p className="text-white font-semibold">
+                        [{item.codigo_iso}] {item.causa_raiz}
+                      </p>
+                      <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className="bg-emerald-500 h-full rounded-full"
+                          style={{ width: `${Math.min(100, item.percentual_setor)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* SEÇÃO 3: DESEMPENHO POR LINHA DE PRODUÇÃO */}
             <div className="bg-slate-900 border border-slate-800 rounded-[2px] p-4 sm:p-5 space-y-3">

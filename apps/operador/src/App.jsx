@@ -36,6 +36,23 @@ import VanguardLogo from './components/VanguardLogo';
 const PNG_BG_CONTAINER_262629 = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNQU9MEAADrAHY1t8gwAAAAAElFTkSuQmCC)';
 const PNG_BG_SELECTED_36363A = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMwM7MCAAFMAKdxj4gVAAAAAElFTkSuQmCC)';
 
+const SUBSISTEMAS_V2 = [
+  { id: 'mecanico', label: 'Mecânico' },
+  { id: 'eletrico', label: 'Elétrico' },
+  { id: 'pneumatico', label: 'Pneumático' },
+  { id: 'hidraulico', label: 'Hidráulico' },
+  { id: 'operacional', label: 'Operacional' }
+];
+
+function inferirSubsistemaPadrao(cat) {
+  const c = String(cat || '').toLowerCase();
+  if (c.includes('eletr') || c.includes('autom')) return 'eletrico';
+  if (c.includes('pneum')) return 'pneumatico';
+  if (c.includes('hidra')) return 'hidraulico';
+  if (c.includes('oper') || c.includes('geral')) return 'operacional';
+  return 'mecanico';
+}
+
 export default function App() {
   // 0. Splash Screen inicial com animação Uiverse.io (#EF4444)
   const [splashVisivel, setSplashVisivel] = useState(true);
@@ -46,6 +63,13 @@ export default function App() {
     try {
       localStorage.removeItem('cmms_trigger_active_draft');
     } catch (e) {}
+
+    // Suporte a NFC passivo / deep-link QR via query string (?qr= ou ?tag=)
+    const paramsUrl = new URLSearchParams(window.location.search);
+    const qrParam = paramsUrl.get('qr') || paramsUrl.get('tag');
+    if (qrParam) {
+      setTimeout(() => handleQRScanned(qrParam, 'OPERADOR_QR'), 150);
+    }
 
     // Sanitização de inicialização: reseta operadores inventados salvos em testes passados
     const salvoNome = localStorage.getItem('cmms_operador_nome');
@@ -90,9 +114,13 @@ export default function App() {
   const [chamadoAtivoAlerta, setChamadoAtivoAlerta] = useState(null);
   const [ignorarTravaDuplicada, setIgnorarTravaDuplicada] = useState(false);
 
-  // 3. Flag de Criticidade / Status Operacional da Máquina (3 Estados Obrigatórios)
-  // 'maquina_parada' (Crítico/Emergência) | 'operando_com_restricao' (Alerta) | 'melhoria_estetica' (Baixa)
+  // 3. Flag binaria de criticidade e Subsistema V2 (5 opcoes padrao)
+  // 'maquina_parada' (Linha Parada) | 'degradacao_funcao' (Degradacao sem parada total)
   const [statusImpacto, setStatusImpacto] = useState('maquina_parada');
+  const [subsistemaSelecionado, setSubsistemaSelecionado] = useState('mecanico');
+  const [origemAbertura, setOrigemAbertura] = useState('OPERADOR_QR');
+  const [idempotencyKey, setIdempotencyKey] = useState(() => `fc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+  const [resultadoEnvioMeta, setResultadoEnvioMeta] = useState(null);
 
   // 4. Gabarito de Sintomas e Observação
   const [sintomasDisponiveis, setSintomasDisponiveis] = useState([]);
@@ -250,6 +278,7 @@ export default function App() {
     setDashboardAberto(false);
     setTela('scanner');
     setChamadoCriado(null);
+    setResultadoEnvioMeta(null);
     setAtivoData(null);
     setChamadoAtivoAlerta(null);
     setIgnorarTravaDuplicada(false);
@@ -258,6 +287,8 @@ export default function App() {
     setAudioBase64(null);
     setTocandoAudio(false);
     setStatusImpacto('maquina_parada');
+    setSubsistemaSelecionado('mecanico');
+    setIdempotencyKey(`fc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
   }
 
   // Gravação de ruído sonoro rápido (até 10 segundos)
@@ -374,9 +405,11 @@ export default function App() {
   }
 
   // AÇÃO: QR Code Lido com Sucesso (Trava contra múltiplos disparos + Detecção de Duplicidade)
-  async function handleQRScanned(qrContent) {
+  async function handleQRScanned(qrContent, origem = 'OPERADOR_QR') {
     if (processandoQRRef.current) return;
     processandoQRRef.current = true;
+    setOrigemAbertura(origem);
+    setIdempotencyKey(`fc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
 
     setCarregandoAtivo(true);
     setAbaAtivaHomebar(null);
@@ -443,16 +476,17 @@ export default function App() {
     setTela('gabarito');
   }
 
-  // Selecionar/Desmarcar Sintoma no formato Penumbra Radio
+  // Selecionar/Desmarcar Sintoma no formato Penumbra Radio + Inferir Subsistema V2
   function toggleSintoma(sintoma) {
     if (sintomasSelecionados.some((s) => s.id === sintoma.id)) {
       setSintomasSelecionados([]);
     } else {
       setSintomasSelecionados([sintoma]);
+      setSubsistemaSelecionado(inferirSubsistemaPadrao(sintoma.categoria || sintoma.descricao));
     }
   }
 
-  // Confirmar e Enviar Chamado ($T_0$) com Status de Impacto e Mídias
+  // Confirmar e Enviar Chamado ($T_0$) com Deduplicacao Ativa, Subsistema V2 e Idempotencia
   async function handleEnviarChamado() {
     if (sintomasSelecionados.length === 0 && !observacaoTexto.trim() && !fotoBase64) {
       alert('Marque no gabarito pelo menos um sintoma ou anexe uma foto da falha.');
@@ -461,6 +495,7 @@ export default function App() {
 
     setEnviando(true);
     let chamadoFinal = null;
+    let metaEnvio = null;
 
     try {
       const sintomaPrincipal = sintomasSelecionados[0];
@@ -483,6 +518,9 @@ export default function App() {
             operador_matricula: identifiant,
             operador_nome: nomeOperador,
             sintoma_id: sintomaPrincipal?.id || 1,
+            subsistema: subsistemaSelecionado,
+            origem_abertura: origemAbertura,
+            idempotency_key: idempotencyKey,
             descricao_sintoma: descricaoConsolidada,
             status_impacto: statusImpacto,
             foto_anexo: fotoBase64,
@@ -494,8 +532,13 @@ export default function App() {
         if (res.ok) {
           const data = await res.json();
           chamadoFinal = data.chamado;
+          metaEnvio = {
+            acao: data.acao || 'OS_CRIADA',
+            elevou_prioridade: Boolean(data.elevou_prioridade),
+            despacho_automatico: Boolean(data.despacho_automatico || data.chamado?.despacho_automatico),
+            total_adendos: data.chamado?.total_adendos || 0
+          };
         } else if (res.status === 404 || res.status === 502 || res.status === 503) {
-          // Servidor backend ausente no host estático da Vercel / sem proxy local ativo
           console.warn(`Host estático/offline (Status ${res.status}). Acionando contingência local de OS.`);
         } else {
           const errData = await res.json().catch(() => ({}));
@@ -515,8 +558,7 @@ export default function App() {
         console.warn('Backend indisponível, ativando contingência offline:', fetchErr);
       }
 
-      // 2. Contingência Operacional (PWA / Demonstração Cloud / Chão de Fábrica Sem Sinal)
-      // Se não houver backend ativo na nuvem, gera o dossiê da OS imediatamente com numeração oficial
+      // 2. Contingência Operacional (Chao de Fabrica Sem Sinal)
       if (!chamadoFinal) {
         const anoAtual = new Date().getFullYear();
         const randomOS = Math.floor(1000 + Math.random() * 9000);
@@ -529,14 +571,15 @@ export default function App() {
           posto_trabalho: ativoData?.posto_trabalho || 'Posto 40 - Geometria Lateral',
           operador_matricula: identifiant,
           operador_nome: nomeOperador,
+          subsistema: subsistemaSelecionado,
           status_impacto: statusImpacto,
           descricao_sintoma: descricaoConsolidada,
           foto_anexo: fotoBase64,
           audio_anexo: audioBase64,
           created_at: new Date().toISOString()
         };
+        metaEnvio = { acao: 'CONTINGENCIA_OFFLINE', despacho_automatico: false, total_adendos: 0 };
 
-        // Salva na fila de contingência do navegador para não perder histórico
         try {
           const historico = JSON.parse(localStorage.getItem('cmms_offline_chamados') || '[]');
           historico.unshift(chamadoFinal);
@@ -545,6 +588,7 @@ export default function App() {
       }
 
       setChamadoCriado(chamadoFinal);
+      setResultadoEnvioMeta(metaEnvio);
       setDashboardAberto(false);
       setAbaAtivaHomebar(null);
       setAvisoValidacaoHomebar(null);
@@ -784,7 +828,7 @@ export default function App() {
               onClick={prosseguirComReforco}
               className="w-full py-3 bg-[#2C2C2E] border border-white/[0.16] hover:bg-[#3A3A3C] text-[#8E8E93] hover:text-white font-bold text-xs rounded-xl transition-all"
             >
-              Agravou o problema? Abrir Reforço de OS
+              Agravou o problema? Anexar Adendo de Contexto à OS
             </button>
           </div>
         </div>
@@ -891,7 +935,7 @@ export default function App() {
               })}
             </fieldset>
 
-            {/* 2. SEÇÃO IMPACTO DO PROBLEMA NA LINHA (PENUMBRA RADIO GROUP) */}
+            {/* 1B. PASSO 2: CLASSIFICACAO INICIAL DE SUBSISTEMA (5 OPCOES PADRAO) */}
             <fieldset
               style={{
                 backgroundColor: '#262629',
@@ -902,9 +946,42 @@ export default function App() {
               }}
               className="penumbra-radio-group"
             >
-              <legend className="penumbra-radio-group__legend">Impacto do Problema na Linha</legend>
+              <legend className="penumbra-radio-group__legend">Passo 2: Subsistema Envolvido</legend>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {SUBSISTEMAS_V2.map((sub) => {
+                  const ativoSub = subsistemaSelecionado === sub.id;
+                  return (
+                    <button
+                      key={sub.id}
+                      type="button"
+                      onClick={() => setSubsistemaSelecionado(sub.id)}
+                      className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        ativoSub
+                          ? 'bg-white text-zinc-950 border-white shadow'
+                          : 'bg-[#1C1C1E] text-zinc-300 border-white/[0.14] hover:border-white/30'
+                      }`}
+                    >
+                      {sub.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
 
-              {/* 1. ALTO - MÁQUINA PARADA (#EF4444) */}
+            {/* 2. SEÇÃO IMPACTO BINARIO V2 NA LINHA (PENUMBRA RADIO GROUP) */}
+            <fieldset
+              style={{
+                backgroundColor: '#262629',
+                backgroundImage: PNG_BG_CONTAINER_262629,
+                backgroundRepeat: 'repeat',
+                border: '1px solid rgba(255, 255, 255, 0.16)',
+                boxShadow: 'none'
+              }}
+              className="penumbra-radio-group"
+            >
+              <legend className="penumbra-radio-group__legend">Passo 3: Criticidade / Impacto na Linha</legend>
+
+              {/* 1. LINHA PARADA (#EF4444) */}
               <div
                 role="button"
                 tabIndex={0}
@@ -946,40 +1023,40 @@ export default function App() {
                 </span>
                 <span className="penumbra-radio__text">
                   <span className="penumbra-radio__title flex items-center gap-2">
-                    <span className="text-[#EF4444] font-bold">ALTO</span>
-                    <span className="text-white font-semibold">- Máquina Parada</span>
+                    <span className="text-[#EF4444] font-bold">CRÍTICO</span>
+                    <span className="text-white font-semibold">- Linha Parada</span>
                   </span>
                   <span className="penumbra-radio__hint">
-                    Interrupção total da produção no posto de trabalho
+                    Interrupção total da produção (aciona Auto-Dispatch direto ao Field)
                   </span>
                 </span>
               </div>
 
-              {/* 2. MÉDIO - OPERANDO COM RESTRIÇÃO (#F59E0B) */}
+              {/* 2. DEGRADACAO DE FUNCAO (#F59E0B) */}
               <div
                 role="button"
                 tabIndex={0}
                 style={{
-                  backgroundColor: statusImpacto === 'operando_com_restricao' ? '#36363A' : 'transparent',
-                  backgroundImage: statusImpacto === 'operando_com_restricao' ? PNG_BG_SELECTED_36363A : 'none',
+                  backgroundColor: statusImpacto === 'degradacao_funcao' ? '#36363A' : 'transparent',
+                  backgroundImage: statusImpacto === 'degradacao_funcao' ? PNG_BG_SELECTED_36363A : 'none',
                   backgroundRepeat: 'repeat',
-                  border: statusImpacto === 'operando_com_restricao' ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid transparent'
+                  border: statusImpacto === 'degradacao_funcao' ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid transparent'
                 }}
-                className={`penumbra-radio ${statusImpacto === 'operando_com_restricao' ? 'is-selected' : ''}`}
+                className={`penumbra-radio ${statusImpacto === 'degradacao_funcao' ? 'is-selected' : ''}`}
                 data-impact="medio"
-                onClick={() => setStatusImpacto('operando_com_restricao')}
+                onClick={() => setStatusImpacto('degradacao_funcao')}
               >
                 <span
                   className="penumbra-radio__mark"
                   aria-hidden="true"
                   style={{
-                    backgroundColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : 'transparent',
-                    borderColor: statusImpacto === 'operando_com_restricao' ? '#F59E0B' : '#6E6E73',
+                    backgroundColor: statusImpacto === 'degradacao_funcao' ? '#F59E0B' : 'transparent',
+                    borderColor: statusImpacto === 'degradacao_funcao' ? '#F59E0B' : '#6E6E73',
                     forcedColorAdjust: 'none',
                     colorScheme: 'dark only'
                   }}
                 >
-                  {statusImpacto === 'operando_com_restricao' && (
+                  {statusImpacto === 'degradacao_funcao' && (
                     <span
                       style={{
                         position: 'absolute',
@@ -997,62 +1074,11 @@ export default function App() {
                 </span>
                 <span className="penumbra-radio__text">
                   <span className="penumbra-radio__title flex items-center gap-2">
-                    <span className="text-[#F59E0B] font-bold">MÉDIO</span>
-                    <span className="text-white font-semibold">- Operando com Restrição</span>
+                    <span className="text-[#F59E0B] font-bold">ALERTA</span>
+                    <span className="text-white font-semibold">- Degradação de Função</span>
                   </span>
                   <span className="penumbra-radio__hint">
-                    Velocidade reduzida, retrabalho ou desvio temporário
-                  </span>
-                </span>
-              </div>
-
-              {/* 3. BAIXO - SEM IMPACTO / MELHORIA (#10B981) */}
-              <div
-                role="button"
-                tabIndex={0}
-                style={{
-                  backgroundColor: statusImpacto === 'melhoria_estetica' ? '#36363A' : 'transparent',
-                  backgroundImage: statusImpacto === 'melhoria_estetica' ? PNG_BG_SELECTED_36363A : 'none',
-                  backgroundRepeat: 'repeat',
-                  border: statusImpacto === 'melhoria_estetica' ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid transparent'
-                }}
-                className={`penumbra-radio ${statusImpacto === 'melhoria_estetica' ? 'is-selected' : ''}`}
-                data-impact="baixo"
-                onClick={() => setStatusImpacto('melhoria_estetica')}
-              >
-                <span
-                  className="penumbra-radio__mark"
-                  aria-hidden="true"
-                  style={{
-                    backgroundColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : 'transparent',
-                    borderColor: statusImpacto === 'melhoria_estetica' ? '#10B981' : '#6E6E73',
-                    forcedColorAdjust: 'none',
-                    colorScheme: 'dark only'
-                  }}
-                >
-                  {statusImpacto === 'melhoria_estetica' && (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '6px',
-                        height: '6px',
-                        borderRadius: '999px',
-                        backgroundColor: '#36363A',
-                        forcedColorAdjust: 'none'
-                      }}
-                    />
-                  )}
-                </span>
-                <span className="penumbra-radio__text">
-                  <span className="penumbra-radio__title flex items-center gap-2">
-                    <span className="text-[#10B981] font-bold">BAIXO</span>
-                    <span className="text-white font-semibold">- Sem Interrupção de Linha</span>
-                  </span>
-                  <span className="penumbra-radio__hint">
-                    Melhoria estética ou anomalia que não impede o ciclo
+                    Equipamento operando com lentidão, alarme ou desvio sem parar linha
                   </span>
                 </span>
               </div>
@@ -1458,13 +1484,21 @@ export default function App() {
 
             <div>
               <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-emerald-400 block">
-                Marco T₀ Registrado
+                {resultadoEnvioMeta?.acao === 'AGRUPADO_COMO_ADENDO'
+                  ? 'Deduplicação Ativa (Adendo Registrado)'
+                  : 'Marco T₀ Registrado'}
               </span>
               <h2 className="text-xl font-black text-white mt-1">
-                Chamado Enviado à Manutenção!
+                {resultadoEnvioMeta?.acao === 'AGRUPADO_COMO_ADENDO'
+                  ? 'Adendo Anexado à OS Aberta!'
+                  : 'Chamado Enviado à Manutenção!'}
               </h2>
               <p className="text-xs text-[#8E8E93] mt-1 font-medium">
-                O Team Leader e a equipe técnica já receberam o alerta no Cockpit.
+                {resultadoEnvioMeta?.acao === 'AGRUPADO_COMO_ADENDO'
+                  ? `Seu reporte foi consolidado à OS ativa (#${resultadoEnvioMeta.total_adendos} adendo(s)) sem gerar spam na fila.`
+                  : resultadoEnvioMeta?.despacho_automatico
+                    ? `Despacho Automático acionado: técnico ${chamadoCriado?.mantenedor_nome || 'de turno'} notificado em campo!`
+                    : 'O Team Leader e a equipe técnica já receberam o alerta no Cockpit.'}
               </p>
             </div>
 

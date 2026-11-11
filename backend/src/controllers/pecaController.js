@@ -306,6 +306,152 @@ const pecaController = {
       console.error('[Pecas] Erro na entrada de estoque:', error);
       return res.status(500).json({ erro: 'Erro ao registrar entrada de estoque.' });
     }
+  },
+
+  /**
+   * GET /api/v2/ativos/:id/bom
+   * Lista BOM (Lista de Materiais Criticos) do ativo com saldo livre real-time
+   * (quantidade_estoque - SUM(reserva_pendente)).
+   */
+  async listarBomPorAtivo(req, res) {
+    try {
+      const ativo_id = Number(req.params.id);
+      const { subsistema } = req.query;
+
+      const ativo = await db('ativos_postos').where({ id: ativo_id, ativo: true }).first();
+      if (!ativo) {
+        return res.status(404).json({ erro: 'Ativo nao encontrado.' });
+      }
+
+      const reservasRows = await db('pecas_utilizadas_os')
+        .where({ status_movimentacao: 'reserva_pendente' })
+        .select('peca_id')
+        .sum('quantidade as total_reservado')
+        .groupBy('peca_id');
+
+      const reservasMap = {};
+      for (const r of reservasRows) {
+        reservasMap[r.peca_id] = Number(r.total_reservado || 0);
+      }
+
+      const bomQuery = db('ativo_bom_pecas as b')
+        .join('pecas as p', 'b.peca_id', 'p.id')
+        .where({ 'b.ativo_id': ativo_id, 'p.ativo': true })
+        .select(
+          'p.id',
+          'p.codigo_sap',
+          'p.descricao',
+          'p.categoria',
+          'p.localizacao_almoxarifado',
+          'p.quantidade_estoque',
+          'p.quantidade_minima',
+          'p.unidade_medida',
+          'p.custo_unitario',
+          'b.subsistema as bom_subsistema',
+          'b.quantidade_instalada',
+          'b.criticidade_reposicao'
+        );
+
+      if (subsistema) {
+        bomQuery.andWhere(function () {
+          this.where('b.subsistema', subsistema.toLowerCase()).orWhereNull('b.subsistema');
+        });
+      }
+
+      const bomRows = await bomQuery.orderBy('b.criticidade_reposicao', 'asc').orderBy('p.descricao', 'asc');
+      const idsNoBom = new Set(bomRows.map((x) => x.id));
+
+      const formatarSaldo = (item, pertenceBom) => {
+        const reservado = reservasMap[item.id] || 0;
+        const saldoLivre = Math.max(0, Number(item.quantidade_estoque) - reservado);
+        return {
+          ...item,
+          pertence_bom: pertenceBom,
+          quantidade_reservada: reservado,
+          saldo_livre: saldoLivre
+        };
+      };
+
+      const bom_pecas = bomRows.map((item) => formatarSaldo(item, true));
+
+      const todasPecas = await db('pecas')
+        .where({ ativo: true })
+        .select(
+          'id',
+          'codigo_sap',
+          'descricao',
+          'categoria',
+          'localizacao_almoxarifado',
+          'quantidade_estoque',
+          'quantidade_minima',
+          'unidade_medida',
+          'custo_unitario'
+        )
+        .orderBy('descricao', 'asc');
+
+      const catalogo_adicional = todasPecas
+        .filter((p) => !idsNoBom.has(p.id))
+        .map((p) => formatarSaldo(p, false));
+
+      return res.status(200).json({
+        ativo_id,
+        tag_patrimonio: ativo.tag_patrimonio,
+        bom_pecas,
+        catalogo_adicional
+      });
+    } catch (error) {
+      console.error('[Pecas BOM] Erro ao consultar BOM do ativo:', error);
+      return res.status(500).json({ erro: 'Erro interno ao consultar BOM do ativo.' });
+    }
+  },
+
+  /**
+   * POST /api/v2/chamados/:id/pecas/baixa-direta
+   * Consumo ou reserva atomica de peca ligada diretamente a OS em campo/almoxarifado.
+   */
+  async registrarBaixaDiretaOS(req, res) {
+    try {
+      const chamado_id = Number(req.params.id);
+      const { peca_id, quantidade = 1, modalidade = 'BAIXA_DIRETA', observacao } = req.body;
+      const usuario_id = req.user.id;
+      const chamadoCoreService = require('../services/chamadoCoreService');
+
+      const chamado = await db('chamados_os').where({ id: chamado_id }).first();
+      if (!chamado) {
+        return res.status(404).json({ erro: 'OS nao encontrada.' });
+      }
+
+      const resultado = await db.transaction(async (trx) => {
+        return chamadoCoreService.registrarPecaNaOSTrx(trx, {
+          chamadoId: chamado_id,
+          pecaId: peca_id,
+          quantidade,
+          usuarioId: usuario_id,
+          modalidade,
+          observacao
+        });
+      });
+
+      const io = req.app.get('io');
+      if (io && resultado.abaixo_minimo) {
+        const pecaAtualizada = await db('pecas').where({ id: peca_id }).first();
+        io.emit('alerta_estoque_critico', { peca: pecaAtualizada });
+      }
+      if (io) {
+        io.emit('estoque_atualizado', { chamado_id, ...resultado });
+      }
+
+      return res.status(201).json({
+        mensagem:
+          modalidade === 'RESERVA_PENDENTE'
+            ? 'Peca reservada na OS com atualizacao de saldo livre.'
+            : 'Baixa direta atomica executada e registrada no estoque.',
+        movimentacao: resultado
+      });
+    } catch (error) {
+      console.error('[Pecas Baixa Direta] Erro:', error);
+      return res.status(error.statusCode || 500).json({ erro: error.message || 'Erro interno ao movimentar peca na OS.' });
+    }
   }
 };
 

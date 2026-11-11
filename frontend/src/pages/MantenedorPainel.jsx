@@ -21,6 +21,7 @@ import {
 import { api } from '../services/api';
 import { getSocket } from '../services/socket';
 import NetworkStatusBadge from '../components/NetworkStatusBadge';
+import { vanguardOfflineDB } from '../services/vanguardOfflineDB';
 
 // Formatador de segundos para MM:SS ou HH:MM:SS
 function formatarTempoCronometro(segundos) {
@@ -132,7 +133,11 @@ export default function MantenedorPainel() {
         }
       }
     } catch (err) {
-      console.error('Erro ao listar chamados:', err);
+      console.warn('Sem rede ao buscar chamados, carregando snapshot IndexedDB:', err);
+      const snapshot = await vanguardOfflineDB.lerSnapshotOS();
+      if (snapshot.length > 0) {
+        setChamados(snapshot);
+      }
     } finally {
       setLoading(false);
     }
@@ -169,6 +174,133 @@ export default function MantenedorPainel() {
     }
   }
 
+  // Estados Vanguard V2: Local-First IndexedDB Outbox, Taxonomia ISO 14224 & BOM Direta
+  const [pendentesSync, setPendentesSync] = useState([]);
+  const [conflitosSync, setConflitosSync] = useState([]);
+  const [sincronizandoOffline, setSincronizandoOffline] = useState(false);
+  const [taxonomiaIso, setTaxonomiaIso] = useState({ modos_falha: [], acoes_corretivas: [] });
+  const [subsistemaIso, setSubsistemaIso] = useState('mecanico');
+  const [modoFalhaId, setModoFalhaId] = useState('');
+  const [causaRaizId, setCausaRaizId] = useState('');
+  const [acaoCorretivaId, setAcaoCorretivaId] = useState('');
+  const [modalidadePeca, setModalidadePeca] = useState('BAIXA_DIRETA');
+  const [pecasBomAtivo, setPecasBomAtivo] = useState([]);
+
+  async function atualizarEstadoOutbox() {
+    const [p, c] = await Promise.all([
+      vanguardOfflineDB.listarEventosPendentes(),
+      vanguardOfflineDB.listarConflitos()
+    ]);
+    setPendentesSync(p);
+    setConflitosSync(c);
+  }
+
+  async function dispararSincronizacaoOffline() {
+    const token = tokenAuth || localStorage.getItem('cmms_auth_token_tecnico');
+    if (!token || !navigator.onLine) return;
+    setSincronizandoOffline(true);
+    try {
+      const resumo = await vanguardOfflineDB.sincronizarComServidor(token);
+      await atualizarEstadoOutbox();
+      if (resumo.aplicados > 0) {
+        carregarChamados();
+      }
+    } catch (err) {
+      console.warn('[Field Sync] Erro ao reconciliar fila:', err.message);
+    } finally {
+      setSincronizandoOffline(false);
+    }
+  }
+
+  async function carregarTaxonomiaIso() {
+    try {
+      const res = await fetch('/api/v2/taxonomia');
+      if (res.ok) {
+        const data = await res.json();
+        setTaxonomiaIso(data);
+        localStorage.setItem('vanguard_iso_taxonomia_cache', JSON.stringify(data));
+        return;
+      }
+    } catch {
+      // Fallback cache local
+    }
+    try {
+      const cached = localStorage.getItem('vanguard_iso_taxonomia_cache');
+      if (cached) setTaxonomiaIso(JSON.parse(cached));
+    } catch {}
+  }
+
+  async function abrirCatalogoBomV2() {
+    setModalPeca(true);
+    setPecaSelecionada(null);
+    setQtdPeca(1);
+    setModalidadePeca('BAIXA_DIRETA');
+    try {
+      const token = tokenAuth || localStorage.getItem('cmms_auth_token_tecnico');
+      if (osAtiva?.ativo_id) {
+        const subParam = osAtiva.subsistema ? `?subsistema=${encodeURIComponent(osAtiva.subsistema)}` : '';
+        const resBom = await fetch(`/api/v2/ativos/${osAtiva.ativo_id}/bom${subParam}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (resBom.ok) {
+          const dataBom = await resBom.json();
+          const unificado = [
+            ...(dataBom.bom_pecas || []),
+            ...(dataBom.catalogo_adicional || [])
+          ];
+          setPecasBomAtivo(unificado);
+          setPecasCatalogo(unificado);
+          return;
+        }
+      }
+      const res = await fetch('/api/pecas', { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) {
+        const data = await res.json();
+        setPecasCatalogo(data);
+        setPecasBomAtivo(data);
+      }
+    } catch (err) {
+      console.error('Erro ao abrir BOM de sobressalentes:', err);
+    }
+  }
+
+  useEffect(() => {
+    carregarTaxonomiaIso();
+    atualizarEstadoOutbox();
+    dispararSincronizacaoOffline();
+
+    const onOnline = () => dispararSincronizacaoOffline();
+    const onOutboxChanged = () => atualizarEstadoOutbox();
+    const onSwMessage = (event) => {
+      if (event.data?.type === 'TRIGGER_OUTBOX_SYNC') dispararSincronizacaoOffline();
+    };
+
+    window.addEventListener('online', onOnline);
+    window.addEventListener('vanguard-outbox-changed', onOutboxChanged);
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', onSwMessage);
+    }
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('vanguard-outbox-changed', onOutboxChanged);
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', onSwMessage);
+      }
+    };
+  }, [tokenAuth]);
+
+  useEffect(() => {
+    if (chamados && chamados.length > 0) {
+      vanguardOfflineDB.salvarSnapshotOS(chamados);
+    }
+  }, [chamados]);
+
+  useEffect(() => {
+    if (osAtiva?.subsistema) {
+      setSubsistemaIso(osAtiva.subsistema);
+    }
+  }, [osAtiva]);
+
   // AÇÃO 1: Mantenedor assume a OS para si mesmo ($T_1$)
   async function handleAutoAtribuir(chamadoItem) {
     try {
@@ -190,11 +322,13 @@ export default function MantenedorPainel() {
     }
   }
 
-  // AÇÃO 2: Mantenedor chega no posto e inicia o reparo ($T_2$)
+  // AÇÃO 2: Mantenedor chega no posto e inicia o reparo ($T_2$) com fallback Local-First IndexedDB
   async function handleIniciarReparo() {
     if (!osAtiva) return;
+    const clientIso = new Date().toISOString();
     try {
       const token = tokenAuth || localStorage.getItem('cmms_auth_token_tecnico');
+      if (!navigator.onLine) throw new TypeError('offline');
       const res = await fetch(`/api/chamados/${osAtiva.id}/iniciar-reparo`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` }
@@ -204,16 +338,31 @@ export default function MantenedorPainel() {
       setOsAtiva(data.chamado);
       carregarChamados();
     } catch (err) {
+      if (err instanceof TypeError || !navigator.onLine) {
+        await vanguardOfflineDB.enfileirarEventoOffline({
+          event_type: 'T2_INICIAR_REPARO',
+          chamado_id: osAtiva.id,
+          occurred_at_client_utc: clientIso,
+          payload: { mantenedor_id: tecnicoAtual?.id }
+        });
+        const otimista = { ...osAtiva, status: 'em_reparo', t2_inicio_reparo: clientIso };
+        setOsAtiva(otimista);
+        setChamados((prev) => prev.map((c) => (c.id === osAtiva.id ? otimista : c)));
+        await atualizarEstadoOutbox();
+        return;
+      }
       alert(err.message || 'Erro ao iniciar reparo');
     }
   }
 
-  // AÇÃO 3: Registrar Pausa Operacional (Congela MTTR)
+  // AÇÃO 3: Registrar Pausa Operacional (Congela MTTR) com fallback Local-First IndexedDB
   async function handleConfirmarPausa() {
     if (!osAtiva) return;
     setSubmetendo(true);
+    const clientIso = new Date().toISOString();
     try {
       const token = tokenAuth || localStorage.getItem('cmms_auth_token_tecnico');
+      if (!navigator.onLine) throw new TypeError('offline');
       const res = await fetch(`/api/chamados/${osAtiva.id}/pausar`, {
         method: 'POST',
         headers: {
@@ -231,17 +380,33 @@ export default function MantenedorPainel() {
       setModalPausa(false);
       carregarChamados();
     } catch (err) {
+      if (err instanceof TypeError || !navigator.onLine) {
+        await vanguardOfflineDB.enfileirarEventoOffline({
+          event_type: 'PAUSAR_OS',
+          chamado_id: osAtiva.id,
+          occurred_at_client_utc: clientIso,
+          payload: { motivo: motivoPausa, justificativa: justificativaPausa }
+        });
+        const otimista = { ...osAtiva, status: 'pausado_peca' };
+        setOsAtiva(otimista);
+        setChamados((prev) => prev.map((c) => (c.id === osAtiva.id ? otimista : c)));
+        setModalPausa(false);
+        await atualizarEstadoOutbox();
+        return;
+      }
       alert(err.message || 'Erro ao pausar atendimento');
     } finally {
       setSubmetendo(false);
     }
   }
 
-  // AÇÃO 4: Retomar Trabalho após Pausa
+  // AÇÃO 4: Retomar Trabalho após Pausa com fallback Local-First IndexedDB
   async function handleRetomarTrabalho() {
     if (!osAtiva) return;
+    const clientIso = new Date().toISOString();
     try {
       const token = tokenAuth || localStorage.getItem('cmms_auth_token_tecnico');
+      if (!navigator.onLine) throw new TypeError('offline');
       const res = await fetch(`/api/chamados/${osAtiva.id}/retomar`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` }
@@ -251,17 +416,35 @@ export default function MantenedorPainel() {
       setOsAtiva(data.chamado);
       carregarChamados();
     } catch (err) {
+      if (err instanceof TypeError || !navigator.onLine) {
+        await vanguardOfflineDB.enfileirarEventoOffline({
+          event_type: 'RETOMAR_OS',
+          chamado_id: osAtiva.id,
+          occurred_at_client_utc: clientIso,
+          payload: {}
+        });
+        const otimista = { ...osAtiva, status: 'em_reparo' };
+        setOsAtiva(otimista);
+        setChamados((prev) => prev.map((c) => (c.id === osAtiva.id ? otimista : c)));
+        await atualizarEstadoOutbox();
+        return;
+      }
       alert(err.message || 'Erro ao retomar trabalho');
     }
   }
 
-  // AÇÃO 5: Solicitar Peça em Modo Reserva Pendente
+  // AÇÃO 5: Movimentar Peça sobressalente (Baixa Direta Atomica ou Reserva Pendente)
   async function handleSolicitarPeca() {
     if (!osAtiva || !pecaSelecionada) return;
     setSubmetendo(true);
     try {
       const token = tokenAuth || localStorage.getItem('cmms_auth_token_tecnico');
-      const res = await fetch(`/api/chamados/${osAtiva.id}/pecas`, {
+      if (!navigator.onLine) throw new TypeError('offline');
+      const endpoint =
+        modalidadePeca === 'BAIXA_DIRETA'
+          ? `/api/v2/chamados/${osAtiva.id}/pecas/baixa-direta`
+          : `/api/chamados/${osAtiva.id}/pecas`;
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -269,49 +452,99 @@ export default function MantenedorPainel() {
         },
         body: JSON.stringify({
           peca_id: pecaSelecionada.id,
-          quantidade: qtdPeca
+          quantidade: qtdPeca,
+          modalidade: modalidadePeca
         })
       });
-      if (!res.ok) throw new Error('Falha ao solicitar peça');
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.erro || 'Falha ao apontar peça');
+      }
       setModalPeca(false);
       setPecaSelecionada(null);
       setQtdPeca(1);
       carregarPecasOS(osAtiva.id);
     } catch (err) {
-      alert(err.message || 'Erro ao solicitar peça');
+      if (err instanceof TypeError || !navigator.onLine) {
+        await vanguardOfflineDB.enfileirarEventoOffline({
+          event_type: 'APONTAR_PECA',
+          chamado_id: osAtiva.id,
+          payload: { peca_id: pecaSelecionada.id, quantidade: qtdPeca, modalidade: modalidadePeca }
+        });
+        setModalPeca(false);
+        setPecaSelecionada(null);
+        await atualizarEstadoOutbox();
+        return;
+      }
+      alert(err.message || 'Erro ao movimentar peça');
     } finally {
       setSubmetendo(false);
     }
   }
 
-  // AÇÃO 6: Concluir Reparo Técnico e Liberar Máquina ($T_3$)
+  // AÇÃO 6: Concluir Reparo Técnico ISO 14224 ($T_3$) com Queue Offline
   async function handleConfirmarConclusao() {
-    if (!osAtiva || !causaRaiz.trim() || !acaoExecutada.trim()) {
-      alert('Preencha a causa raiz e a ação executada.');
+    if (!osAtiva) return;
+    const usaIso = Boolean(modoFalhaId && causaRaizId && acaoCorretivaId);
+    if (!usaIso && (!causaRaiz.trim() || !acaoExecutada.trim())) {
+      alert('Selecione Modo de Falha, Causa Raiz e Ação Corretiva ISO 14224.');
       return;
     }
+
     setSubmetendo(true);
+    const clientIso = new Date().toISOString();
+    const payloadConclusao = usaIso
+      ? {
+          modo_falha_id: Number(modoFalhaId),
+          causa_raiz_id: Number(causaRaizId),
+          acao_corretiva_id: Number(acaoCorretivaId),
+          necessita_revisao_preventiva: revisaoPreventiva,
+          observacoes_tecnicas: observacoes.trim()
+        }
+      : {
+          causa_raiz: causaRaiz.trim(),
+          acao_executada: acaoExecutada.trim(),
+          arvore_falha_sistema: arvoreFalha,
+          necessita_revisao_preventiva: revisaoPreventiva,
+          observacoes_tecnicas: observacoes.trim()
+        };
+
     try {
       const token = tokenAuth || localStorage.getItem('cmms_auth_token_tecnico');
+      if (!navigator.onLine) throw new TypeError('offline');
+
       const res = await fetch(`/api/chamados/${osAtiva.id}/concluir`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({
-          causa_raiz: causaRaiz.trim(),
-          acao_executada: acaoExecutada.trim(),
-          arvore_falha_sistema: arvoreFalha,
-          necessita_revisao_preventiva: revisaoPreventiva,
-          observacoes_tecnicas: observacoes.trim()
-        })
+        body: JSON.stringify(payloadConclusao)
       });
-      if (!res.ok) throw new Error('Falha ao concluir ordem de serviço');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.erro || 'Falha ao concluir ordem de serviço');
+      }
       const data = await res.json();
       setResultadoConclusao(data);
       carregarChamados();
     } catch (err) {
+      if (err instanceof TypeError || !navigator.onLine) {
+        await vanguardOfflineDB.enfileirarEventoOffline({
+          event_type: 'T3_CONCLUIR_OS',
+          chamado_id: osAtiva.id,
+          occurred_at_client_utc: clientIso,
+          payload: payloadConclusao
+        });
+        setModalConcluir(false);
+        setOsAtiva(null);
+        setChamados((prev) =>
+          prev.map((c) => (c.id === osAtiva.id ? { ...c, status: 'concluido' } : c))
+        );
+        await atualizarEstadoOutbox();
+        alert('Sem sinal na fábrica: T3 salvo no IndexedDB e será sincronizado assim que reconectar.');
+        return;
+      }
       alert(err.message || 'Erro ao concluir ordem de serviço');
     } finally {
       setSubmetendo(false);
@@ -362,6 +595,51 @@ export default function MantenedorPainel() {
           </div>
           <NetworkStatusBadge />
         </div>
+
+        {/* BANNER LOCAL-FIRST INDEXEDDB: OUTBOX PENDENTE & CONFLITOS DE REATRIBUICAO */}
+        {(pendentesSync.length > 0 || conflitosSync.length > 0) && (
+          <div className="mt-3 space-y-2">
+            {pendentesSync.length > 0 && (
+              <div className="bg-amber-500/15 border border-amber-500/40 rounded-[2px] p-2.5 px-3 flex items-center justify-between text-xs">
+                <div className="text-amber-200 font-semibold">
+                  Fila Offline Local-First (IndexedDB): {pendentesSync.length} evento(s) aguardando sincronização
+                </div>
+                <button
+                  type="button"
+                  disabled={sincronizandoOffline}
+                  onClick={dispararSincronizacaoOffline}
+                  className="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-[2px] text-[11px]"
+                >
+                  {sincronizandoOffline ? 'Sincronizando...' : 'Sincronizar Agora'}
+                </button>
+              </div>
+            )}
+
+            {conflitosSync.map((conf) => (
+              <div
+                key={conf.event_id}
+                className="bg-rose-500/15 border border-rose-500/40 rounded-[2px] p-2.5 px-3 flex items-start justify-between gap-2 text-xs"
+              >
+                <div className="text-rose-200">
+                  <span className="font-bold block">Conflito de Sincronização (OS #{conf.chamado_id})</span>
+                  <span className="text-[11px] text-rose-300/90">
+                    {conf.motivo_conflito || 'OS modificada/reatribuida na Central enquanto voce estava offline. Notas preservadas em Adendos.'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await vanguardOfflineDB.removerEventoOutbox(conf.event_id);
+                    atualizarEstadoOutbox();
+                  }}
+                  className="text-rose-300 hover:text-white text-[11px] font-bold shrink-0"
+                >
+                  Ciente
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* MODO 1: COCKPIT DE ATENDIMENTO ATIVO (SELECIONADO) */}
         {osAtiva ? (
@@ -546,11 +824,11 @@ export default function MantenedorPainel() {
                       <span>Pausar Atendimento</span>
                     </button>
                     <button
-                      onClick={abrirCatalogoPecas}
+                      onClick={abrirCatalogoBomV2}
                       className="py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-[2px] text-xs flex items-center justify-center gap-1.5 border border-slate-700 active:scale-98 transition-all"
                     >
                       <Boxes className="w-4 h-4 text-amber-400" />
-                      <span>Pedir Peça</span>
+                      <span>BOM / Peças</span>
                     </button>
                   </div>
 
@@ -720,24 +998,58 @@ export default function MantenedorPainel() {
                           : 'bg-slate-950 border-slate-800 hover:border-slate-700'
                       }`}
                     >
-                      <div className="flex justify-between items-start">
-                        <span className="font-mono font-bold text-white">{p.codigo_sap}</span>
-                        <span className="text-[10px] px-1.5 py-0.2 bg-slate-800 rounded text-slate-300">
-                          Saldo: {p.quantidade_estoque} {p.unidade_medida}
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-mono font-bold text-white">{p.codigo_sap}</span>
+                          {p.pertence_bom && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase">
+                              BOM {p.criticidade_reposicao || 'ATIVO'}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[10px] px-1.5 py-0.5 bg-slate-800 rounded text-emerald-300 font-mono shrink-0">
+                          Livre: {p.saldo_livre !== undefined ? p.saldo_livre : p.quantidade_estoque} {p.unidade_medida}
                         </span>
                       </div>
                       <p className="text-slate-300 mt-1 font-medium">{p.descricao}</p>
-                      <span className="text-[10px] text-slate-500 mt-0.5 block">{p.localizacao_almoxarifado}</span>
+                      <span className="text-[10px] text-slate-500 mt-0.5 block">
+                        {p.localizacao_almoxarifado} • Físico: {p.quantidade_estoque}
+                      </span>
                     </div>
                   );
                 })}
             </div>
 
-            {/* Quantidade e Botão de Adição */}
+            {/* Quantidade, Modalidade (Baixa Direta vs Reserva) e Botão */}
             {pecaSelecionada && (
-              <div className="pt-2 border-t border-slate-800 space-y-2">
+              <div className="pt-2 border-t border-slate-800 space-y-2.5">
+                <div className="grid grid-cols-2 gap-1.5 text-[11px]">
+                  <button
+                    type="button"
+                    onClick={() => setModalidadePeca('BAIXA_DIRETA')}
+                    className={`py-2 px-2 rounded-[2px] font-bold border ${
+                      modalidadePeca === 'BAIXA_DIRETA'
+                        ? 'bg-emerald-600/25 border-emerald-500 text-emerald-300'
+                        : 'bg-slate-950 border-slate-800 text-slate-400'
+                    }`}
+                  >
+                    Baixa Direta em Campo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModalidadePeca('RESERVA_PENDENTE')}
+                    className={`py-2 px-2 rounded-[2px] font-bold border ${
+                      modalidadePeca === 'RESERVA_PENDENTE'
+                        ? 'bg-amber-500/20 border-amber-500 text-amber-300'
+                        : 'bg-slate-950 border-slate-800 text-slate-400'
+                    }`}
+                  >
+                    Reserva Almoxarifado
+                  </button>
+                </div>
+
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Quantidade requisitada:</span>
+                  <span className="text-slate-400">Quantidade:</span>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -759,11 +1071,15 @@ export default function MantenedorPainel() {
 
                 <button
                   type="button"
-                  disabled={submetendo}
+                  disabled={submetendo || qtdPeca > (pecaSelecionada.saldo_livre ?? pecaSelecionada.quantidade_estoque)}
                   onClick={handleSolicitarPeca}
-                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-[2px] text-xs shadow-lg active:scale-98 transition-all"
+                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold rounded-[2px] text-xs shadow-lg active:scale-98 transition-all"
                 >
-                  {submetendo ? 'Requisitando...' : 'Vincular Peça à OS (Reserva Pendente)'}
+                  {submetendo
+                    ? 'Processando...'
+                    : modalidadePeca === 'BAIXA_DIRETA'
+                      ? 'Confirmar Baixa Direta na OS'
+                      : 'Vincular Peça (Reserva Pendente)'}
                 </button>
               </div>
             )}
@@ -887,44 +1203,112 @@ export default function MantenedorPainel() {
               </div>
             ) : (
               <div className="space-y-3 text-xs">
+                <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-[2px] p-2.5 text-[11px] text-indigo-200">
+                  Encerramento Estruturado ISO 14224: selecione em cascata sem digitação livre obrigatória.
+                </div>
+
                 <div>
                   <label className="text-slate-300 font-semibold block mb-1">
-                    Subsistema Afetado (Árvore de Falhas):
+                    1. Subsistema Afetado (ISO 14224):
                   </label>
                   <select
-                    value={arvoreFalha}
-                    onChange={(e) => setArvoreFalha(e.target.value)}
+                    value={subsistemaIso}
+                    onChange={(e) => {
+                      setSubsistemaIso(e.target.value);
+                      setModoFalhaId('');
+                      setCausaRaizId('');
+                    }}
                     className="w-full bg-slate-950 border border-slate-700 text-white rounded-[2px] p-2.5 text-xs focus:outline-none focus:border-indigo-500"
                   >
-                    <option value="mecanica">Mecânica (Estrutural / Rolamentos / Guias)</option>
-                    <option value="pneumatica">Pneumática (Válvulas / Cilindros / Mangueiras)</option>
-                    <option value="eletrica">Elétrica (Sensores / Motores / Cabeamento)</option>
-                    <option value="automacao">Automação / Software (PLC / Robô / Rede)</option>
+                    <option value="mecanico">Mecânico</option>
+                    <option value="eletrico">Elétrico / Automação</option>
+                    <option value="pneumatico">Pneumático</option>
+                    <option value="hidraulico">Hidráulico</option>
+                    <option value="operacional">Operacional / Setup</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="text-slate-300 font-semibold block mb-1">
-                    Causa Raiz Identificada:
+                    2. Modo de Falha (ISO 14224):
                   </label>
-                  <input
-                    type="text"
-                    value={causaRaiz}
-                    onChange={(e) => setCausaRaiz(e.target.value)}
-                    placeholder="Ex: Ruptura de mangueira pneumática por fadiga mecânica"
-                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-[2px] p-2.5 text-xs placeholder-slate-600 focus:outline-none focus:border-indigo-500"
-                  />
+                  <select
+                    value={modoFalhaId}
+                    onChange={(e) => {
+                      setModoFalhaId(e.target.value);
+                      setCausaRaizId('');
+                    }}
+                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-[2px] p-2.5 text-xs focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="">-- Selecione o Modo de Falha --</option>
+                    {(taxonomiaIso.modos_falha || [])
+                      .filter((m) => m.subsistema === subsistemaIso)
+                      .map((m) => (
+                        <option key={m.id} value={m.id}>
+                          [{m.codigo_iso}] {m.nome}
+                        </option>
+                      ))}
+                  </select>
                 </div>
 
                 <div>
                   <label className="text-slate-300 font-semibold block mb-1">
-                    Ação Técnica Executada:
+                    3. Causa Raiz Identificada:
+                  </label>
+                  <select
+                    value={causaRaizId}
+                    disabled={!modoFalhaId}
+                    onChange={(e) => setCausaRaizId(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-[2px] p-2.5 text-xs disabled:opacity-50 focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="">-- Selecione a Causa Raiz --</option>
+                    {(
+                      (taxonomiaIso.modos_falha || []).find((m) => String(m.id) === String(modoFalhaId))
+                        ?.causas_raiz || []
+                    ).map((c) => (
+                      <option key={c.id} value={c.id}>
+                        [{c.codigo_iso}] {c.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-slate-300 font-semibold block mb-1">
+                    4. Ação Corretiva Executada:
+                  </label>
+                  <select
+                    value={acaoCorretivaId}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setAcaoCorretivaId(val);
+                      const acao = (taxonomiaIso.acoes_corretivas || []).find(
+                        (a) => String(a.id) === String(val)
+                      );
+                      if (acao?.gera_pendencia_preventiva) {
+                        setRevisaoPreventiva(true);
+                      }
+                    }}
+                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-[2px] p-2.5 text-xs focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="">-- Selecione a Ação Corretiva --</option>
+                    {(taxonomiaIso.acoes_corretivas || []).map((a) => (
+                      <option key={a.id} value={a.id}>
+                        [{a.codigo_iso}] {a.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-slate-300 font-semibold block mb-1">
+                    Observações Complementares (Opcional):
                   </label>
                   <textarea
                     rows={2}
-                    value={acaoExecutada}
-                    onChange={(e) => setAcaoExecutada(e.target.value)}
-                    placeholder="Ex: Substituição da mangueira de 8mm e reposicionamento da abraçadeira..."
+                    value={observacoes}
+                    onChange={(e) => setObservacoes(e.target.value)}
+                    placeholder="Notas opcionais sobre ajuste ou medição em campo..."
                     className="w-full bg-slate-950 border border-slate-700 text-white rounded-[2px] p-2.5 text-xs placeholder-slate-600 focus:outline-none focus:border-indigo-500"
                   />
                 </div>

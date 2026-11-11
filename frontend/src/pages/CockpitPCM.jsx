@@ -155,6 +155,50 @@ export default function CockpitPCM() {
       );
     });
 
+    socket.on('os_atualizada', (data) => {
+      if (!data?.chamado) return;
+      setChamados((prev) =>
+        prev.map((c) => (c.id === data.chamado.id ? { ...c, ...data.chamado } : c))
+      );
+    });
+
+    socket.on('adendo_chamado', (data) => {
+      if (!data?.chamado) return;
+      setChamados((prev) =>
+        prev.map((c) => (c.id === data.chamado.id ? { ...c, ...data.chamado } : c))
+      );
+      setNovoAlerta({
+        mensagem: `Adendo anexado à ${data.chamado.numero_os}${data.elevou_prioridade ? ' (PRIORIDADE ELEVADA!)' : ''}`,
+        tag: data.chamado.tag_patrimonio,
+        numero_os: data.chamado.numero_os,
+        prioridade: data.chamado.prioridade
+      });
+      setTimeout(() => setNovoAlerta(null), 6000);
+    });
+
+    socket.on('sla_escalonado', (data) => {
+      carregarDados();
+      setNovoAlerta({
+        mensagem: `Escalonamento SLA Nível ${data.nivel} em ${data.numero_os}: ${data.motivo}`,
+        tag: data.tag_patrimonio,
+        numero_os: data.numero_os,
+        prioridade: 'alta'
+      });
+      setTimeout(() => setNovoAlerta(null), 8000);
+    });
+
+    socket.on('sla_escalonado_critico', (data) => {
+      soundAlert.tocarAlarmeEmergencia();
+      carregarDados();
+      setNovoAlerta({
+        mensagem: `ALERTA CRÍTICO PCM (SLA Nível 2): ${data.numero_os} excedeu limite sem atendimento!`,
+        tag: data.tag_patrimonio,
+        numero_os: data.numero_os,
+        prioridade: 'critica'
+      });
+      setTimeout(() => setNovoAlerta(null), 10000);
+    });
+
     socket.on('os_concluida', (data) => {
       setChamados((prev) =>
         prev.map((c) => (c.id === data.chamado.id ? { ...c, ...data.chamado } : c))
@@ -164,6 +208,10 @@ export default function CockpitPCM() {
     return () => {
       socket.off('novo_chamado');
       socket.off('status_alterado');
+      socket.off('os_atualizada');
+      socket.off('adendo_chamado');
+      socket.off('sla_escalonado');
+      socket.off('sla_escalonado_critico');
       socket.off('os_concluida');
     };
   }, []);
@@ -857,26 +905,58 @@ export default function CockpitPCM() {
                           </p>
                         </div>
 
-                        {/* Impacto da Máquina (Trigger Flag) */}
-                        {item.status_impacto && (
-                          <div className="mt-2 flex items-center gap-1.5">
+                        {/* Impacto, Auto-Dispatch, Deduplicacao, IoT & SLA V2 */}
+                        <div className="mt-2 flex items-center flex-wrap gap-1.5">
+                          {item.status_impacto && (
                             <span
                               className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider inline-flex items-center gap-1 ${
                                 item.status_impacto === 'maquina_parada'
                                   ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                                  : item.status_impacto === 'operando_com_restricao'
-                                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                                  : 'bg-sky-500/20 text-sky-300 border-sky-500/40'
+                                  : item.status_impacto === 'operando_com_restricao' ||
+                                      item.status_impacto === 'degradacao_funcao'
+                                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                                    : 'bg-sky-500/20 text-sky-300 border-sky-500/40'
                               }`}
                             >
                               {item.status_impacto === 'maquina_parada'
-                                ? '🔴 Máquina Parada (Crítico)'
-                                : item.status_impacto === 'operando_com_restricao'
-                                ? '🟡 Com Restrição / Anomalia'
-                                : '🔵 Melhoria / Baixa'}
+                                ? 'Linha Parada (Crítico)'
+                                : item.status_impacto === 'operando_com_restricao' ||
+                                    item.status_impacto === 'degradacao_funcao'
+                                  ? 'Degradação / Restrição'
+                                  : 'Melhoria / Baixa'}
                             </span>
-                          </div>
-                        )}
+                          )}
+
+                          {Boolean(item.despacho_automatico) && (
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">
+                              Auto-Dispatch
+                            </span>
+                          )}
+
+                          {item.origem_abertura === 'IOT_PLC' && (
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 uppercase font-mono">
+                              CLP / IoT
+                            </span>
+                          )}
+
+                          {Number(item.total_adendos || 0) > 0 && (
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40 font-mono">
+                              +{item.total_adendos} Adendo(s)
+                            </span>
+                          )}
+
+                          {Number(item.sla_nivel_escalonado || 0) > 0 && (
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-red-600 text-white uppercase animate-pulse">
+                              SLA Nível {item.sla_nivel_escalonado}
+                            </span>
+                          )}
+
+                          {item.subsistema && (
+                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-zinc-300 border border-white/10 uppercase">
+                              {item.subsistema}
+                            </span>
+                          )}
+                        </div>
 
                         {/* Miniatura de Foto Anexada (se houver) */}
                         {item.foto_anexo && (
@@ -953,7 +1033,11 @@ export default function CockpitPCM() {
                             <button
                               onClick={() => {
                                 setModalAtribuir(item);
-                                if (tecnicos.length > 0) setTecnicoAtribuirId(tecnicos[0].id);
+                                if (item.tecnico_recomendado?.id) {
+                                  setTecnicoAtribuirId(item.tecnico_recomendado.id);
+                                } else if (tecnicos.length > 0) {
+                                  setTecnicoAtribuirId(tecnicos[0].id);
+                                }
                               }}
                               className="px-3 py-1.5 bg-[#EF4444] hover:bg-red-500 text-white font-bold rounded-xl text-xs flex items-center gap-1 shadow-lg shadow-red-600/20 active:scale-95 transition-all"
                             >
@@ -1241,44 +1325,47 @@ export default function CockpitPCM() {
                   {/* MTBF */}
                   <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-4 shadow-xl">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-[#8E8E93]">
-                      MTBF Médio Estimado
+                      MTBF Médio Real
                     </span>
                     <div className="text-3xl font-black text-emerald-400 font-mono mt-2">
-                      {metricasDashboard.resumo_geral?.mtbf_medio_horas || 0} <span className="text-base text-[#8E8E93]">h</span>
+                      {metricasDashboard.resumo_geral?.mtbf_horas || 0} <span className="text-base text-[#8E8E93]">h</span>
                     </div>
                     <p className="text-[11px] text-[#8E8E93] mt-1">
-                      Tempo médio de operação ininterrupta entre falhas mecânicas.
+                      Calculado sobre {metricasDashboard.resumo_geral?.linhas_ativas_consideradas || 1} linha(s) ativa(s).
                     </p>
                   </div>
 
                   {/* Wait Time / Tempo de Resposta */}
                   <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-4 shadow-xl">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400">
-                      Tempo Médio Resposta (Wait Time)
+                      Tempo Médio Resposta (MTTA)
                     </span>
                     <div className="text-3xl font-black text-amber-300 font-mono mt-2">
-                      {metricasDashboard.resumo_geral?.tempo_medio_resposta_minutos || 0} <span className="text-base text-[#8E8E93]">min</span>
+                      {metricasDashboard.resumo_geral?.mtta_medio_minutos || 0} <span className="text-base text-[#8E8E93]">min</span>
                     </div>
                     <p className="text-[11px] text-[#8E8E93] mt-1">
-                      Tempo entre o operador disparar no Trigger e o despacho da Central ($T_0 \to T_1$).
+                      Despacho T0-&gt;T1. Espera acumulada: {metricasDashboard.resumo_geral?.tempo_perdido_espera_horas || 0}h.
                     </p>
                   </div>
 
-                  {/* Disponibilidade Operacional */}
+                  {/* Disponibilidade Operacional vs Inerente */}
                   <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-4 shadow-xl">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
-                      Disponibilidade Inerente (A%)
+                      Disp. Operacional vs Inerente
                     </span>
-                    <div className="text-3xl font-black text-indigo-300 font-mono mt-2">
-                      {metricasDashboard.resumo_geral?.disponibilidade_percentual || 100}%
+                    <div className="text-2xl font-black text-indigo-300 font-mono mt-2 flex items-baseline gap-2">
+                      <span>{metricasDashboard.resumo_geral?.disponibilidade_operacional_pct ?? metricasDashboard.resumo_geral?.disponibilidade_percentual ?? 100}%</span>
+                      <span className="text-xs text-emerald-400 font-normal">
+                        (Ai: {metricasDashboard.resumo_geral?.disponibilidade_inerente_pct ?? 100}%)
+                      </span>
                     </div>
                     <p className="text-[11px] text-[#8E8E93] mt-1">
-                      Régua World Class Manufacturing (WCM &gt; 95%).
+                      Régua WCM (&gt; 95%) com separação de perdas logísticas.
                     </p>
                   </div>
                 </div>
 
-                {/* Pareto de Quebras por Subsistema & Top Ofensores */}
+                {/* Pareto de Quebras por Subsistema & Dual Bad Actors */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {/* Diagrama de Pareto */}
                   <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-5 space-y-3">
@@ -1296,13 +1383,13 @@ export default function CockpitPCM() {
                           <div className="flex justify-between font-medium">
                             <span className="text-zinc-200 capitalize font-mono">{sub.subsistema}</span>
                             <span className="text-[#8E8E93]">
-                              {sub.quantidade_ocorrencias} falhas ({sub.percentual_impacto}%) • Acumulado: {sub.percentual_acumulado}%
+                              {sub.quantidade} falhas ({sub.percentual}%) • Acum: {sub.percentual_acumulado}%
                             </span>
                           </div>
                           <div className="w-full bg-[#121216] h-2.5 rounded-full overflow-hidden border border-white/[0.08]">
                             <div
                               className="bg-red-500 h-full rounded-full transition-all"
-                              style={{ width: `${Math.min(100, sub.percentual_impacto)}%` }}
+                              style={{ width: `${Math.min(100, sub.percentual)}%` }}
                             />
                           </div>
                         </div>
@@ -1310,14 +1397,14 @@ export default function CockpitPCM() {
                     </div>
                   </div>
 
-                  {/* Top 3 Máquinas Ofensoras de Downtime */}
+                  {/* Top 5 Máquinas Ofensoras de Downtime */}
                   <div className="bg-[#1C1C1E] border border-white/[0.08] rounded-xl p-5 space-y-3">
                     <h3 className="text-sm font-bold text-white flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-amber-500" />
-                      <span>Top Máquinas Ofensoras de Downtime (Bad Actors)</span>
+                      <span>Top 5 Bad Actors (Downtime & Frequência)</span>
                     </h3>
                     <p className="text-xs text-[#8E8E93]">
-                      Equipamentos com maior somatório de horas paradas no período selecionado.
+                      Equipamentos com maior impacto de parada e repetitividade no período.
                     </p>
 
                     <div className="space-y-2 pt-2">
@@ -1332,15 +1419,15 @@ export default function CockpitPCM() {
                             </span>
                             <p className="font-semibold text-zinc-200">{ofensor.ativo_nome}</p>
                             <p className="text-[10px] text-[#8E8E93]">
-                              {ofensor.linha_nome} • {ofensor.total_falhas} falhas reportadas
+                              {ofensor.linha_nome} • {ofensor.total_quebras} falha(s) • MTTR {ofensor.mttr_medio_minutos} min
                             </p>
                           </div>
                           <div className="text-right font-mono">
                             <span className="text-base font-bold text-white">
-                              {ofensor.downtime_total_minutos} min
+                              {ofensor.downtime_horas} h
                             </span>
                             <span className="block text-[10px] text-[#8E8E93]">
-                              {Math.round(ofensor.downtime_total_minutos / 60)}h paradas
+                              downtime
                             </span>
                           </div>
                         </div>
@@ -1378,6 +1465,23 @@ export default function CockpitPCM() {
             </div>
 
             <div className="space-y-3">
+              {modalAtribuir.tecnico_recomendado && (
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-xs space-y-1">
+                  <div className="flex justify-between items-center font-bold text-emerald-300">
+                    <span>Recomendação Semi-Automatizada (Vanguard)</span>
+                    {modalAtribuir.gut && (
+                      <span className="font-mono text-[10px] bg-emerald-500/20 px-1.5 py-0.5 rounded">
+                        GUT: {modalAtribuir.gut.gut_score}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-zinc-300">
+                    Sugerido: <strong>{modalAtribuir.tecnico_recomendado.nome}</strong> ({modalAtribuir.tecnico_recomendado.carga_ativa} OS ativas
+                    {modalAtribuir.tecnico_recomendado.afinidade_especialidade ? ' • Afinidade com subsistema' : ''})
+                  </p>
+                </div>
+              )}
+
               <label className="text-xs font-semibold text-zinc-300">
                 Selecione o mantenedor responsável pelo atendimento:
               </label>
@@ -1598,6 +1702,32 @@ export default function CockpitPCM() {
                     <p className="text-[#8E8E93]">Nenhum componente substituído nesta intervenção.</p>
                   )}
                 </div>
+
+                {/* 5. Adendos de Contexto (Deduplicacao / IoT) & Escalonamento SLA */}
+                {(modalDossie.adendos?.length > 0 || modalDossie.escalonamentos?.length > 0) && (
+                  <div className="bg-[#121216] border border-white/[0.08] rounded-xl p-3.5 space-y-2">
+                    <h4 className="font-bold text-purple-300 uppercase tracking-wider text-[11px]">
+                      Rastreabilidade V2: Adendos ({modalDossie.adendos?.length || 0}) & SLA ({modalDossie.escalonamentos?.length || 0})
+                    </h4>
+                    {modalDossie.adendos?.map((ad) => (
+                      <div key={ad.id} className="bg-[#1C1C1E] border border-purple-500/30 p-2 rounded-xl text-xs">
+                        <div className="flex justify-between text-[10px] font-mono text-purple-300">
+                          <span>{ad.origem} • {ad.operador_nome || ad.operador_matricula}</span>
+                          <span>{new Date(ad.created_at).toLocaleString()}</span>
+                        </div>
+                        <p className="text-zinc-200 mt-0.5">{ad.descricao}</p>
+                      </div>
+                    ))}
+                    {modalDossie.escalonamentos?.map((esc) => (
+                      <div key={esc.id} className="bg-[#1C1C1E] border border-rose-500/30 p-2 rounded-xl text-xs">
+                        <span className="text-[10px] font-bold text-rose-400">
+                          SLA Nível {esc.nivel_escalonamento} &rarr; {esc.destinatario_nome || 'Supervisor'}
+                        </span>
+                        <p className="text-zinc-300 mt-0.5">{esc.motivo}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

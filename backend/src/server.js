@@ -43,12 +43,15 @@ app.get('/status', (req, res) => {
   });
 });
 
+const slaEscalationService = require('./services/slaEscalationService');
+
 const PORT = process.env.PORT || 3001;
 
 server.listen(PORT, () => {
   console.log(`[CMMS Backend] Servidor rodando na porta ${PORT}`);
   console.log(`[CMMS Backend] Barramento WebSocket ativo e aguardando conexões`);
   console.log(`[CMMS Backend] Rotas disponíveis em: http://localhost:${PORT}/api`);
+  slaEscalationService.iniciarMonitoramentoSLA(app, 60000);
 });
 
 module.exports = { app, server };
