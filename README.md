@@ -141,6 +141,41 @@ Abra o navegador em `http://localhost:5173`.
 
 ---
 
+## 🛡️ Quality Gate Automatizado (Gemini Code Review)
+
+Este repositório utiliza um **Quality Gate automatizado via GitHub Actions** ([`.github/workflows/gemini-code-review.yml`](.github/workflows/gemini-code-review.yml)) executado pelo job **`review-and-gate`** a cada abertura ou atualização de Pull Request (`pull_request` nos tipos `opened` e `synchronize`).
+
+O pipeline extrai o diff contra a branch base (limitado a 50.000 caracteres), envia para auditoria na API REST do Google Gemini (`gemini-1.5-flash` com fallback automático para modelos Flash ativos caso o endpoint retorne 404 por descontinuação), publica um parecer estruturado em Markdown diretamente no Pull Request e **bloqueia o merge** (`exit 1`) nos seguintes cenários:
+- **`BLOQUEADO`**: falhas críticas de segurança (segredos expostos, SQL/command injection, inputs sem sanitização, rotas sensíveis desprotegidas) ou quebras severas de execução/arquitetura (erros evidentes de runtime, deadlocks, loops infinitos, chamadas assíncronas soltas).
+- **`ERRO`**: ausência da chave de API, falha de comunicação com o Gemini ou JSON inválido.
+- _(Os vereditos **`APROVADO`** e **`REQUER_AJUSTES`** publicam o parecer no PR sem bloquear o status check.)_
+
+### 1. Cadastrar a secret `GEMINI_API_KEY` no GitHub
+1. Gere uma chave de API gratuita ou corporativa no **Google AI Studio**: https://aistudio.google.com/apikey
+2. No repositório do GitHub, acesse: **`Settings` > `Secrets and variables` > `Actions`**.
+3. Na aba **Secrets**, clique em **`New repository secret`**.
+4. Preencha os campos:
+   - **Name:** `GEMINI_API_KEY`
+   - **Secret:** cole a chave gerada no Google AI Studio.
+5. Clique em **`Add secret`**.
+6. *(Opcional)* Caso deseje fixar explicitamente outro modelo Flash (ex: `gemini-flash-latest` ou `gemini-3.8-flash`), acesse a aba **`Variables`** em `Settings > Secrets and variables > Actions` e crie a variável `GEMINI_MODEL`.
+
+### 2. Configurar a Branch Protection Rule na branch `main`
+> **Importante:** O GitHub só lista o status check para seleção após o workflow `.github/workflows/gemini-code-review.yml` ter sido executado pelo menos uma vez em um Pull Request. Em repositórios privados, regras de proteção de branch requerem plano **GitHub Pro / Team** (ou alterar a visibilidade do repositório para **Public**).
+
+1. No repositório do GitHub, acesse **`Settings` > `Branches`**.
+2. Em **Branch protection rules**, clique em **`Add branch protection rule`** (ou edite a regra existente para `main`).
+3. Em **Branch name pattern**, digite: `main`
+4. Marque **`Require a pull request before merging`**.
+5. Marque **`Require status checks to pass before merging`**.
+   - *(Recomendado)* Marque também **`Require branches to be up to date before merging`**.
+6. Na barra de busca **"Status checks that are required"**, pesquise e selecione exatamente **`review-and-gate`**.
+7. Clique em **`Create`** (ou **`Save changes`**) no fim da página.
+
+A partir dessa configuração, o botão de merge na branch `main` permanecerá bloqueado enquanto o check **`review-and-gate`** retornar `BLOQUEADO` ou `ERRO`.
+
+---
+
 ## 📚 Documentação Adicional
 - Dicionário de Dados e Diagrama Entidade-Relacionamento (DER): `Segundo Cerebro/conhecimento/wiki/tcc-cmms-dicionario-de-dados-e-der.md`
 - Design System e Ergonomia Cognitiva (NBR 7195 / ISO 3864): `Segundo Cerebro/conhecimento/wiki/tcc-cmms-design-system-e-ergonomia.md`

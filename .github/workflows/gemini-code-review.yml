@@ -1,0 +1,406 @@
+name: Gemini Code Review Quality Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: gemini-quality-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review-and-gate:
+    name: review-and-gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout do repositório com histórico completo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 2. Configurar Node.js nativo (sem dependências extras)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 3. Extrair diff contra a branch base (máx. 50.000 caracteres)
+        shell: bash
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          git fetch origin "$BASE_REF" --quiet || true
+          git diff "origin/${BASE_REF}...HEAD" > /tmp/pr_diff_full.patch
+          node - << 'EOF'
+            const fs = require('fs');
+            const fullDiff = fs.readFileSync('/tmp/pr_diff_full.patch', 'utf8');
+            const MAX_CHARS = 50000;
+            const truncated = fullDiff.length > MAX_CHARS;
+            const safeDiff = truncated
+              ? fullDiff.slice(0, MAX_CHARS) + '\n\n[... DIFF TRUNCADO EM 50.000 CARACTERES PARA SEGURANCA DE PAYLOAD ...]'
+              : fullDiff;
+
+            fs.writeFileSync('/tmp/pr_diff.patch', safeDiff, 'utf8');
+            fs.writeFileSync(
+              '/tmp/diff_meta.json',
+              JSON.stringify({
+                originalLength: fullDiff.length,
+                sentLength: safeDiff.length,
+                truncated
+              }),
+              'utf8'
+            );
+
+            console.log(`Diff extraído: ${fullDiff.length} caracteres | Enviado: ${safeDiff.length} | Truncado: ${truncated}`);
+          EOF
+
+      - name: 4. Auditar diff via API REST do Gemini
+        shell: bash
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-1.5-flash' }}
+        run: |
+          node - << 'EOF'
+            const fs = require('fs');
+
+            const RESULT_PATH = '/tmp/review-result.json';
+
+            function saveResult(payload, diffMeta = { originalLength: 0, sentLength: 0, truncated: false }) {
+              const normalized = {
+                status: ['APROVADO', 'REQUER_AJUSTES', 'BLOQUEADO', 'ERRO'].includes(payload.status)
+                  ? payload.status
+                  : 'ERRO',
+                justificativa: String(payload.justificativa || 'Sem justificativa retornada.'),
+                problemas_criticos: Array.isArray(payload.problemas_criticos)
+                  ? payload.problemas_criticos.map(String).filter(Boolean)
+                  : [],
+                sugestoes: Array.isArray(payload.sugestoes)
+                  ? payload.sugestoes.map(String).filter(Boolean)
+                  : [],
+                meta: {
+                  modelo_utilizado: payload.meta?.modelo_utilizado || process.env.GEMINI_MODEL || 'gemini-1.5-flash',
+                  fallback_aplicado: Boolean(payload.meta?.fallback_aplicado),
+                  original_diff_chars: diffMeta.originalLength,
+                  sent_diff_chars: diffMeta.sentLength,
+                  truncated: diffMeta.truncated
+                }
+              };
+              fs.writeFileSync(RESULT_PATH, JSON.stringify(normalized, null, 2), 'utf8');
+            }
+
+            async function runAudit() {
+              const diffContent = fs.readFileSync('/tmp/pr_diff.patch', 'utf8');
+              const diffMeta = JSON.parse(fs.readFileSync('/tmp/diff_meta.json', 'utf8'));
+              const apiKey = (process.env.GEMINI_API_KEY || '').trim();
+              if (!apiKey) {
+                saveResult({
+                  status: 'ERRO',
+                  justificativa: 'A secret GEMINI_API_KEY não está configurada neste repositório.',
+                  problemas_criticos: [
+                    'Variável de ambiente GEMINI_API_KEY ausente em Settings > Secrets and variables > Actions.'
+                  ],
+                  sugestoes: [
+                    'Cadastre uma API Key válida do Google AI Studio em Settings > Secrets and variables > Actions e reexecute o check review-and-gate.'
+                  ]
+                }, diffMeta);
+                return;
+              }
+
+              if (!diffContent.trim()) {
+                saveResult({
+                  status: 'APROVADO',
+                  justificativa: 'Nenhuma alteração detectada no diff contra a branch base.',
+                  problemas_criticos: [],
+                  sugestoes: []
+                }, diffMeta);
+                return;
+              }
+
+              const systemPrompt = [
+                'Você é um Staff Security & Architecture Engineer responsável pelo Quality Gate automatizado deste repositório.',
+                'Sua missão é auditar rigorosamente o git diff de um Pull Request e emitir um veredito estruturado em JSON no idioma Português (Brasil).',
+                '',
+                'CRITÉRIOS EXPLÍCITOS PARA STATUS "BLOQUEADO" (IMPEDE O MERGE):',
+                '1. Falhas de segurança:',
+                '   - Tokens, senhas, API keys ou segredos expostos em texto claro.',
+                '   - Injeção de código ou SQL (ex: SQL concatenado sem parametrização), XSS, command injection (ex: interpolação direta de entrada não confiável em comandos shell ou GitHub Actions run).',
+                '   - Inputs críticos sem sanitização ou validação no backend.',
+                '   - Rotas administrativas, mutações ou endpoints sensíveis desprotegidos sem autenticação/autorização.',
+                '2. Quebras severas de arquitetura ou execução:',
+                '   - Erros evidentes de runtime (variáveis indefinidas, imports inexistentes, sintaxe quebrada).',
+                '   - Deadlocks, loops infinitos ou race conditions destrutivas.',
+                '   - Chamadas assíncronas soltas (promises sem await ou tratamento de erro) que corrompem transações ou derrubam a aplicação.',
+                '',
+                'CRITÉRIOS PARA STATUS "REQUER_AJUSTES" (NÃO BLOQUEIA O MERGE):',
+                '   - Melhorias recomendadas de arquitetura, legibilidade, tratamento de edge cases não críticos, duplicação de código ou ausência de testes.',
+                '',
+                'CRITÉRIOS PARA STATUS "APROVADO":',
+                '   - Código seguro, limpo, funcional e sem falhas críticas ou de segurança.',
+                '',
+                'Cite sempre o arquivo e trecho correspondente nos itens encontrados.'
+              ].join('\n');
+
+              const userPrompt = [
+                `Analise o git diff abaixo (${diffMeta.sentLength} caracteres enviados de ${diffMeta.originalLength} totais):`,
+                '',
+                '```diff',
+                diffContent,
+                '```'
+              ].join('\n');
+
+              const requestBody = {
+                systemInstruction: {
+                  parts: [{ text: systemPrompt }]
+                },
+                contents: [
+                  {
+                    role: 'user',
+                    parts: [{ text: userPrompt }]
+                  }
+                ],
+                generationConfig: {
+                  temperature: 0.1,
+                  responseMimeType: 'application/json',
+                  responseSchema: {
+                    type: 'OBJECT',
+                    properties: {
+                      status: {
+                        type: 'STRING',
+                        enum: ['APROVADO', 'REQUER_AJUSTES', 'BLOQUEADO']
+                      },
+                      justificativa: {
+                        type: 'STRING',
+                        description: 'Resumo executivo objetivo do veredito da auditoria.'
+                      },
+                      problemas_criticos: {
+                        type: 'ARRAY',
+                        items: { type: 'STRING' },
+                        description: 'Lista de vulnerabilidades de segurança ou falhas graves de execução/arquitetura encontradas.'
+                      },
+                      sugestoes: {
+                        type: 'ARRAY',
+                        items: { type: 'STRING' },
+                        description: 'Recomendações de melhoria e correções sugeridas.'
+                      }
+                    },
+                    required: ['status', 'justificativa', 'problemas_criticos', 'sugestoes']
+                  }
+                }
+              };
+
+              const configuredModel = (process.env.GEMINI_MODEL || 'gemini-1.5-flash').trim();
+              const modelCandidates = Array.from(
+                new Set([
+                  configuredModel,
+                  'gemini-1.5-flash',
+                  'gemini-flash-latest',
+                  'gemini-2.5-flash',
+                  'gemini-3.8-flash'
+                ])
+              );
+
+              let lastErrorMessage = 'Falha desconhecida ao consultar a API do Gemini.';
+
+              for (let i = 0; i < modelCandidates.length; i++) {
+                const model = modelCandidates[i];
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+
+                try {
+                  const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'x-goog-api-key': apiKey
+                    },
+                    body: JSON.stringify(requestBody),
+                    signal: AbortSignal.timeout(60000)
+                  });
+
+                  const rawText = await res.text();
+                  let responseJson = null;
+                  try {
+                    responseJson = JSON.parse(rawText);
+                  } catch {
+                    responseJson = null;
+                  }
+
+                  if (!res.ok) {
+                    const apiErrMsg = responseJson?.error?.message || `HTTP ${res.status}`;
+                    lastErrorMessage = `Modelo "${model}" retornou erro (${res.status}): ${apiErrMsg}`;
+                    console.warn(lastErrorMessage);
+
+                    // Caso o modelo configurado (ex: gemini-1.5-flash) esteja descontinuado/404 na conta, tenta próximo modelo Flash ativo
+                    if (res.status === 404 && i < modelCandidates.length - 1) {
+                      console.warn(`Tentando fallback para próximo modelo Flash disponível...`);
+                      continue;
+                    }
+                    break;
+                  }
+
+                  const candidate = responseJson?.candidates?.[0];
+                  const textPayload = candidate?.content?.parts?.[0]?.text;
+
+                  if (!textPayload) {
+                    const blockReason = responseJson?.promptFeedback?.blockReason || candidate?.finishReason || 'Resposta vazia';
+                    lastErrorMessage = `Gemini não retornou conteúdo estruturado (motivo: ${blockReason}).`;
+                    break;
+                  }
+
+                  const parsedAudit = JSON.parse(textPayload);
+                  if (!['APROVADO', 'REQUER_AJUSTES', 'BLOQUEADO'].includes(parsedAudit.status)) {
+                    lastErrorMessage = `Status inválido retornado pelo modelo: "${parsedAudit.status}".`;
+                    break;
+                  }
+
+                  saveResult({
+                    ...parsedAudit,
+                    meta: {
+                      modelo_utilizado: model,
+                      fallback_aplicado: model !== configuredModel
+                    }
+                  }, diffMeta);
+                  console.log(`Auditoria concluída com modelo "${model}". Veredito: ${parsedAudit.status}`);
+                  return;
+                } catch (err) {
+                  lastErrorMessage = `Erro de execução ao chamar modelo "${model}": ${err.message}`;
+                  console.error(lastErrorMessage);
+                  break;
+                }
+              }
+
+              saveResult({
+                status: 'ERRO',
+                justificativa: `Não foi possível concluir a auditoria automatizada: ${lastErrorMessage}`,
+                problemas_criticos: [
+                  'Falha na comunicação ou validação da resposta da API do Gemini.'
+                ],
+                sugestoes: [
+                  'Verifique se a secret GEMINI_API_KEY é válida, possui cota ativa no Google AI Studio e se o modelo configurado está disponível.'
+                ]
+              }, diffMeta);
+            }
+
+            runAudit().catch((fatalErr) => {
+              console.error('Erro fatal inesperado na auditoria:', fatalErr);
+              saveResult({
+                status: 'ERRO',
+                justificativa: `Erro interno inesperado no script de auditoria: ${fatalErr.message}`,
+                problemas_criticos: ['Falha não tratada durante execução do passo de auditoria.'],
+                sugestoes: ['Consulte os logs da execução do job review-and-gate no GitHub Actions.']
+              });
+            });
+          EOF
+
+      - name: 5. Publicar parecer estruturado em Markdown no Pull Request
+        if: ${{ !cancelled() }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const resultPath = '/tmp/review-result.json';
+
+            let review;
+            if (fs.existsSync(resultPath)) {
+              review = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
+            } else {
+              review = {
+                status: 'ERRO',
+                justificativa: 'Arquivo de resultado da auditoria (/tmp/review-result.json) não foi gerado.',
+                problemas_criticos: ['Falha crítica na etapa anterior ao comentário do Pull Request.'],
+                sugestoes: ['Inspecione os logs do job review-and-gate.'],
+                meta: {}
+              };
+            }
+
+            const badges = {
+              APROVADO: '🟢 **APROVADO**',
+              REQUER_AJUSTES: '🟡 **REQUER AJUSTES**',
+              BLOQUEADO: '🔴 **BLOQUEADO (Merge Impedido)**',
+              ERRO: '⚠️ **ERRO NA AUDITORIA (Merge Impedido)**'
+            };
+
+            const badge = badges[review.status] || `⚠️ **${review.status}**`;
+            const criticos = (review.problemas_criticos && review.problemas_criticos.length > 0)
+              ? review.problemas_criticos.map((item) => `- ❌ ${item}`).join('\n')
+              : '- Nenhum problema crítico identificado.';
+            const sugestoes = (review.sugestoes && review.sugestoes.length > 0)
+              ? review.sugestoes.map((item) => `- 💡 ${item}`).join('\n')
+              : '- Nenhuma sugestão adicional.';
+
+            const meta = review.meta || {};
+            const shortSha = context.sha ? context.sha.slice(0, 7) : 'HEAD';
+            const truncAviso = meta.truncated
+              ? ` _(truncado em ${meta.sent_diff_chars} de ${meta.original_diff_chars} caracteres)_`
+              : ` _(${meta.sent_diff_chars || 0} caracteres auditados)_`;
+            const fallbackNota = meta.fallback_aplicado
+              ? ` _(fallback automático aplicado para modelo ativo)_`
+              : '';
+
+            const body = [
+              '## 🛡️ Quality Gate — Gemini Code Review',
+              '',
+              `**Status:** ${badge}`,
+              `**Commit:** \`${shortSha}\` | **Modelo:** \`${meta.modelo_utilizado || 'gemini-1.5-flash'}\`${fallbackNota} | **Diff:**${truncAviso}`,
+              '',
+              '### 📋 Justificativa',
+              review.justificativa,
+              '',
+              '### 🚨 Problemas Críticos',
+              criticos,
+              '',
+              '### 💬 Sugestões',
+              sugestoes,
+              '',
+              '<details>',
+              '<summary>JSON estruturado da auditoria</summary>',
+              '',
+              '```json',
+              JSON.stringify(
+                {
+                  status: review.status,
+                  justificativa: review.justificativa,
+                  problemas_criticos: review.problemas_criticos,
+                  sugestoes: review.sugestoes
+                },
+                null,
+                2
+              ),
+              '```',
+              '',
+              '</details>'
+            ].join('\n').slice(0, 65000);
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
+
+      - name: 6. Validar resultado e bloquear merge em BLOQUEADO ou ERRO
+        if: ${{ !cancelled() }}
+        run: |
+          node - << 'EOF'
+            const fs = require('fs');
+            const resultPath = '/tmp/review-result.json';
+
+            if (!fs.existsSync(resultPath)) {
+              console.error('::error::Arquivo /tmp/review-result.json não encontrado. Bloqueando check.');
+              process.exit(1);
+            }
+
+            const result = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
+            console.log(`Veredito Quality Gate (${result.meta?.modelo_utilizado || 'gemini'}): ${result.status}`);
+
+            if (result.status === 'BLOQUEADO' || result.status === 'ERRO') {
+              console.error(`::error::Quality Gate bloqueado com status "${result.status}": ${result.justificativa}`);
+              process.exit(1);
+            }
+
+            console.log(`Quality Gate concluído sem bloqueios (status: ${result.status}).`);
+          EOF
